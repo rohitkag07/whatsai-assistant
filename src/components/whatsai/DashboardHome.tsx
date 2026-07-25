@@ -61,7 +61,7 @@ export function DashboardHome({ data }: { data: WhatsAiInboxData }) {
           <SectionHeader title="Needs attention" description="Customer conversations waiting for a human decision." icon={Siren} action={{ href: '/chats', label: 'Review inbox' }} />
           <div className="divide-y divide-[#edf0ef] px-2 pb-2">
             {attention.length ? attention.map((thread) => <AttentionRow key={thread.id} thread={thread} />) : (
-              <PositiveState title="No handoffs waiting" body="WhatsAI is handling active conversations. You will see urgent customer requests here." />
+              <PositiveState title="No handoffs waiting" body="XeroWA AI is handling active conversations. You will see urgent customer requests here." />
             )}
           </div>
         </div>

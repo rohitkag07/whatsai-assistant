@@ -65,7 +65,7 @@ export function DashboardHomePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <AgentRow name="WhatsAI Receptionist" status="active" detail="Replied to 7 WhatsApp leads · last 1 hr" />
+            <AgentRow name="XeroWA AI Receptionist" status="active" detail="Replied to 7 WhatsApp leads · last 1 hr" />
             <AgentRow name="Qualification Playbook" status="active" detail="Captured budget, need, and appointment intent" />
             <AgentRow name="Owner Handoff" status="active" detail="Sent 2 hot-lead alerts to the business owner" />
             <AgentRow name="Follow-up Engine" status="idle" detail="Next warm lead nudge scheduled" />

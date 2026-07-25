@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     return new NextResponse(body, {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Content-Disposition': 'attachment; filename="whatsai-okf-bundle.json"',
+        'Content-Disposition': 'attachment; filename="xerowa-okf-bundle.json"',
       },
     });
   } catch (error) {

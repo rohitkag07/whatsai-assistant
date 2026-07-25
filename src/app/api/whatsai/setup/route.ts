@@ -141,7 +141,7 @@ export async function POST(request: Request) {
   const playbookValues = {
     business_id: business.id,
     vertical: payload.category,
-    name: `${payload.name} WhatsAI Playbook`,
+    name: `${payload.name} XeroWA AI Playbook`,
     system_prompt: payload.core_offer ? `Core offer: ${payload.core_offer}` : null,
     qualification_questions: payload.qualification_questions.length ? payload.qualification_questions : defaultQuestions(payload.category),
     keyword_replies: payload.keyword_replies,

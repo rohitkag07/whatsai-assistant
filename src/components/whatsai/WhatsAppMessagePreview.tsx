@@ -17,7 +17,7 @@ export function WhatsAppMessagePreview({
     <div className="overflow-hidden rounded-[28px] border-[7px] border-[#111b21] bg-[#efeae2] shadow-lg">
       <div className="flex items-center gap-2 bg-[#075e54] px-4 py-3 text-white">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#d9fdd3] text-xs font-bold text-[#075e54]">WA</div>
-        <div><div className="text-xs font-semibold">Your business</div><div className="text-[9px] text-white/70">WhatsAI Assistant</div></div>
+        <div><div className="text-xs font-semibold">Your business</div><div className="text-[9px] text-white/70">XeroWA AI</div></div>
       </div>
       <div className="min-h-56 p-4">
         <div className="ml-auto max-w-[92%] overflow-hidden rounded-2xl rounded-tr-sm bg-[#d9fdd3] text-xs text-[#111b21] shadow-sm">

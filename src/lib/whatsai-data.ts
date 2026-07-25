@@ -299,7 +299,7 @@ export function buildOwnerSummaryText(data: WhatsAiInboxData) {
     .map((thread) => `- ${thread.contactName} (${thread.phone}): ${thread.lastBody.slice(0, 90)}`)
     .join('\n');
 
-  return ['WhatsAI Daily Summary', `Total conversations: ${metrics.totalThreads}`, `Unread threads: ${metrics.unreadThreads}`, `Hot leads: ${metrics.hotThreads}`, `AI paused threads: ${metrics.aiPausedThreads}`, `Inbound today: ${metrics.inboundToday}`, `Outbound today: ${metrics.outboundToday}`, hot ? `\nTop hot leads:\n${hot}` : '\nTop hot leads: none right now'].join('\n');
+  return ['XeroWA AI Daily Summary', `Total conversations: ${metrics.totalThreads}`, `Unread threads: ${metrics.unreadThreads}`, `Hot leads: ${metrics.hotThreads}`, `AI paused threads: ${metrics.aiPausedThreads}`, `Inbound today: ${metrics.inboundToday}`, `Outbound today: ${metrics.outboundToday}`, hot ? `\nTop hot leads:\n${hot}` : '\nTop hot leads: none right now'].join('\n');
 }
 
 async function getReadClientOrNull(): Promise<any> {

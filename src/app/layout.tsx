@@ -6,7 +6,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: APP_NAME,
+    default: 'XeroWA AI — The 24/7 WhatsApp AI & Lead Intelligence Platform',
     template: `%s · ${APP_NAME}`,
   },
   description: APP_TAGLINE,
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#00A884',
+  themeColor: '#10B981',
   width: 'device-width',
   initialScale: 1,
 };

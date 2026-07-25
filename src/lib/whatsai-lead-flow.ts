@@ -97,7 +97,7 @@ export async function persistLeadToAppointmentFlow(supabase: any, input: LeadFlo
       title: buildAppointmentTitle(input.appointmentType ?? 'site_visit', input.name ?? stringValue(lead?.name) ?? phone),
       appointmentType: input.appointmentType ?? inferAppointmentType(source),
       scheduledAt: appointmentAt,
-      notes: body || 'Booked from WhatsAI lead-to-appointment flow.',
+      notes: body || 'Booked from XeroWA AI lead-to-appointment flow.',
     });
   }
 
@@ -108,7 +108,7 @@ export async function persistLeadToAppointmentFlow(supabase: any, input: LeadFlo
       threadId: rowId(thread)!,
       reason: appointment ? 'appointment_booked_hot_lead' : 'qualified_hot_lead',
       priority: appointment ? 'high' : 'medium',
-      summary: body || 'Hot lead detected by WhatsAI qualification flow.',
+      summary: body || 'Hot lead detected by XeroWA AI qualification flow.',
     });
   }
 
@@ -476,7 +476,7 @@ function scoreLead(body: string, appointmentAt?: string | null) {
 }
 
 function mergeNotes(existing: string | null | undefined, body?: string | null, metaLeadId?: string | null) {
-  const lines = [existing, body ? `WhatsAI intake: ${body}` : null, metaLeadId ? `Meta lead id: ${metaLeadId}` : null].filter(Boolean);
+  const lines = [existing, body ? `XeroWA AI intake: ${body}` : null, metaLeadId ? `Meta lead id: ${metaLeadId}` : null].filter(Boolean);
   return Array.from(new Set(lines)).join('\n').slice(0, 2000);
 }
 

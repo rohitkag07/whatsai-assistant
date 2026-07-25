@@ -27,7 +27,7 @@ export type LeadStage        =
 
 export type LeadTemperature  = 'hot' | 'warm' | 'cold';
 
-/** Operator-facing CRM stage used by canonical WhatsAI contacts and threads. */
+/** Operator-facing CRM stage used by canonical XeroWA AI contacts and threads. */
 export type ConversationStage = 'new' | 'interested' | 'negotiating' | 'booked' | 'lost' | 'cold';
 
 export type SiteVisitStatus  =

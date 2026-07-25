@@ -8,7 +8,7 @@ export default function AssistantSetupPage() {
     <div className="space-y-6">
       <PageHeader
         title="Assistant Setup"
-        description="Connect WhatsApp, add your business details, and teach the assistant what to ask."
+        description="Connect WhatsApp, add your business details, and teach XeroWA AI what to ask."
       />
       <WhatsAiSetupForm />
     </div>

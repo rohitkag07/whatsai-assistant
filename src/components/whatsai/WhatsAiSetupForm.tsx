@@ -210,7 +210,7 @@ export function WhatsAiSetupForm() {
         if (!followupResponse.ok) toast.error('Setup saved, but follow-up sequence could not be saved.');
       }
       setStep(4);
-      toast.success('WhatsAI setup completed.');
+      toast.success('XeroWA AI setup completed.');
     });
   }
 
@@ -380,7 +380,7 @@ function PlaybookStep({ form, update, setupResult }: StepProps & { setupResult: 
   return (
     <div className="grid gap-5">
       <KeywordReplyEditor rules={form.keyword_replies} fallbackReply={form.fallback_reply} businessId={setupResult?.businessId} playbookId={setupResult?.playbookId} onRulesChange={(rules) => update('keyword_replies', rules)} onFallbackReplyChange={(value) => update('fallback_reply', value)} />
-      <Field label="Owner follow-up checklist" helper="One item per line. These are saved for the owner to use after WhatsAI hands over an unmatched inquiry.">
+      <Field label="Owner follow-up checklist" helper="One item per line. These are saved for the owner to use after XeroWA AI hands over an unmatched inquiry.">
         <Textarea value={form.qualification_questions_text} onChange={(event) => update('qualification_questions_text', event.target.value)} rows={5} />
       </Field>
       <div className="rounded-2xl border border-[#d8dee4] bg-[#f7faf9] p-5">

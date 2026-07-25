@@ -63,7 +63,7 @@ export default async function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <CreditCard className="h-4 w-4" /> WhatsAI Plan
+                <CreditCard className="h-4 w-4" /> XeroWA AI Plan
                 <Badge variant="success">Active</Badge>
               </CardTitle>
               <CardDescription>WhatsApp assistant, qualification playbook, appointment booking, and owner alerts.</CardDescription>

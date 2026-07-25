@@ -60,7 +60,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
 
   // Keep the legacy lead pipeline broadly aligned without forcing its older
-  // real-estate-specific stages onto the WhatsAI operator experience.
+  // real-estate-specific stages onto the XeroWA AI operator experience.
   if (contact.lead_id) {
     await (supabase.from('leads') as any)
       .update({ lead_stage: legacyStageFor(payload.data.stage), updated_at: now })

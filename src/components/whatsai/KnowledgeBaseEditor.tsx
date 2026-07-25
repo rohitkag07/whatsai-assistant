@@ -39,7 +39,7 @@ export function KnowledgeBaseEditor({ items, onChange, compact = false }: Props)
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#075e54] text-white"><BookOpen className="h-5 w-5" /></div>
             <div>
               <h3 className="font-semibold text-[#111b21]">Owner-approved business knowledge</h3>
-              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#667781]">Add the facts customers ask about: services, prices, location, policies, and offers. WhatsAI sends only the exact answer you approve.</p>
+              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#667781]">Add the facts customers ask about: services, prices, location, policies, and offers. XeroWA AI sends only the exact answer you approve.</p>
             </div>
           </div>
           <Badge className="w-fit bg-[#d9fdd3] text-[#075e54] hover:bg-[#d9fdd3]">{publishedCount} published</Badge>
@@ -80,7 +80,7 @@ export function KnowledgeBaseEditor({ items, onChange, compact = false }: Props)
               {match.content}
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#667781]"><span>Source: {match.title}</span><span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3" />Owner approved</span></div>
             </div>
-          ) : <p className="p-3 text-center text-xs font-medium text-[#9a6700]">No published answer matched. WhatsAI will hand this chat to the owner.</p>}
+          ) : <p className="p-3 text-center text-xs font-medium text-[#9a6700]">No published answer matched. XeroWA AI will hand this chat to the owner.</p>}
         </div>
       </div>
     </div>

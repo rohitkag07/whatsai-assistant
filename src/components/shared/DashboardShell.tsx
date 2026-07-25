@@ -13,7 +13,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
       <SheetContent side="left" className="w-72 p-0 sm:max-w-72">
         <SheetHeader className="sr-only">
-          <SheetTitle>WhatsAI navigation</SheetTitle>
+          <SheetTitle>XeroWA AI navigation</SheetTitle>
           <SheetDescription>Open a dashboard workspace.</SheetDescription>
         </SheetHeader>
         <Sidebar mobile onNavigate={() => setMenuOpen(false)} />

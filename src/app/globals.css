@@ -107,7 +107,7 @@
   color: #111b21;
 }
 
-/* Legacy helper kept for old screens; new WhatsAI surfaces use English-only labels. */
+/* Legacy helper kept for old screens; new XeroWA AI surfaces use English-only labels. */
 [lang='hi'] {
   font-family: var(--font-noto-devanagari), var(--font-geist-sans), system-ui, sans-serif;
 }

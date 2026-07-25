@@ -77,7 +77,7 @@ function LoginCard({
           <span className="font-semibold">{APP_NAME}</span>
         </div>
         <div>
-          <CardTitle className="text-2xl">WhatsAI Console Login</CardTitle>
+          <CardTitle className="text-2xl">XeroWA AI Console Login</CardTitle>
           <CardDescription>
             Namaste! Apne WhatsApp assistant trial console me wapas swagat hai.
           </CardDescription>
@@ -112,7 +112,7 @@ function LoginCard({
           </Button>
 
           <p className="text-center text-xs text-muted-foreground pt-2">
-            New here? Contact your WhatsAI onboarding partner to get setup access.
+            New here? Contact your XeroWA AI onboarding partner to get setup access.
           </p>
         </form>
       </CardContent>

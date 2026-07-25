@@ -63,6 +63,6 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, { hi: string; en: stri
   refunded:   { hi: 'रिफंड',        en: 'Refunded',   color: 'bg-red-100 text-red-800' },
 };
 
-export const APP_NAME      = 'WhatsAI Assistant';
-export const APP_TAGLINE   = '24/7 WhatsApp Receptionist for Indian SMBs';
-export const APP_COPYRIGHT = `© ${new Date().getFullYear()} Xero Seven`;
+export const APP_NAME      = 'XeroWA AI';
+export const APP_TAGLINE   = 'XeroWA — The 24/7 WhatsApp AI & Lead Intelligence Platform';
+export const APP_COPYRIGHT = `© ${new Date().getFullYear()} Xero Seven AI`;

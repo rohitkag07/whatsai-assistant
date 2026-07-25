@@ -20,10 +20,10 @@ const pageNames: Record<string, { title: string; eyebrow: string }> = {
   settings: { title: 'Business settings', eyebrow: 'Workspace' },
 };
 
-export function TopBar({ builderName = 'WhatsAI Assistant', onMenuClick }: TopBarProps) {
+export function TopBar({ builderName = 'XeroWA AI', onMenuClick }: TopBarProps) {
   const pathname = usePathname();
   const route = pathname.split('/').filter(Boolean)[0] ?? 'dashboard';
-  const page = pageNames[route] ?? { title: 'WhatsAI workspace', eyebrow: 'Workspace' };
+  const page = pageNames[route] ?? { title: 'XeroWA AI workspace', eyebrow: 'Workspace' };
   const fallback = builderName
     .split(' ')
     .slice(0, 2)

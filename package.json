@@ -2,7 +2,7 @@
   "name": "@x7/whatsai-dashboard",
   "version": "0.1.0",
   "private": true,
-  "description": "WhatsAI Assistant — WhatsApp-first AI console for Indian SMBs",
+  "description": "XeroWA AI — The 24/7 WhatsApp AI & Lead Intelligence Platform",
   "author": "Rohit Kag <rohit@xeroseven.in>",
   "scripts": {
     "dev": "next dev",
