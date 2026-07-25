@@ -78,7 +78,7 @@ export default async function LandingPage({ params }: PageParams) {
 function defaultFaqs(project: LandingProject, builder: LandingBuilder) {
   return [
     { q: 'Is this offer verified?', a: project.rera_number ? `Yes — verification reference ${project.rera_number}.` : 'The business team will confirm verification details on WhatsApp.' },
-    { q: 'What is the next step?', a: 'Share your name and phone number. The WhatsAI assistant will qualify your need and route hot enquiries to the owner.' },
+    { q: 'What is the next step?', a: 'Share your name and phone number. XeroWA AI will qualify your need and route hot enquiries to the owner.' },
     { q: 'How is pricing shared?', a: `The business team can share current packages between ₹${project.price_range_min} Lakh and ₹${project.price_range_max} Lakh based on fit and availability.` },
     { q: 'Can I speak to a person?', a: 'Yes. Qualified or urgent enquiries are handed off to the business owner or team.' },
     { q: 'How do I book an appointment?', a: `WhatsApp ${builder.whatsapp_number ?? builder.phone} — we will confirm the right callback or appointment slot.` },

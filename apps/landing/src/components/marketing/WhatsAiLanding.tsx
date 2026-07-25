@@ -37,7 +37,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const dashboardHref = 'https://x7-whatsai-dashboard.vercel.app/dashboard';
 const setupMessage = encodeURIComponent(
-  'Hi Rohit, I want to set up WhatsAI Assistant for my business. Please show me the live workflow.',
+  'Hi Rohit, I want to set up XeroWA AI for my business. Please show me the live workflow.',
 );
 const setupHref = `https://wa.me/917869161842?text=${setupMessage}`;
 
@@ -60,7 +60,7 @@ type Outcome = {
 const outcomes: Outcome[] = [
   {
     title: 'Your approved answers. Every time.',
-    text: 'Set the questions your customers ask and the exact answer WhatsAI should send.',
+    text: 'Set the questions your customers ask and the exact answer XeroWA AI should send.',
     icon: ShieldCheck,
     className: 'md:col-span-7',
     visual: 'rules',
@@ -104,7 +104,7 @@ const workflow = [
   },
   {
     step: '02',
-    title: 'WhatsAI finds the approved rule',
+    title: 'XeroWA AI finds the approved rule',
     text: 'The system identifies the closest configured intent without generating a new or unpredictable answer.',
     visual: <RuleMatch />,
   },
@@ -117,7 +117,7 @@ const workflow = [
   {
     step: '04',
     title: 'The owner gets the next action',
-    text: 'WhatsAI captures the lead, records the appointment, or marks the chat for human takeover.',
+    text: 'XeroWA AI captures the lead, records the appointment, or marks the chat for human takeover.',
     visual: <OwnerAction />,
   },
 ];
@@ -253,13 +253,13 @@ export function WhatsAiLanding() {
           className="mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-white/70 bg-white/85 px-3 py-3 shadow-[0_18px_60px_rgba(16,25,22,0.08)] backdrop-blur-xl sm:px-5"
           aria-label="Primary navigation"
         >
-          <a href="#top" className="flex min-h-11 items-center gap-3 rounded-xl px-2" aria-label="WhatsAI Assistant home">
+          <a href="#top" className="flex min-h-11 items-center gap-3 rounded-xl px-2" aria-label="XeroWA AI home">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00a884] text-white shadow-[0_8px_24px_rgba(0,168,132,0.25)]">
               <MessageCircle className="h-5 w-5" />
             </span>
             <span className="leading-tight">
-              <span className="block text-sm font-bold tracking-[-0.02em]">WhatsAI Assistant</span>
-              <span className="hidden text-[11px] font-medium text-[#68746f] sm:block">The always-on front desk</span>
+              <span className="block text-sm font-bold tracking-[-0.02em]">XeroWA AI</span>
+              <span className="hidden text-[11px] font-medium text-[#68746f] sm:block">The 24/7 WhatsApp AI &amp; Lead Intelligence Platform</span>
             </span>
           </a>
 
@@ -323,7 +323,7 @@ export function WhatsAiLanding() {
                 </span>
               </h1>
               <p className="mx-auto mt-7 max-w-3xl text-balance text-lg leading-8 text-[#52605a] sm:text-xl sm:leading-9">
-                WhatsAI answers common questions with replies you approve, captures every lead, and hands hot conversations to your team before they go cold.
+                XeroWA AI answers common questions with replies you approve, captures every lead, and hands hot conversations to your team before they go cold.
               </p>
             </div>
 
@@ -352,7 +352,7 @@ export function WhatsAiLanding() {
             <SectionIntro
               kicker="A calmer sales day"
               title="Your front desk follows the playbook, even when your team is busy."
-              text="WhatsAI keeps the repetitive questions moving and gives the owner a clean next action. It does not invent answers."
+              text="XeroWA AI keeps the repetitive questions moving and gives the owner a clean next action. It does not invent answers."
             />
             <div className="mt-14 grid grid-flow-dense overflow-hidden rounded-[2rem] border border-[#dce3df] bg-[#dce3df] md:grid-cols-12">
               {outcomes.map((outcome) => (
@@ -475,7 +475,7 @@ export function WhatsAiLanding() {
               <div className="border-b border-[#dce3df] p-6 sm:p-9">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-[#00a884]">WhatsAI assisted setup</p>
+                    <p className="text-sm font-semibold text-[#00a884]">XeroWA AI assisted setup</p>
                     <h3 className="mt-2 text-3xl font-semibold tracking-[-0.035em]">One business. One WhatsApp number.</h3>
                   </div>
                   <BadgeIndianRupee className="h-10 w-10 text-[#075e54]" />
@@ -534,7 +534,7 @@ export function WhatsAiLanding() {
                 WhatsApp us for a live demo
                 <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" />
               </a>
-              <a href="mailto:rohit@xeroseven.in?subject=WhatsAI%20Assistant%20demo" className="inline-flex min-h-14 items-center justify-center rounded-2xl border border-white/25 px-7 text-sm font-semibold text-white transition hover:bg-white/10">
+              <a href="mailto:rohit@xeroseven.in?subject=XeroWA%20AI%20demo" className="inline-flex min-h-14 items-center justify-center rounded-2xl border border-white/25 px-7 text-sm font-semibold text-white transition hover:bg-white/10">
                 Contact by email
               </a>
             </div>
@@ -678,7 +678,7 @@ function DemoDetail({ label, value }: { label: string; value: string }) {
 function CapabilityMarquee() {
   const items = ['Approved replies', 'Hinglish-ready', 'Human takeover', 'Media support', 'Lead capture', 'Appointment tracking'];
   return (
-    <div className="overflow-hidden border-y border-[#dce3df] bg-white py-5" aria-label="WhatsAI capabilities">
+    <div className="overflow-hidden border-y border-[#dce3df] bg-white py-5" aria-label="XeroWA AI capabilities">
       <div className="flex min-w-max animate-[marquee_28s_linear_infinite] items-center gap-8 motion-reduce:animate-none">
         {[...items, ...items].map((item, index) => (
           <div key={`${item}-${index}`} className="flex items-center gap-8">
@@ -813,8 +813,8 @@ function LandingFooter() {
       <div className="landing-shell">
         <div className="grid gap-12 border-b border-white/10 pb-12 md:grid-cols-[1.4fr_0.6fr_0.6fr]">
           <div>
-            <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00a884]"><MessageCircle className="h-5 w-5" /></span><p className="font-semibold">WhatsAI Assistant</p></div>
-            <p className="mt-5 max-w-sm text-sm leading-6 text-white/50">A controlled WhatsApp receptionist for Indian SMBs. Built by Xero Seven Private Limited.</p>
+            <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00a884]"><MessageCircle className="h-5 w-5" /></span><p className="font-semibold">XeroWA AI</p></div>
+            <p className="mt-5 max-w-sm text-sm leading-6 text-white/50">XeroWA — The 24/7 WhatsApp AI &amp; Lead Intelligence Platform. Built by Xero Seven AI.</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-white/90">Product</p>
@@ -825,7 +825,7 @@ function LandingFooter() {
             <div className="mt-4 grid gap-3 text-sm text-white/50"><Link href="/privacy" className="hover:text-white">Privacy</Link><Link href="/terms" className="hover:text-white">Terms</Link><a href="mailto:rohit@xeroseven.in" className="hover:text-white">Contact</a></div>
           </div>
         </div>
-        <div className="flex flex-col gap-3 pt-8 text-xs text-white/38 sm:flex-row sm:items-center sm:justify-between"><p>Copyright 2026 Xero Seven Private Limited. All rights reserved.</p><p>Made for owner-led Indian businesses.</p></div>
+        <div className="flex flex-col gap-3 pt-8 text-xs text-white/38 sm:flex-row sm:items-center sm:justify-between"><p>Copyright 2026 Xero Seven AI. All rights reserved.</p><p>Made for owner-led Indian businesses.</p></div>
       </div>
     </footer>
   );

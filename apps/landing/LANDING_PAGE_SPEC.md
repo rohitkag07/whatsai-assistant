@@ -1,4 +1,4 @@
-# WhatsAI Assistant Landing Page Spec
+# XeroWA AI Landing Page Spec
 
 ## Goal
 
@@ -10,7 +10,7 @@ Clinics, coaching institutes, restaurants, real estate agents, gyms, and salons 
 
 ## Core Promise
 
-Your WhatsApp replies 24/7. WhatsAI qualifies leads, books appointments, and alerts you for hot leads while you sleep.
+Your WhatsApp replies 24/7. XeroWA AI qualifies leads, books appointments, and alerts you for hot leads while you sleep.
 
 ## Required Sections
 

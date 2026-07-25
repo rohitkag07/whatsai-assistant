@@ -11,12 +11,12 @@ const noto = Noto_Sans_Devanagari({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://landing-iota-lemon.vercel.app'),
-  title: { default: 'WhatsAI Assistant', template: '%s | WhatsAI Assistant' },
+  title: { default: 'XeroWA AI', template: '%s | XeroWA AI' },
   description:
-    'A controlled WhatsApp receptionist for Indian businesses. Every automated reply stays under the owner’s control.',
+    'XeroWA — The 24/7 WhatsApp AI & Lead Intelligence Platform.',
   openGraph: {
-    title: 'WhatsAI Assistant',
-    description: 'Turn WhatsApp enquiries into appointments with replies you approve.',
+    title: 'XeroWA AI',
+    description: 'Turn Every WhatsApp Inbound into Revenue — 24/7.',
     type: 'website',
     locale: 'en_IN',
   },
