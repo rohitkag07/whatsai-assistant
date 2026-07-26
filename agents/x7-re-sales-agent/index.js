@@ -193,6 +193,250 @@ app.use((req, res, next) => {
   return next();
 });
 
+const operatorLeadListSchema = z.object({
+  business_id: z.string().uuid(),
+  builder_id: z.string().uuid().optional().nullable(),
+  limit: z.number().int().positive().max(200).default(120).optional(),
+});
+
+const operatorLeadStageSchema = z.object({
+  business_id: z.string().uuid(),
+  builder_id: z.string().uuid().optional().nullable(),
+  contact_id: z.string().uuid(),
+  stage: z.enum(['new', 'interested', 'negotiating', 'booked', 'lost', 'cold']),
+});
+
+app.post('/operator/leads/list', async (req, res) => {
+  const parsed = operatorLeadListSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
+  }
+  if (!supabase) {
+    return res.status(503).json({ ok: false, error: 'supabase_not_configured' });
+  }
+
+  const { business_id: businessId, builder_id: builderId, limit = 120 } = parsed.data;
+  const businessResult = await supabase
+    .from('businesses')
+    .select('id,name,category,status,plan,trial_ends_at,daily_message_limit,builder_id')
+    .eq('id', businessId)
+    .maybeSingle();
+
+  if (businessResult.error) {
+    return res.status(502).json({ ok: false, error: businessResult.error.message });
+  }
+  if (!businessResult.data) {
+    return res.status(404).json({ ok: false, error: 'business_not_found' });
+  }
+  if (businessResult.data.builder_id && builderId && businessResult.data.builder_id !== builderId) {
+    return res.status(403).json({ ok: false, error: 'business_builder_context_mismatch' });
+  }
+
+  const [threadsResult, contactsResult, appointmentsResult, handoffsResult] = await Promise.all([
+    supabase
+      .from('conversation_threads')
+      .select('*')
+      .eq('business_id', businessId)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .limit(limit),
+    supabase
+      .from('conversation_contacts')
+      .select('*')
+      .eq('business_id', businessId)
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .limit(Math.min(limit * 2, 400)),
+    supabase
+      .from('appointments')
+      .select('*')
+      .eq('business_id', businessId)
+      .order('scheduled_at', { ascending: false })
+      .limit(Math.min(limit * 2, 400)),
+    supabase
+      .from('handoff_events')
+      .select('*')
+      .eq('business_id', businessId)
+      .in('status', ['open', 'pending'])
+      .order('created_at', { ascending: false })
+      .limit(Math.min(limit * 2, 400)),
+  ]);
+
+  const requiredError = [
+    threadsResult.error,
+    contactsResult.error,
+    appointmentsResult.error,
+    handoffsResult.error,
+  ].find(Boolean);
+  if (requiredError) {
+    return res.status(502).json({ ok: false, error: requiredError.message });
+  }
+
+  const threads = threadsResult.data ?? [];
+  const contacts = contactsResult.data ?? [];
+  const threadIds = threads.map((thread) => thread.id);
+  const leadIds = [...new Set([
+    ...threads.map((thread) => thread.lead_id),
+    ...contacts.map((contact) => contact.lead_id),
+  ].filter(Boolean))];
+
+  const emptyResult = { data: [], error: null };
+  const [messagesResult, qualificationResult, leadsResult] = await Promise.all([
+    threadIds.length
+      ? supabase
+        .from('conversation_messages')
+        .select('*')
+        .in('thread_id', threadIds)
+        .order('created_at', { ascending: false })
+        .limit(Math.min(limit * 12, 1200))
+      : Promise.resolve(emptyResult),
+    threadIds.length
+      ? supabase
+        .from('lead_qualification_answers')
+        .select('*')
+        .in('thread_id', threadIds)
+        .order('extracted_at', { ascending: false })
+        .limit(Math.min(limit * 8, 1000))
+      : Promise.resolve(emptyResult),
+    leadIds.length
+      ? (() => {
+        let query = supabase.from('leads').select('*').in('id', leadIds);
+        if (builderId) query = query.eq('builder_id', builderId);
+        return query.limit(Math.min(limit * 2, 400));
+      })()
+      : Promise.resolve(emptyResult),
+  ]);
+
+  const dependentError = [
+    messagesResult.error,
+    qualificationResult.error,
+    leadsResult.error,
+  ].find(Boolean);
+  if (dependentError) {
+    return res.status(502).json({ ok: false, error: dependentError.message });
+  }
+
+  return res.json({
+    ok: true,
+    business: businessResult.data,
+    threads,
+    contacts,
+    messages: messagesResult.data ?? [],
+    leads: leadsResult.data ?? [],
+    qualification_answers: qualificationResult.data ?? [],
+    appointments: appointmentsResult.data ?? [],
+    handoffs: handoffsResult.data ?? [],
+    audit_summary: {
+      business_id: businessId,
+      thread_count: threads.length,
+      contact_count: contacts.length,
+      appointment_count: appointmentsResult.data?.length ?? 0,
+      open_handoff_count: handoffsResult.data?.length ?? 0,
+    },
+  });
+});
+
+app.post('/operator/leads/stage', async (req, res) => {
+  const parsed = operatorLeadStageSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
+  }
+  if (!supabase) {
+    return res.status(503).json({ ok: false, error: 'supabase_not_configured' });
+  }
+
+  const {
+    business_id: businessId,
+    builder_id: builderId,
+    contact_id: contactId,
+    stage,
+  } = parsed.data;
+  const contactResult = await supabase
+    .from('conversation_contacts')
+    .select('id,business_id,builder_id,lead_id,stage')
+    .eq('id', contactId)
+    .eq('business_id', businessId)
+    .maybeSingle();
+
+  if (contactResult.error) {
+    return res.status(502).json({ ok: false, error: contactResult.error.message });
+  }
+  if (!contactResult.data) {
+    return res.status(404).json({ ok: false, error: 'contact_not_found_for_business' });
+  }
+  if (contactResult.data.builder_id && builderId && contactResult.data.builder_id !== builderId) {
+    return res.status(403).json({ ok: false, error: 'contact_builder_context_mismatch' });
+  }
+
+  const previousStage = contactResult.data.stage;
+  const now = new Date().toISOString();
+  const contactUpdate = await supabase
+    .from('conversation_contacts')
+    .update({ stage, updated_at: now })
+    .eq('id', contactId)
+    .eq('business_id', businessId)
+    .select('id,stage')
+    .maybeSingle();
+
+  if (contactUpdate.error || !contactUpdate.data) {
+    return res.status(contactUpdate.error ? 502 : 409).json({
+      ok: false,
+      error: contactUpdate.error?.message || 'contact_stage_update_did_not_persist',
+    });
+  }
+
+  const threadsUpdate = await supabase
+    .from('conversation_threads')
+    .update({ stage, updated_at: now })
+    .eq('contact_id', contactId)
+    .eq('business_id', businessId)
+    .select('id,stage');
+
+  if (threadsUpdate.error || !(threadsUpdate.data?.length)) {
+    await supabase
+      .from('conversation_contacts')
+      .update({ stage: previousStage, updated_at: new Date().toISOString() })
+      .eq('id', contactId)
+      .eq('business_id', businessId);
+    return res.status(threadsUpdate.error ? 502 : 409).json({
+      ok: false,
+      error: threadsUpdate.error?.message || 'no_tenant_scoped_threads_updated',
+    });
+  }
+
+  let legacyLeadSynced = false;
+  if (contactResult.data.lead_id && builderId) {
+    const legacyUpdate = await supabase
+      .from('leads')
+      .update({ lead_stage: legacyStageForOperator(stage), updated_at: now })
+      .eq('id', contactResult.data.lead_id)
+      .eq('builder_id', builderId)
+      .select('id')
+      .maybeSingle();
+    legacyLeadSynced = Boolean(!legacyUpdate.error && legacyUpdate.data);
+  }
+
+  return res.json({
+    ok: true,
+    business_id: businessId,
+    contact_id: contactId,
+    stage,
+    updated_thread_ids: threadsUpdate.data.map((thread) => thread.id),
+    legacy_lead_synced: legacyLeadSynced,
+    audit_summary: {
+      business_id: businessId,
+      contact_id: contactId,
+      stage,
+      updated_thread_count: threadsUpdate.data.length,
+    },
+  });
+});
+
+function legacyStageForOperator(stage) {
+  if (stage === 'interested') return 'qualified';
+  if (stage === 'cold') return 'lost';
+  if (stage === 'negotiating') return 'negotiation';
+  return stage;
+}
+
 const qualifySchema = z.object({
   message: z.string().min(2),
   locale: z.enum(['hi', 'en', 'hi-en']).default('hi-en').optional(),

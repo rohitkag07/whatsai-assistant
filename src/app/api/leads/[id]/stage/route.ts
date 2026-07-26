@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { serviceClientOrNull } from '@/lib/sales-server';
-import type { ConversationStage, LeadStage } from '@/types/database';
+import { callSalesAgent, serviceClientOrNull } from '@/lib/sales-server';
+import { BusinessContextError, resolveDashboardBusiness } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,68 +11,54 @@ const stageSchema = z.object({
   stage: z.enum(['new', 'interested', 'negotiating', 'booked', 'lost', 'cold']),
 });
 
+type OperatorStageResponse = {
+  ok: boolean;
+  business_id: string;
+  contact_id: string;
+  stage: string;
+  updated_thread_ids: string[];
+  legacy_lead_synced: boolean;
+};
+
 /**
- * Updates the canonical contact stage. The contact is fetched with its business
- * scope before any mutation, so a business cannot update another tenant's lead.
+ * Resolves the dashboard tenant first, then routes the canonical stage mutation
+ * through Summoner -> Sales Agent -> Supabase.
  */
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  const payload = stageSchema.safeParse(await request.json());
+  const payload = stageSchema.safeParse(await request.json().catch(() => null));
   if (!payload.success || !z.string().uuid().safeParse(id).success) {
     return NextResponse.json({ ok: false, error: 'A valid contact, business, and stage are required.' }, { status: 400 });
   }
 
-  const supabase = serviceClientOrNull();
-  if (!supabase) {
+  const tenantClient = serviceClientOrNull();
+  if (!tenantClient) {
     return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 503 });
   }
 
-  const contactResult = await (supabase.from('conversation_contacts') as any)
-    .select('id,business_id,lead_id')
-    .eq('id', id)
-    .eq('business_id', payload.data.business_id)
-    .maybeSingle();
-
-  if (contactResult.error || !contactResult.data) {
-    return NextResponse.json({ ok: false, error: 'Contact not found for this business.' }, { status: 404 });
+  let business;
+  try {
+    business = await resolveDashboardBusiness(tenantClient, payload.data.business_id);
+  } catch (error) {
+    const status = error instanceof BusinessContextError ? error.status : 500;
+    return NextResponse.json({
+      ok: false,
+      error: error instanceof Error ? error.message : 'Dashboard business context could not be resolved.',
+    }, { status });
   }
 
-  const now = new Date().toISOString();
-  const contact = contactResult.data as { id: string; business_id: string; lead_id: string | null };
-  const contactUpdate = await (supabase.from('conversation_contacts') as any)
-    .update({ stage: payload.data.stage, updated_at: now })
-    .eq('id', contact.id)
-    .eq('business_id', contact.business_id)
-    .select('id,stage')
-    .single();
-
-  if (contactUpdate.error) {
-    return NextResponse.json({ ok: false, error: contactUpdate.error.message }, { status: 500 });
+  const result = await callSalesAgent<OperatorStageResponse>('/operator/leads/stage', {
+    business_id: business.id,
+    builder_id: business.builder_id ?? process.env.DEFAULT_BUILDER_ID ?? null,
+    contact_id: id,
+    stage: payload.data.stage,
+  });
+  if (!result?.ok) {
+    return NextResponse.json({
+      ok: false,
+      error: 'Summoner or Sales Agent could not persist the tenant-scoped stage change.',
+    }, { status: 503 });
   }
 
-  const threadsUpdate = await (supabase.from('conversation_threads') as any)
-    .update({ stage: payload.data.stage, updated_at: now })
-    .eq('contact_id', contact.id)
-    .eq('business_id', contact.business_id);
-
-  if (threadsUpdate.error) {
-    return NextResponse.json({ ok: false, error: threadsUpdate.error.message }, { status: 500 });
-  }
-
-  // Keep the legacy lead pipeline broadly aligned without forcing its older
-  // real-estate-specific stages onto the XeroWA AI operator experience.
-  if (contact.lead_id) {
-    await (supabase.from('leads') as any)
-      .update({ lead_stage: legacyStageFor(payload.data.stage), updated_at: now })
-      .eq('id', contact.lead_id);
-  }
-
-  return NextResponse.json({ ok: true, contact_id: contact.id, stage: payload.data.stage });
-}
-
-function legacyStageFor(stage: ConversationStage): LeadStage {
-  if (stage === 'interested') return 'qualified';
-  if (stage === 'cold') return 'lost';
-  if (stage === 'negotiating') return 'negotiation';
-  return stage;
+  return NextResponse.json(result);
 }

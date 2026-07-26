@@ -50,6 +50,14 @@ print_group "Dashboard" \
   "apps/dashboard/.env.local" "DEFAULT_PROJECT_ID" \
   "apps/dashboard/.env.local" "AGENT_SECRET"
 
+print_group "Root Dashboard" \
+  ".env.local" "NEXT_PUBLIC_SUPABASE_URL" \
+  ".env.local" "NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  ".env.local" "SUPABASE_SERVICE_ROLE_KEY" \
+  ".env.local" "DEFAULT_BUSINESS_ID" \
+  ".env.local" "DEFAULT_BUILDER_ID" \
+  ".env.local" "AGENT_SECRET"
+
 print_group "Landing" \
   "apps/landing/.env.local" "NEXT_PUBLIC_SUPABASE_URL" \
   "apps/landing/.env.local" "NEXT_PUBLIC_SUPABASE_ANON_KEY" \

@@ -2,6 +2,9 @@ const summonerUrl = process.env.SUMMONER_URL || process.env.NEXT_PUBLIC_SUMMONER
 const agentSecret = process.env.AGENT_SECRET || '';
 
 type TargetAgent = 'sales' | 'content' | 'ads' | 'colony' | 'finance';
+type SummonerDispatchOptions = {
+  auditMode?: 'full' | 'summary';
+};
 
 async function post<T>(path: string, payload: unknown): Promise<T | null> {
   try {
@@ -21,11 +24,17 @@ async function post<T>(path: string, payload: unknown): Promise<T | null> {
   }
 }
 
-export async function callSummonerDispatch<T>(targetAgent: TargetAgent, endpoint: string, payload: unknown): Promise<T | null> {
+export async function callSummonerDispatch<T>(
+  targetAgent: TargetAgent,
+  endpoint: string,
+  payload: unknown,
+  options: SummonerDispatchOptions = {},
+): Promise<T | null> {
   const response = await post<{ ok: boolean; result?: T }>('/dispatch', {
     target_agent: targetAgent,
     endpoint,
     payload,
+    audit_mode: options.auditMode ?? 'full',
   });
 
   if (!response?.ok) return null;

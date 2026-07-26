@@ -50,7 +50,7 @@ export function LeadPipeline({ threads }: LeadPipelineProps) {
     }
 
     const previous = thread.stage;
-    setItems((current) => current.map((item) => item.id === thread.id ? { ...item, stage } : item));
+    setItems((current) => current.map((item) => item.contactId === thread.contactId ? { ...item, stage } : item));
     startTransition(async () => {
       try {
         const response = await fetch(`/api/leads/${thread.contactId}/stage`, {
@@ -62,7 +62,7 @@ export function LeadPipeline({ threads }: LeadPipelineProps) {
         if (!response.ok || !payload?.ok) throw new Error(payload?.error || 'Stage update failed.');
         toast.success(`${thread.contactName} moved to ${stage}.`);
       } catch (error) {
-        setItems((current) => current.map((item) => item.id === thread.id ? { ...item, stage: previous } : item));
+        setItems((current) => current.map((item) => item.contactId === thread.contactId ? { ...item, stage: previous } : item));
         toast.error(error instanceof Error ? error.message : 'Stage update failed.');
       }
     });

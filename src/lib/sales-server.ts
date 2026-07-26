@@ -12,8 +12,12 @@ export function serviceClientOrNull() {
   }
 }
 
-export async function callSalesAgent<T>(path: string, payload: unknown): Promise<T | null> {
-  const viaSummoner = await callSummonerDispatch<T>('sales', path, payload);
+export async function callSalesAgent<T>(
+  path: string,
+  payload: unknown,
+  options: { auditMode?: 'full' | 'summary' } = {},
+): Promise<T | null> {
+  const viaSummoner = await callSummonerDispatch<T>('sales', path, payload, options);
   if (viaSummoner) return viaSummoner;
 
   try {

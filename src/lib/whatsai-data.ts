@@ -1,8 +1,9 @@
 import 'server-only';
 
-import { serviceClientOrNull } from '@/lib/sales-server';
+import { callSalesAgent, serviceClientOrNull } from '@/lib/sales-server';
 import { createClient } from '@/lib/supabase/server';
 import { DEMO_BUILDER_ID } from '@/lib/sales-data';
+import { resolveDashboardBusiness } from '@/lib/whatsai-business';
 import type { AiMode, Appointment, Business, ConversationStage, ConversationContact, ConversationMessage, ConversationStatus, ConversationThread, HandoffEvent, Lead, LeadQualificationAnswer } from '@/types/database';
 
 export type WhatsAiReadSource = 'supabase' | 'demo' | 'error';
@@ -99,7 +100,65 @@ type CanonicalInboxInput = {
   selectedPhone?: string | null;
 };
 
+type OperatorLeadsResponse = {
+  ok: boolean;
+  business: WhatsAiBusinessSummary['business'] & { builder_id?: string | null };
+  threads: ConversationThread[];
+  messages: ConversationMessage[];
+  contacts: ConversationContact[];
+  leads: Lead[];
+  qualification_answers: LeadQualificationAnswer[];
+  appointments: Appointment[];
+  handoffs: HandoffEvent[];
+};
+
 const now = new Date();
+
+export async function loadOperatorLeadsData(): Promise<WhatsAiInboxData> {
+  const tenantClient = serviceClientOrNull();
+  if (!tenantClient) {
+    return buildOperatorLeadError('Supabase service access is not configured for the operator pipeline.');
+  }
+
+  let business;
+  try {
+    business = await resolveDashboardBusiness(tenantClient);
+  } catch (error) {
+    return buildOperatorLeadError(
+      error instanceof Error ? error.message : 'The dashboard business context could not be resolved.',
+    );
+  }
+
+  const builderId = business.builder_id ?? process.env.DEFAULT_BUILDER_ID ?? null;
+  const response = await callSalesAgent<OperatorLeadsResponse>(
+    '/operator/leads/list',
+    {
+      business_id: business.id,
+      builder_id: builderId,
+      limit: 120,
+    },
+    { auditMode: 'summary' },
+  );
+
+  if (!response?.ok) {
+    return buildOperatorLeadError(
+      'The Summoner-led operator pipeline could not load live Supabase records. Check Summoner and Sales Agent health, then retry.',
+    );
+  }
+
+  return buildCanonicalInbox({
+    source: 'supabase',
+    threads: response.threads,
+    messages: response.messages,
+    contacts: response.contacts,
+    leads: response.leads,
+    qualificationAnswers: response.qualification_answers,
+    appointments: response.appointments,
+    handoffs: response.handoffs,
+    business: response.business,
+    humanHandoffs: response.handoffs.length,
+  });
+}
 
 export async function loadWhatsAiInboxData(selectedPhone?: string | null): Promise<WhatsAiInboxData> {
   const client = await getReadClientOrNull();
@@ -146,6 +205,22 @@ export async function loadWhatsAiInboxData(selectedPhone?: string | null): Promi
     business: businessResult.error ? null : (businessResult.data ?? null),
     humanHandoffs: handoffsResult.error ? 0 : (handoffsResult.data ?? []).length,
     selectedPhone,
+  });
+}
+
+function buildOperatorLeadError(error: string): WhatsAiInboxData {
+  return buildCanonicalInbox({
+    source: 'error',
+    error,
+    threads: [],
+    messages: [],
+    contacts: [],
+    leads: [],
+    qualificationAnswers: [],
+    appointments: [],
+    handoffs: [],
+    business: null,
+    humanHandoffs: 0,
   });
 }
 

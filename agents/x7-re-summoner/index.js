@@ -775,6 +775,7 @@ const dispatchSchema = z.object({
   target_agent: z.enum(['sales', 'content', 'ads', 'ghost_closer', 'colony', 'finance']),
   endpoint: z.string().min(1),
   payload: z.record(z.any()).default({}).optional(),
+  audit_mode: z.enum(['full', 'summary']).default('full').optional(),
 });
 
 const queueEnqueueSchema = z.object({
@@ -1667,12 +1668,15 @@ app.post('/dispatch', async (req, res) => {
   try {
     const payload = parsed.data.payload || {};
     const result = await agentFetch(parsed.data.target_agent, parsed.data.endpoint, payload);
+    const auditOutput = parsed.data.audit_mode === 'summary'
+      ? summarizeDispatchResult(result)
+      : result;
 
     await logRun({
       builderId: payload.builder_id || DEFAULT_BUILDER_ID || null,
       action: `dispatch:${parsed.data.target_agent}${parsed.data.endpoint}`,
       input: parsed.data,
-      output: result,
+      output: auditOutput,
       durationMs: Date.now() - started,
     });
 
@@ -1686,6 +1690,19 @@ app.post('/dispatch', async (req, res) => {
     return res.status(502).json({ ok: false, error: error.message });
   }
 });
+
+function summarizeDispatchResult(result) {
+  if (!result || typeof result !== 'object' || Array.isArray(result)) {
+    return { ok: true, result_type: typeof result };
+  }
+
+  return {
+    ok: result.ok !== false,
+    audit_summary: result.audit_summary && typeof result.audit_summary === 'object'
+      ? result.audit_summary
+      : { keys: Object.keys(result).filter((key) => key !== 'data').slice(0, 20) },
+  };
+}
 
 app.post('/queue/enqueue', async (req, res) => {
   const parsed = queueEnqueueSchema.safeParse(req.body);

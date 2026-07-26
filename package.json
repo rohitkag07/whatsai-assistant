@@ -6,9 +6,11 @@
   "author": "Rohit Kag <rohit@xeroseven.in>",
   "scripts": {
     "dev": "next dev",
+    "dev:operator": "node --env-file=agents/x7-re-summoner/.env ./node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3000",
     "build": "next build",
     "postbuild": "node scripts/fix-next-manifests.js && node scripts/sanitize-next-types.js",
     "start": "next start",
+    "start:operator": "node --env-file=agents/x7-re-summoner/.env ./node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3000",
     "lint": "eslint src",
     "type-check": "node scripts/sanitize-next-types.js && tsc --noEmit",
     "prove:whatsai": "node scripts/prove-whatsai.js",
