@@ -4,6 +4,16 @@
 
 @layer base {
   :root {
+    --bg-obsidian: #0A192F;
+    --surface-card: #112240;
+    --surface-hover: #1D3557;
+    --accent-emerald: #10B981;
+    --accent-emerald-glow: rgba(16, 185, 129, 0.15);
+    --accent-cyan: #06B6D4;
+    --text-platinum: #F8FAFC;
+    --text-slate: #94A3B8;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+
     --background: 150 11% 97%;
     --foreground: 192 32% 10%;
 

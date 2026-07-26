@@ -4,15 +4,23 @@
 
 @layer base {
   :root {
+    --bg-obsidian: #0A192F;
+    --surface-card: #112240;
+    --surface-hover: #1D3557;
+    --accent-emerald: #10B981;
+    --accent-emerald-glow: rgba(16, 185, 129, 0.15);
+    --accent-cyan: #06B6D4;
+    --text-platinum: #F8FAFC;
+    --text-slate: #94A3B8;
+    --border-subtle: rgba(255, 255, 255, 0.08);
     --font-sans: 'Geist';
+    --font-mono: 'Geist Mono';
+    --font-outfit: 'Outfit';
     --font-hindi: 'Noto Sans Devanagari';
-    --ink: #101916;
-    --canvas: #f6f7f3;
-    --brand: #00a884;
-    --brand-deep: #075e54;
-    --chat-green: #d9fdd3;
-    --chat-sand: #efeae2;
-    --line: #dce3df;
+    --ink: var(--text-platinum);
+    --canvas: var(--bg-obsidian);
+    --brand: var(--accent-emerald);
+    --line: var(--border-subtle);
   }
 
   html {
@@ -21,7 +29,7 @@
   }
 
   body {
-    @apply m-0 bg-[#f6f7f3] font-sans text-[#101916] antialiased;
+    @apply m-0 bg-bg-obsidian font-sans text-text-platinum antialiased;
   }
 
   * {
@@ -29,12 +37,12 @@
   }
 
   ::selection {
-    background: #b9f4df;
-    color: #075e54;
+    background: rgba(16, 185, 129, 0.35);
+    color: #F8FAFC;
   }
 
   :focus-visible {
-    outline: 3px solid rgba(0, 168, 132, 0.4);
+    outline: 2px solid #10B981;
     outline-offset: 3px;
   }
 }
@@ -47,9 +55,10 @@
 
   .landing-grid {
     background-image:
-      linear-gradient(rgba(16, 25, 22, 0.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(16, 25, 22, 0.045) 1px, transparent 1px);
-    background-size: 42px 42px;
+      linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.055) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
   }
 
   .landing-noise {
@@ -58,6 +67,28 @@
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  .brand-hairline {
+    border-color: var(--border-subtle);
+  }
+
+  .brand-card {
+    border: 1px solid var(--border-subtle);
+    background: linear-gradient(145deg, rgba(17, 34, 64, 0.96), rgba(10, 25, 47, 0.88));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  }
+
+  .brand-kicker {
+    @apply font-mono text-eyebrow uppercase text-accent-emerald;
+  }
+
+  .brand-button-primary {
+    @apply inline-flex min-h-12 items-center justify-center rounded-brand-sm bg-accent-emerald px-5 text-sm font-bold text-[#04130f] transition duration-300 hover:-translate-y-0.5 hover:bg-[#34D399] hover:shadow-glow-emerald focus-visible:outline-accent-emerald;
+  }
+
+  .brand-button-secondary {
+    @apply inline-flex min-h-12 items-center justify-center rounded-brand-sm border border-white/10 bg-white/[0.035] px-5 text-sm font-semibold text-text-platinum transition duration-300 hover:-translate-y-0.5 hover:border-accent-emerald/40 hover:bg-white/[0.07];
   }
 }
 
