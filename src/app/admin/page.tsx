@@ -1,61 +1,139 @@
-import { Activity, Building2, ShieldCheck, SlidersHorizontal } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertTriangle } from 'lucide-react';
+import { AdminControlPanel } from '@/components/admin/AdminControlPanel';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ADMIN_MODULES, getAdminModuleStates } from '@/lib/admin-control';
+import { requirePlatformRole } from '@/lib/auth/session';
+import { serviceClientOrNull } from '@/lib/sales-server';
 
-const adminCards = [
-  {
-    title: 'Client Control Center',
-    description: 'All-client list, tenant mapping, and owner/team access controls will live here.',
-    icon: Building2,
-  },
-  {
-    title: 'Feature Toggles',
-    description: 'Tenant-level WhatsApp, knowledge, broadcasts, follow-up, and handoff switches.',
-    icon: SlidersHorizontal,
-  },
-  {
-    title: 'Launch Gates',
-    description: 'Client dashboard, admin controls, and dogfood proof status before demo claims.',
-    icon: ShieldCheck,
-  },
-  {
-    title: 'Runtime Health',
-    description: 'Webhook, Supabase, cron, Meta send, template sync, and failed-send visibility.',
-    icon: Activity,
-  },
-];
+export const dynamic = 'force-dynamic';
 
-export default function AdminHomePage() {
+type SearchParams = Promise<{ business_id?: string | string[] }>;
+
+type BusinessRow = {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  plan: string;
+  city: string | null;
+  owner_name: string | null;
+  owner_phone: string | null;
+  updated_at: string;
+  metadata?: Record<string, unknown> | null;
+};
+
+export default async function AdminHomePage({ searchParams }: { searchParams: SearchParams }) {
+  await requirePlatformRole(['admin', 'dev']);
+  const supabase = serviceClientOrNull();
+
+  if (!supabase) {
+    return (
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base text-destructive">
+            <AlertTriangle className="h-4 w-4" />
+            Admin data unavailable
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          Supabase service role is not configured for this runtime, so the platform dashboard cannot load client controls.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const params = await searchParams;
+  const rawBusinessId = Array.isArray(params?.business_id) ? params.business_id[0] : params?.business_id;
+  const selectedBusinessId = rawBusinessId || null;
+
+  const { data: businessesData, error: businessesError } = await (supabase.from('businesses') as any)
+    .select('id,name,category,status,plan,city,owner_name,owner_phone,updated_at')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (businessesError) {
+    return (
+      <Card className="shadow-none">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base text-destructive">
+            <AlertTriangle className="h-4 w-4" />
+            Client list failed
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">{businessesError.message}</CardContent>
+      </Card>
+    );
+  }
+
+  const businesses = ((businessesData ?? []) as BusinessRow[]).map(stripMetadata);
+  const selectedBusinessResult = selectedBusinessId
+    ? await (supabase.from('businesses') as any)
+        .select('id,name,category,status,plan,city,owner_name,owner_phone,updated_at,metadata')
+        .eq('id', selectedBusinessId)
+        .maybeSingle()
+    : null;
+  const selectedBusiness = selectedBusinessResult?.data ? selectedBusinessResult.data as BusinessRow : null;
+
+  const [channelsResult, membersResult, counts] = selectedBusinessId && selectedBusiness
+    ? await Promise.all([
+        (supabase.from('business_channels') as any)
+          .select('id,channel_type,phone_number,phone_number_id,display_name,status,is_primary,last_verified_at')
+          .eq('business_id', selectedBusinessId)
+          .order('is_primary', { ascending: false }),
+        (supabase.from('business_members') as any)
+          .select('id,user_id,display_name,role,active,created_at')
+          .eq('business_id', selectedBusinessId)
+          .order('created_at', { ascending: true }),
+        loadSelectedBusinessCounts(supabase, selectedBusinessId),
+      ])
+    : [null, null, null];
+
   return (
-    <div className="space-y-6">
-      <div className="max-w-3xl">
-        <p className="text-sm font-medium text-[#075e54]">XeroWA operations</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#111b21]">Admin dashboard</h1>
-        <p className="mt-3 text-sm leading-6 text-[#667781]">
-          Internal control surface for client management, feature readiness, and launch proof. Detailed controls land in the follow-up PRs after the auth boundary is enforced.
-        </p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {adminCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Card key={card.title} className="shadow-none">
-              <CardHeader className="space-y-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#edf8f4] text-[#075e54]">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-base">{card.title}</CardTitle>
-                  <CardDescription className="mt-1 leading-5">{card.description}</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <span className="inline-flex rounded-full border border-[#d8dee4] px-2.5 py-1 text-xs font-medium text-[#667781]">PR 4 control lane</span>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
+    <AdminControlPanel
+      businesses={businesses}
+      selectedBusinessId={selectedBusinessId}
+      selectedBusiness={selectedBusiness ? stripMetadata(selectedBusiness) : null}
+      channels={channelsResult?.data ?? []}
+      members={membersResult?.data ?? []}
+      counts={counts}
+      moduleDefinitions={ADMIN_MODULES}
+      moduleStates={selectedBusiness ? getAdminModuleStates(selectedBusiness.metadata) : null}
+    />
   );
+}
+
+async function loadSelectedBusinessCounts(supabase: ReturnType<typeof serviceClientOrNull>, businessId: string) {
+  if (!supabase) return null;
+
+  const [contacts, threads, appointments, handoffs, knowledge] = await Promise.all([
+    countByBusiness(supabase, 'conversation_contacts', businessId),
+    countByBusiness(supabase, 'conversation_threads', businessId),
+    countByBusiness(supabase, 'appointments', businessId),
+    countByBusiness(supabase, 'handoff_events', businessId),
+    countByBusiness(supabase, 'assistant_knowledge_items', businessId),
+  ]);
+
+  return { contacts, threads, appointments, handoffs, knowledge };
+}
+
+async function countByBusiness(supabase: NonNullable<ReturnType<typeof serviceClientOrNull>>, table: string, businessId: string) {
+  const { count } = await (supabase.from(table) as any)
+    .select('id', { count: 'exact', head: true })
+    .eq('business_id', businessId);
+
+  return count ?? 0;
+}
+
+function stripMetadata(business: BusinessRow) {
+  return {
+    id: business.id,
+    name: business.name,
+    category: business.category,
+    status: business.status,
+    plan: business.plan,
+    city: business.city,
+    owner_name: business.owner_name,
+    owner_phone: business.owner_phone,
+    updated_at: business.updated_at,
+  };
 }

@@ -7,6 +7,7 @@ import {
   BookOpen,
   Home,
   MessageCircle,
+  SlidersHorizontal,
   Users,
   ShieldCheck,
 } from 'lucide-react';
@@ -32,7 +33,7 @@ const clientItems: Item[] = [
 ];
 
 const adminItems: Item[] = [
-  { href: '/admin', label: 'Admin Home', description: 'Launch gates', icon: Home },
+  { href: '/admin', label: 'Client Controls', description: 'Tenants and modules', icon: SlidersHorizontal },
 ];
 
 export function Sidebar({ mode, mobile = false, onNavigate }: { mode: NavMode; mobile?: boolean; onNavigate?: () => void }) {
