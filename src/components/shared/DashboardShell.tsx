@@ -21,7 +21,7 @@ export function DashboardShell({ children, navMode }: { children: React.ReactNod
       </SheetContent>
     </Sheet>
     <div className="flex min-w-0 flex-1 flex-col">
-      <TopBar onMenuClick={() => setMenuOpen(true)} />
+      <TopBar mode={navMode} onMenuClick={() => setMenuOpen(true)} />
       <main className="flex-1 overflow-x-hidden p-3 sm:p-5 lg:p-7"><RouteMotion>{children}</RouteMotion></main>
     </div>
   </div>;

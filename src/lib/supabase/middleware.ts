@@ -17,8 +17,6 @@ const CLIENT_ONLY_PATHS = [
   '/leads',
   '/knowledge',
   '/bookings',
-  '/site-visits',
-  '/conversations',
 ];
 
 const DEV_ONLY_PATHS = [
@@ -31,6 +29,11 @@ const DEV_ONLY_PATHS = [
   '/reports',
   '/settings',
 ];
+
+const CLIENT_ROUTE_ALIASES: Record<string, string> = {
+  '/conversations': '/chats',
+  '/site-visits': '/calendar',
+};
 
 function matchesPath(pathname: string, paths: string[]) {
   return paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -107,9 +110,14 @@ export async function updateSession(request: NextRequest) {
 
   const platformRole = await resolvePlatformRole(supabase, user.id, getUserPlatformRole(user));
   const landingPath = defaultLandingForRole(platformRole);
+  const clientAlias = Object.entries(CLIENT_ROUTE_ALIASES).find(([source]) => pathname === source || pathname.startsWith(`${source}/`));
 
   if (isAuthPg || pathname === '/') {
     return redirectTo(request, landingPath);
+  }
+
+  if (clientAlias) {
+    return redirectTo(request, clientAlias[1]);
   }
 
   if (matchesPath(pathname, DEV_ONLY_PATHS) && !isAdminPlatformRole(platformRole)) {
