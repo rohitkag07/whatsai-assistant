@@ -860,7 +860,7 @@ export interface BusinessMember {
   business_id: string;
   user_id: string;
   display_name: string | null;
-  role: 'owner' | 'manager' | 'agent';
+  role: 'owner' | 'manager' | 'agent' | 'client' | 'admin' | 'dev';
   active: boolean;
   created_at: string;
 }
