@@ -3,6 +3,7 @@ import {
   adminModuleSchema,
   applyModuleContractSideEffects,
   buildUpdatedModuleMetadata,
+  isRuntimeEnforcedAdminModule,
   requireSelectedAdminBusiness,
 } from '@/lib/admin-control';
 import { serviceClientOrNull } from '@/lib/sales-server';
@@ -25,6 +26,14 @@ export async function PATCH(request: Request) {
   try {
     const payload = parsed.data;
     const { session, business, businessId } = await requireSelectedAdminBusiness(supabase, payload.business_id);
+
+    if (!isRuntimeEnforcedAdminModule(payload.module_id)) {
+      return NextResponse.json(
+        { ok: false, error: 'module_not_runtime_enforced', module_id: payload.module_id },
+        { status: 409 },
+      );
+    }
+
     const updatedAt = new Date().toISOString();
     const metadata = buildUpdatedModuleMetadata({
       metadata: business.metadata,

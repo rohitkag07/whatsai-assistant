@@ -285,13 +285,14 @@ export function AdminControlPanel({
               <Card className="shadow-none">
                 <CardHeader>
                   <CardTitle className="text-base">Operational Modules</CardTitle>
-                  <CardDescription>Durable per-business switches with actor and timestamp metadata.</CardDescription>
+                  <CardDescription>Runtime-enforced controls are switchable. Configuration-only rows are visible for rollout planning and do not disable live behavior yet.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {moduleError ? <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{moduleError}</div> : null}
                   {moduleDefinitions.map((module) => {
                     const state = moduleStates?.[module.id];
                     const enabled = state?.enabled ?? module.defaultEnabled;
+                    const runtimeEnforced = module.enforcement === 'runtime';
                     const Icon = iconByModule[module.id];
                     return (
                       <div key={module.id} className="flex items-start justify-between gap-3 rounded-lg border border-[#e5e9e7] p-4">
@@ -302,19 +303,30 @@ export function AdminControlPanel({
                           <div>
                             <div className="text-sm font-medium text-[#111b21]">{module.label}</div>
                             <div className="mt-1 text-xs leading-5 text-[#667781]">{module.description}</div>
-                            <div className="mt-2 text-[11px] text-[#8696a0]">{module.contract}</div>
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <Badge variant={runtimeEnforced ? 'success' : 'outline'}>
+                                {runtimeEnforced ? 'runtime-enforced' : 'configuration only'}
+                              </Badge>
+                              <span className="text-[11px] text-[#8696a0]">{module.contract}</span>
+                            </div>
                           </div>
                         </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant={enabled ? 'outline' : 'default'}
-                          disabled={pendingModule === module.id}
-                          onClick={() => toggleModule(module.id, !enabled)}
-                          className="min-w-24"
-                        >
-                          {pendingModule === module.id ? 'Saving' : enabled ? 'Enabled' : 'Disabled'}
-                        </Button>
+                        {runtimeEnforced ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={enabled ? 'outline' : 'default'}
+                            disabled={pendingModule === module.id}
+                            onClick={() => toggleModule(module.id, !enabled)}
+                            className="min-w-24"
+                          >
+                            {pendingModule === module.id ? 'Saving' : enabled ? 'Enabled' : 'Disabled'}
+                          </Button>
+                        ) : (
+                          <Button type="button" size="sm" variant="outline" disabled className="min-w-36">
+                            Not enforced
+                          </Button>
+                        )}
                       </div>
                     );
                   })}

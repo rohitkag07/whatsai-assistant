@@ -25,6 +25,7 @@ export type AdminModuleDefinition = {
   label: string;
   description: string;
   contract: string;
+  enforcement: 'runtime' | 'configuration_only';
   defaultEnabled: boolean;
 };
 
@@ -34,6 +35,7 @@ export const ADMIN_MODULES: AdminModuleDefinition[] = [
     label: 'WhatsApp channel',
     description: 'Inbound/outbound Meta WhatsApp routing for this business.',
     contract: 'business_channels.status',
+    enforcement: 'runtime',
     defaultEnabled: true,
   },
   {
@@ -41,27 +43,31 @@ export const ADMIN_MODULES: AdminModuleDefinition[] = [
     label: 'AI replies',
     description: 'Active assistant playbooks and keyword replies.',
     contract: 'assistant_playbooks.is_active',
+    enforcement: 'runtime',
     defaultEnabled: true,
   },
   {
     id: 'knowledge',
     label: 'Knowledge base',
-    description: 'Owner-approved FAQs, policies, offers, and OKF-backed answers.',
-    contract: 'assistant_knowledge_items.status',
+    description: 'Owner-approved FAQs, policies, offers, and OKF-backed answers. Configuration only; runtime disablement is not enforced yet.',
+    contract: 'not runtime-enforced; assistant_knowledge_items does not consume this module state',
+    enforcement: 'configuration_only',
     defaultEnabled: true,
   },
   {
     id: 'calendar',
     label: 'Appointments',
-    description: 'Booked callbacks, visits, and follow-up slots.',
-    contract: 'appointments.business_id',
+    description: 'Booked callbacks, visits, and follow-up slots. Configuration only; runtime disablement is not enforced yet.',
+    contract: 'not runtime-enforced; appointments does not consume this module state',
+    enforcement: 'configuration_only',
     defaultEnabled: true,
   },
   {
     id: 'handoffs',
     label: 'Owner handoffs',
-    description: 'Human takeover and urgent owner-action workflow.',
-    contract: 'handoff_events.business_id',
+    description: 'Human takeover and urgent owner-action workflow. Configuration only; runtime disablement is not enforced yet.',
+    contract: 'not runtime-enforced; handoff_events does not consume this module state',
+    enforcement: 'configuration_only',
     defaultEnabled: true,
   },
   {
@@ -69,13 +75,15 @@ export const ADMIN_MODULES: AdminModuleDefinition[] = [
     label: 'Follow-up sequence',
     description: 'Durable lead follow-up jobs for active conversations.',
     contract: 'followup_sequences.active',
+    enforcement: 'runtime',
     defaultEnabled: true,
   },
   {
     id: 'broadcasts',
     label: 'Broadcasts',
-    description: 'Template-based audience campaigns for approved contacts.',
-    contract: 'broadcast_campaigns.status',
+    description: 'Template-based audience campaigns for approved contacts. Configuration only; runtime disablement is not enforced yet.',
+    contract: 'not runtime-enforced; broadcast_campaigns does not consume this module state',
+    enforcement: 'configuration_only',
     defaultEnabled: false,
   },
 ];
@@ -158,6 +166,10 @@ export function buildUpdatedModuleMetadata({
       },
     },
   };
+}
+
+export function isRuntimeEnforcedAdminModule(moduleId: AdminModuleId) {
+  return ADMIN_MODULES.some((module) => module.id === moduleId && module.enforcement === 'runtime');
 }
 
 export async function applyModuleContractSideEffects(
