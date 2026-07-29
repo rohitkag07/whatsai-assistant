@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 
@@ -21,8 +22,14 @@ export async function POST(request: Request) {
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
 
   const payload = parsed.data;
+  const context = await requireDashboardBusinessContext(supabase, payload.business_id).catch((error) => error);
+  if (context instanceof Error) {
+    const status = context instanceof BusinessContextError ? context.status : 500;
+    return NextResponse.json({ ok: false, error: context.message }, { status });
+  }
+  const businessId = context.businessId;
   const values = {
-    business_id: payload.business_id,
+    business_id: businessId,
     playbook_id: payload.playbook_id ?? null,
     name: 'Default lead follow-up',
     steps: payload.steps,
@@ -31,7 +38,7 @@ export async function POST(request: Request) {
   };
   let existingQuery = (supabase.from('followup_sequences') as any)
     .select('id')
-    .eq('business_id', payload.business_id)
+    .eq('business_id', businessId)
     .eq('active', true);
   existingQuery = payload.playbook_id ? existingQuery.eq('playbook_id', payload.playbook_id) : existingQuery.is('playbook_id', null);
   const { data: existing, error: lookupError } = await existingQuery.maybeSingle();

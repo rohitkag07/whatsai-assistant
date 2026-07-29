@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 
 const appointmentUpdate = z.object({
   status: z.enum(['scheduled', 'completed', 'cancelled', 'no_show']).optional(),
@@ -12,8 +13,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!client) return NextResponse.json({ error: 'Supabase service credentials are not configured.' }, { status: 503 });
   const parsed = appointmentUpdate.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid appointment update.' }, { status: 400 });
+  const context = await requireDashboardBusinessContext(client).catch((error) => error);
+  if (context instanceof Error) {
+    const status = context instanceof BusinessContextError ? context.status : 500;
+    return NextResponse.json({ error: context.message }, { status });
+  }
   const { id } = await params;
-  const { data, error } = await (client.from('appointments') as any).update({ ...parsed.data, updated_at: new Date().toISOString() }).eq('id', id).select('id,thread_id,contact_id,title,appointment_type,scheduled_at,status,notes').single();
+  const { data, error } = await (client.from('appointments') as any).update({ ...parsed.data, updated_at: new Date().toISOString() }).eq('id', id).eq('business_id', context.businessId).select('id,thread_id,contact_id,title,appointment_type,scheduled_at,status,notes').single();
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ ok: true, appointment: data });
 }

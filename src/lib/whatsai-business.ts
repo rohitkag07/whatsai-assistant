@@ -1,4 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { getAuthSession } from '@/lib/auth/session';
+import { isAdminPlatformRole, type PlatformRole } from '@/lib/auth/roles';
+
+type DashboardBusiness = Awaited<ReturnType<typeof fetchBusiness>>;
+
+export type DashboardBusinessContext = {
+  business: DashboardBusiness;
+  businessId: string;
+  session: NonNullable<Awaited<ReturnType<typeof getAuthSession>>>;
+};
 
 export async function resolveDashboardBusiness(supabase: SupabaseClient, requestedBusinessId?: string | null) {
   const configuredBusinessId = process.env.DEFAULT_BUSINESS_ID || null;
@@ -43,6 +53,30 @@ async function fetchBusiness(supabase: SupabaseClient, businessId: string) {
   if (error) throw new BusinessContextError(error.message, 502);
   if (!data) throw new BusinessContextError('business_not_found', 404);
   return data;
+}
+
+export async function requireDashboardBusinessContext(supabase: SupabaseClient, requestedBusinessId?: string | null): Promise<DashboardBusinessContext> {
+  const session = await getAuthSession();
+  if (!session) throw new BusinessContextError('authentication_required', 401);
+
+  const isPlatformUser = isAdminPlatformRole(session.platformRole);
+  const membershipIds = new Set(session.memberships.map((membership) => membership.business_id));
+  const businessId = requestedBusinessId ?? session.activeBusinessId;
+
+  if (!businessId) throw new BusinessContextError('business_membership_required', 403);
+  if (!isPlatformUser && !membershipIds.has(businessId)) {
+    throw new BusinessContextError('business_access_denied', 403);
+  }
+
+  const business = await fetchBusiness(supabase, businessId);
+  return { business, businessId, session };
+}
+
+export async function requirePlatformApiSession(allowedRoles: PlatformRole[]) {
+  const session = await getAuthSession();
+  if (!session) throw new BusinessContextError('authentication_required', 401);
+  if (!allowedRoles.includes(session.platformRole)) throw new BusinessContextError('platform_access_denied', 403);
+  return session;
 }
 
 export class BusinessContextError extends Error {

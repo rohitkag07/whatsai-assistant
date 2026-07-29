@@ -1,12 +1,16 @@
+import { redirect } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { LeadPipeline } from '@/components/leads/LeadPipeline';
+import { requireBusinessAccess } from '@/lib/auth/session';
 import { loadWhatsAiInboxData } from '@/lib/whatsai-data';
 
 export const metadata = { title: 'Leads' };
 
 export default async function LeadsPage() {
-  const data = await loadWhatsAiInboxData();
+  const session = await requireBusinessAccess();
+  if (!session.activeBusinessId) redirect('/admin');
+  const data = await loadWhatsAiInboxData({ businessId: session.activeBusinessId });
 
   return (
     <>

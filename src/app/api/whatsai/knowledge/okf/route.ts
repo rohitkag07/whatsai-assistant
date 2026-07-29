@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { knowledgeItemsInputSchema } from '@/lib/knowledge-schema';
 import { buildOkfBundle, parseOkfBundle } from '@/lib/okf';
 import { serviceClientOrNull } from '@/lib/sales-server';
-import { resolveDashboardBusiness } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const supabase = serviceClientOrNull();
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
   try {
-    const business = await resolveDashboardBusiness(supabase, new URL(request.url).searchParams.get('business_id'));
+    const { business } = await requireDashboardBusinessContext(supabase, new URL(request.url).searchParams.get('business_id'));
     const { data, error } = await (supabase.from('assistant_knowledge_items') as any)
       .select('*')
       .eq('business_id', business.id)
@@ -26,7 +26,8 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : 'okf_export_failed' }, { status: 500 });
+    const status = error instanceof BusinessContextError ? error.status : 500;
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : 'okf_export_failed' }, { status });
   }
 }
 

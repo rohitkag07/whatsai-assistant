@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
 import { keywordPlaybookInputSchema } from '@/lib/keyword-reply-schema';
 import { knowledgeItemsInputSchema, normalizeKnowledgeKeywords, slugifyKnowledgeTitle } from '@/lib/knowledge-schema';
+import { BusinessContextError, requirePlatformApiSession } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -28,6 +29,12 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json());
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const platformSession = await requirePlatformApiSession(['admin', 'dev']).catch((error) => error);
+  if (platformSession instanceof Error) {
+    const status = platformSession instanceof BusinessContextError ? platformSession.status : 500;
+    return NextResponse.json({ ok: false, error: platformSession.message }, { status });
   }
 
   const supabase = serviceClientOrNull();

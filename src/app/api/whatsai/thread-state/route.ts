@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 import type { AiMode, ConversationStatus } from '@/types/database';
 
 export const runtime = 'nodejs';
@@ -26,10 +27,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 503 });
   }
 
+  const context = await requireDashboardBusinessContext(supabase).catch((error) => error);
+  if (context instanceof Error) {
+    const status = context instanceof BusinessContextError ? context.status : 500;
+    return NextResponse.json({ ok: false, error: context.message }, { status });
+  }
+
   const payload = parsed.data;
   const current = await (supabase.from('conversation_threads') as any)
     .select('id,metadata,ai_mode,status')
     .eq('id', payload.thread_id)
+    .eq('business_id', context.businessId)
     .maybeSingle();
 
   if (current.error || !current.data) {
@@ -55,6 +63,7 @@ export async function POST(request: Request) {
       updated_at: new Date().toISOString(),
     })
     .eq('id', payload.thread_id)
+    .eq('business_id', context.businessId)
     .select()
     .single();
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
 import { persistLeadToAppointmentFlow } from '@/lib/whatsai-lead-flow';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -36,9 +37,14 @@ export async function POST(request: Request) {
   }
 
   const payload = parsed.data;
+  const context = await requireDashboardBusinessContext(supabase, payload.business_id).catch((error) => error);
+  if (context instanceof Error) {
+    const status = context instanceof BusinessContextError ? context.status : 500;
+    return NextResponse.json({ ok: false, error: context.message }, { status });
+  }
   const result = await persistLeadToAppointmentFlow(supabase, {
-    businessId: payload.business_id,
-    builderId: payload.builder_id ?? process.env.DEFAULT_BUILDER_ID ?? null,
+    businessId: context.businessId,
+    builderId: context.business.builder_id ?? payload.builder_id ?? null,
     projectId: payload.project_id ?? process.env.DEFAULT_PROJECT_ID ?? null,
     businessChannelId: payload.business_channel_id,
     contactId: payload.contact_id,
@@ -56,4 +62,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ ok: true, ...result });
 }
-

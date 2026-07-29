@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { BusinessContextError, requirePlatformApiSession } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const platformSession = await requirePlatformApiSession(['admin', 'dev']).catch((error) => error);
+  if (platformSession instanceof Error) {
+    const status = platformSession instanceof BusinessContextError ? platformSession.status : 500;
+    return NextResponse.json({ ok: false, error: platformSession.message }, { status });
+  }
+
   const env = {
     supabase: Boolean(
       process.env.NEXT_PUBLIC_SUPABASE_URL

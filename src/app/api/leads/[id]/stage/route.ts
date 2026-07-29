@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 import type { ConversationStage, LeadStage } from '@/types/database';
 
 export const runtime = 'nodejs';
@@ -15,8 +16,8 @@ const stageSchema = z.object({
  * Updates the canonical contact stage. The contact is fetched with its business
  * scope before any mutation, so a business cannot update another tenant's lead.
  */
-export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params;
+export async function PATCH(request: Request, routeContext: { params: Promise<{ id: string }> }) {
+  const { id } = await routeContext.params;
   const payload = stageSchema.safeParse(await request.json());
   if (!payload.success || !z.string().uuid().safeParse(id).success) {
     return NextResponse.json({ ok: false, error: 'A valid contact, business, and stage are required.' }, { status: 400 });
@@ -27,10 +28,17 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 503 });
   }
 
+  const businessContext = await requireDashboardBusinessContext(supabase, payload.data.business_id).catch((error) => error);
+  if (businessContext instanceof Error) {
+    const status = businessContext instanceof BusinessContextError ? businessContext.status : 500;
+    return NextResponse.json({ ok: false, error: businessContext.message }, { status });
+  }
+  const businessId = businessContext.businessId;
+
   const contactResult = await (supabase.from('conversation_contacts') as any)
     .select('id,business_id,lead_id')
     .eq('id', id)
-    .eq('business_id', payload.data.business_id)
+    .eq('business_id', businessId)
     .maybeSingle();
 
   if (contactResult.error || !contactResult.data) {
