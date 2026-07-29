@@ -313,12 +313,11 @@ export function WhatsAiLanding() {
             <div data-hero-copy className="mx-auto max-w-6xl">
               <h1 className="text-balance text-[clamp(3rem,7vw,6.5rem)] font-[680] leading-[0.92] tracking-[-0.066em] text-[#101916]">
                 Turn WhatsApp enquiries into{' '}
-                <span className="whitespace-nowrap text-[#075e54]">
+                <span className="whitespace-nowrap text-[#075e54]" aria-label="booked appointments.">
                   booked
                   <span aria-hidden="true" className="mx-2 inline-flex h-[0.72em] w-[1.45em] translate-y-[0.02em] items-center justify-center rounded-full bg-[#d9fdd3] align-baseline sm:mx-3">
                     <CalendarCheck2 className="h-[0.44em] w-[0.44em] stroke-[2.5]" />
                   </span>
-                  <span className="sr-only"> </span>
                   appointments.
                 </span>
               </h1>

@@ -14,6 +14,11 @@ export const metadata: Metadata = {
   title: { default: 'XeroWA AI', template: '%s | XeroWA AI' },
   description:
     'XeroWA — The 24/7 WhatsApp AI & Lead Intelligence Platform.',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
     title: 'XeroWA AI',
     description: 'Turn Every WhatsApp Inbound into Revenue — 24/7.',
