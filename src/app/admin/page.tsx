@@ -22,106 +22,180 @@ type BusinessRow = {
   metadata?: Record<string, unknown> | null;
 };
 
-export default async function AdminHomePage({ searchParams }: { searchParams: SearchParams }) {
-  await requirePlatformRole(['admin', 'dev']);
+type ChannelRow = {
+  id: string;
+  business_id: string;
+  channel_type: string;
+  phone_number: string | null;
+  display_name: string | null;
+  status: string;
+  is_primary: boolean;
+  last_verified_at: string | null;
+};
+
+export default async function AdminHomePage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const session = await requirePlatformRole(['admin', 'dev']);
   const supabase = serviceClientOrNull();
 
   if (!supabase) {
-    return (
-      <Card className="shadow-none">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base text-destructive">
-            <AlertTriangle className="h-4 w-4" />
-            Admin data unavailable
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Supabase service role is not configured for this runtime, so the platform dashboard cannot load client controls.
-        </CardContent>
-      </Card>
-    );
+    return <AdminError title="Admin data unavailable" body="Client controls cannot load right now. Check the Supabase service connection and retry." />;
   }
 
   const params = await searchParams;
-  const rawBusinessId = Array.isArray(params?.business_id) ? params.business_id[0] : params?.business_id;
-  const selectedBusinessId = rawBusinessId || null;
+  const rawBusinessId = Array.isArray(params?.business_id)
+    ? params.business_id[0]
+    : params?.business_id;
 
-  const { data: businessesData, error: businessesError } = await (supabase.from('businesses') as any)
-    .select('id,name,category,status,plan,city,owner_name,owner_phone,updated_at')
-    .order('created_at', { ascending: false })
-    .limit(100);
+  const [
+    businessesResult,
+    channelsResult,
+    messagesSentToday,
+    hotHandoffs,
+  ] = await Promise.all([
+    (supabase.from('businesses') as any)
+      .select('id,name,category,status,plan,city,owner_name,owner_phone,updated_at')
+      .order('created_at', { ascending: false })
+      .limit(100),
+    (supabase.from('business_channels') as any)
+      .select('id,business_id,channel_type,phone_number,display_name,status,is_primary,last_verified_at')
+      .eq('channel_type', 'whatsapp')
+      .order('is_primary', { ascending: false }),
+    countRows(supabase, 'conversation_messages', (query) =>
+      query
+        .eq('direction', 'outbound')
+        .gte('created_at', startOfTodayInIndia()),
+    ),
+    countRows(supabase, 'handoff_events', (query) =>
+      query.in('status', ['open', 'pending']),
+    ),
+  ]);
 
-  if (businessesError) {
-    return (
-      <Card className="shadow-none">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base text-destructive">
-            <AlertTriangle className="h-4 w-4" />
-            Client list failed
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">{businessesError.message}</CardContent>
-      </Card>
-    );
+  if (businessesResult.error) {
+    return <AdminError title="Client list failed" body="The client directory could not load. Retry in a moment." />;
   }
 
-  const businesses = ((businessesData ?? []) as BusinessRow[]).map(stripMetadata);
+  const businesses = (businessesResult.data ?? []) as BusinessRow[];
+  const channels = (channelsResult.data ?? []) as ChannelRow[];
+  const selectedBusinessId =
+    rawBusinessId ||
+    session.activeBusinessId ||
+    businesses[0]?.id ||
+    null;
   const selectedBusinessResult = selectedBusinessId
     ? await (supabase.from('businesses') as any)
         .select('id,name,category,status,plan,city,owner_name,owner_phone,updated_at,metadata')
         .eq('id', selectedBusinessId)
         .maybeSingle()
     : null;
-  const selectedBusiness = selectedBusinessResult?.data ? selectedBusinessResult.data as BusinessRow : null;
+  const selectedBusiness = selectedBusinessResult?.data
+    ? (selectedBusinessResult.data as BusinessRow)
+    : null;
+  const selectedCounts = selectedBusinessId
+    ? await loadSelectedBusinessCounts(supabase, selectedBusinessId)
+    : null;
+  const primaryChannelByBusiness = new Map<string, ChannelRow>();
 
-  const [channelsResult, membersResult, counts] = selectedBusinessId && selectedBusiness
-    ? await Promise.all([
-        (supabase.from('business_channels') as any)
-          .select('id,channel_type,phone_number,phone_number_id,display_name,status,is_primary,last_verified_at')
-          .eq('business_id', selectedBusinessId)
-          .order('is_primary', { ascending: false }),
-        (supabase.from('business_members') as any)
-          .select('id,user_id,display_name,role,active,created_at')
-          .eq('business_id', selectedBusinessId)
-          .order('created_at', { ascending: true }),
-        loadSelectedBusinessCounts(supabase, selectedBusinessId),
-      ])
-    : [null, null, null];
+  for (const channel of channels) {
+    const current = primaryChannelByBusiness.get(channel.business_id);
+    if (!current || channel.is_primary) {
+      primaryChannelByBusiness.set(channel.business_id, channel);
+    }
+  }
+
+  const clientDirectory = businesses.map((business) => {
+    const channel = primaryChannelByBusiness.get(business.id);
+    return {
+      ...stripMetadata(business),
+      whatsapp_phone: channel?.phone_number ?? business.owner_phone,
+      whatsapp_status: channel?.status ?? 'not_connected',
+    };
+  });
 
   return (
     <AdminControlPanel
-      businesses={businesses}
+      businesses={clientDirectory}
       selectedBusinessId={selectedBusinessId}
       selectedBusiness={selectedBusiness ? stripMetadata(selectedBusiness) : null}
-      channels={channelsResult?.data ?? []}
-      members={membersResult?.data ?? []}
-      counts={counts}
-      moduleDefinitions={ADMIN_MODULES}
-      moduleStates={selectedBusiness ? getAdminModuleStates(selectedBusiness.metadata) : null}
+      selectedChannels={channels.filter(
+        (channel) => channel.business_id === selectedBusinessId,
+      )}
+      selectedCounts={selectedCounts}
+      overview={{
+        totalClients: businesses.length,
+        liveConnections: channels.filter(
+          (channel) => channel.status === 'connected',
+        ).length,
+        messagesSentToday,
+        hotHandoffs,
+      }}
+      moduleDefinitions={ADMIN_MODULES.filter((module) =>
+        ['assistant', 'followups', 'whatsapp'].includes(module.id),
+      )}
+      moduleStates={
+        selectedBusiness
+          ? getAdminModuleStates(selectedBusiness.metadata)
+          : null
+      }
     />
   );
 }
 
-async function loadSelectedBusinessCounts(supabase: ReturnType<typeof serviceClientOrNull>, businessId: string) {
-  if (!supabase) return null;
-
-  const [contacts, threads, appointments, handoffs, knowledge] = await Promise.all([
-    countByBusiness(supabase, 'conversation_contacts', businessId),
-    countByBusiness(supabase, 'conversation_threads', businessId),
-    countByBusiness(supabase, 'appointments', businessId),
-    countByBusiness(supabase, 'handoff_events', businessId),
-    countByBusiness(supabase, 'assistant_knowledge_items', businessId),
-  ]);
-
-  return { contacts, threads, appointments, handoffs, knowledge };
+function AdminError({ title, body }: { title: string; body: string }) {
+  return (
+    <Card className="border-red-200 shadow-none">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base text-red-700">
+          <AlertTriangle className="h-4 w-4" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="text-sm text-[#667781]">{body}</CardContent>
+    </Card>
+  );
 }
 
-async function countByBusiness(supabase: NonNullable<ReturnType<typeof serviceClientOrNull>>, table: string, businessId: string) {
-  const { count } = await (supabase.from(table) as any)
-    .select('id', { count: 'exact', head: true })
-    .eq('business_id', businessId);
+async function loadSelectedBusinessCounts(
+  supabase: NonNullable<ReturnType<typeof serviceClientOrNull>>,
+  businessId: string,
+) {
+  const [contacts, appointments, handoffs] = await Promise.all([
+    countRows(supabase, 'conversation_contacts', (query) =>
+      query.eq('business_id', businessId),
+    ),
+    countRows(supabase, 'appointments', (query) =>
+      query.eq('business_id', businessId).in('status', ['scheduled', 'confirmed']),
+    ),
+    countRows(supabase, 'handoff_events', (query) =>
+      query.eq('business_id', businessId).in('status', ['open', 'pending']),
+    ),
+  ]);
 
+  return { contacts, appointments, handoffs };
+}
+
+async function countRows(
+  supabase: NonNullable<ReturnType<typeof serviceClientOrNull>>,
+  table: string,
+  refine: (query: any) => any,
+) {
+  const query = (supabase.from(table) as any).select('id', {
+    count: 'exact',
+    head: true,
+  });
+  const { count } = await refine(query);
   return count ?? 0;
+}
+
+function startOfTodayInIndia() {
+  const now = new Date();
+  const indiaOffsetMs = 5.5 * 60 * 60 * 1000;
+  const indiaNow = new Date(now.getTime() + indiaOffsetMs);
+  indiaNow.setUTCHours(0, 0, 0, 0);
+  return new Date(indiaNow.getTime() - indiaOffsetMs).toISOString();
 }
 
 function stripMetadata(business: BusinessRow) {

@@ -6,8 +6,24 @@ import { TopBar } from '@/components/shared/TopBar';
 import { RouteMotion } from '@/components/shared/RouteMotion';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import type { NavMode } from '@/components/shared/Sidebar';
+import type { PlatformRole } from '@/lib/auth/roles';
+import type { ShellBusiness } from '@/lib/auth/shell-types';
 
-export function DashboardShell({ children, navMode }: { children: React.ReactNode; navMode: NavMode }) {
+type DashboardShellProps = {
+  children: React.ReactNode;
+  navMode: NavMode;
+  platformRole: PlatformRole;
+  activeBusinessId: string | null;
+  businesses: ShellBusiness[];
+};
+
+export function DashboardShell({
+  children,
+  navMode,
+  platformRole,
+  activeBusinessId,
+  businesses,
+}: DashboardShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   return <div className="flex min-h-screen bg-transparent">
     <Sidebar mode={navMode} />
@@ -21,7 +37,13 @@ export function DashboardShell({ children, navMode }: { children: React.ReactNod
       </SheetContent>
     </Sheet>
     <div className="flex min-w-0 flex-1 flex-col">
-      <TopBar mode={navMode} onMenuClick={() => setMenuOpen(true)} />
+      <TopBar
+        mode={navMode}
+        platformRole={platformRole}
+        activeBusinessId={activeBusinessId}
+        businesses={businesses}
+        onMenuClick={() => setMenuOpen(true)}
+      />
       <main className="flex-1 overflow-x-hidden p-3 sm:p-5 lg:p-7"><RouteMotion>{children}</RouteMotion></main>
     </div>
   </div>;

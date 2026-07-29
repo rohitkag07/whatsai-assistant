@@ -10,15 +10,6 @@ import {
   type PlatformRole,
 } from '@/lib/auth/roles';
 
-const CLIENT_ONLY_PATHS = [
-  '/dashboard',
-  '/chats',
-  '/calendar',
-  '/leads',
-  '/knowledge',
-  '/bookings',
-];
-
 const DEV_ONLY_PATHS = [
   '/admin',
   '/assistant-setup',
@@ -122,10 +113,6 @@ export async function updateSession(request: NextRequest) {
 
   if (matchesPath(pathname, DEV_ONLY_PATHS) && !isAdminPlatformRole(platformRole)) {
     return redirectTo(request, '/dashboard');
-  }
-
-  if (matchesPath(pathname, CLIENT_ONLY_PATHS) && isAdminPlatformRole(platformRole) && pathname === '/dashboard') {
-    return redirectTo(request, '/admin');
   }
 
   return response;

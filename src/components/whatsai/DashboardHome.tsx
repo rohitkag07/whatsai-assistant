@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Clock3,
   MessageCircle,
-  ShieldCheck,
   Siren,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +16,14 @@ import { cn } from '@/lib/utils';
 import type { WhatsAiInboxData, WhatsAiThread } from '@/lib/whatsai-data';
 
 export function DashboardHome({ data }: { data: WhatsAiInboxData }) {
-  const today = new Date().toISOString().slice(0, 10);
   const metrics = data.summary.metrics;
   const todayMessages = metrics.inboundToday + metrics.outboundToday;
-  const qualifiedToday = data.threads.filter((thread) => thread.qualification.qualified && thread.lastMessageAt.startsWith(today)).length;
+  const hotLeads = data.threads.filter(
+    (thread) =>
+      thread.hotHandoff ||
+      thread.status === 'pending_human' ||
+      thread.stage === 'negotiating',
+  ).length;
   const appointments = data.threads.flatMap((thread) => thread.appointment ? [{ thread, appointment: thread.appointment }] : []);
   const appointmentsThisWeek = appointments.filter(({ appointment }) => isThisWeek(appointment.scheduledAt)).length;
   const upcoming = appointments
@@ -46,11 +49,10 @@ export function DashboardHome({ data }: { data: WhatsAiInboxData }) {
         </Button>
       </header>
 
-      <section aria-label="Today at a glance" className="wa-panel grid grid-cols-2 divide-x divide-y divide-[#e7ebe9] overflow-hidden lg:grid-cols-4 lg:divide-y-0">
+      <section aria-label="Today at a glance" className="wa-panel grid divide-y divide-[#e7ebe9] overflow-hidden sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         <Metric label="Messages today" value={todayMessages} icon={MessageCircle} />
-        <Metric label="Qualified today" value={qualifiedToday} icon={CheckCircle2} />
-        <Metric label="Appointments this week" value={appointmentsThisWeek} icon={CalendarDays} />
-        <Metric label="Needs your attention" value={metrics.humanHandoffs} icon={Siren} attention={metrics.humanHandoffs > 0} />
+        <Metric label="Hot leads" value={hotLeads} icon={Siren} attention={hotLeads > 0} />
+        <Metric label="Upcoming visits" value={appointmentsThisWeek} icon={CalendarDays} />
       </section>
 
       <section className="grid grid-flow-dense grid-cols-1 gap-5 xl:grid-cols-12">
@@ -72,7 +74,7 @@ export function DashboardHome({ data }: { data: WhatsAiInboxData }) {
           </div>
         </div>
 
-        <div className="wa-panel overflow-hidden xl:col-span-8">
+        <div className="wa-panel overflow-hidden xl:col-span-12">
           <SectionHeader title="Recent customer activity" description="The latest conversations across your business." icon={MessageCircle} action={{ href: '/chats', label: 'All chats' }} />
           <div className="divide-y divide-[#edf0ef] px-2 pb-2">
             {activity.length ? activity.map((thread) => <ActivityRow key={thread.id} thread={thread} />) : (
@@ -81,9 +83,6 @@ export function DashboardHome({ data }: { data: WhatsAiInboxData }) {
           </div>
         </div>
 
-        <div className="wa-panel overflow-hidden xl:col-span-4">
-          <BusinessCoverage data={data} />
-        </div>
       </section>
     </div>
   );
@@ -135,31 +134,6 @@ function AppointmentRow({ thread, appointment }: { thread: WhatsAiThread; appoin
       <div className="mt-2 flex items-center gap-2 text-xs text-[#667781]"><Clock3 className="h-3.5 w-3.5 text-[#00a884]" />{formatDateTime(appointment.scheduledAt)}</div>
       <div className="mt-1 text-xs capitalize text-[#667781]">{appointment.type.replace('_', ' ')}</div>
     </Link>
-  );
-}
-
-function BusinessCoverage({ data }: { data: WhatsAiInboxData }) {
-  const business = data.summary.business;
-  const metrics = data.summary.metrics;
-  const rows = [
-    { label: 'Business', value: business?.name ?? 'Current business' },
-    { label: 'Plan', value: business?.plan ?? 'Not set' },
-    { label: 'Daily limit', value: business?.daily_message_limit ? `${business.daily_message_limit} messages` : 'Not set' },
-    { label: 'AI paused', value: `${metrics.aiPausedThreads} conversations` },
-  ];
-
-  return (
-    <>
-      <SectionHeader title="Business coverage" description="Client-facing account status from the current workspace." icon={ShieldCheck} />
-      <div className="divide-y divide-[#edf0ef] px-4 py-2">
-        {rows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between gap-4 py-3">
-            <div className="text-sm font-medium text-[#111b21]">{row.label}</div>
-            <div className="max-w-[170px] truncate text-right text-xs text-[#667781]">{row.value}</div>
-          </div>
-        ))}
-      </div>
-    </>
   );
 }
 

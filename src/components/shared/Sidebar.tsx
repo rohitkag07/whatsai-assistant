@@ -5,11 +5,12 @@ import { usePathname } from 'next/navigation';
 import {
   CalendarDays,
   BookOpen,
+  CreditCard,
   Home,
   MessageCircle,
   SlidersHorizontal,
+  Smartphone,
   Users,
-  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_NAME, APP_TAGLINE } from '@/lib/constants';
@@ -24,16 +25,17 @@ type Item = {
 };
 
 const clientItems: Item[] = [
-  { href: '/dashboard', label: 'Home', description: 'Morning overview', icon: Home },
+  { href: '/dashboard', label: 'Home / Today', description: 'Daily business summary', icon: Home },
   { href: '/chats', label: 'Customer Chats', description: 'WhatsApp inbox', icon: MessageCircle },
-  { href: '/calendar', label: 'Appointments', description: 'Booked calls', icon: CalendarDays },
-  { href: '/leads', label: 'Leads', description: 'Active leads', icon: Users },
+  { href: '/leads', label: 'Leads', description: 'Sales pipeline', icon: Users },
+  { href: '/calendar', label: 'Appointments', description: 'Visits and bookings', icon: CalendarDays },
   { href: '/knowledge', label: 'Approved Replies', description: 'Published answers', icon: BookOpen },
-  { href: '/bookings', label: 'Handoffs', description: 'Owner actions', icon: ShieldCheck },
+  { href: '/whatsapp-status', label: 'WhatsApp Status', description: 'Connection health', icon: Smartphone },
+  { href: '/plan-support', label: 'Plan & Support', description: 'Account help', icon: CreditCard },
 ];
 
 const adminItems: Item[] = [
-  { href: '/admin', label: 'Client Controls', description: 'Tenants and modules', icon: SlidersHorizontal },
+  { href: '/admin', label: 'Client Control Room', description: 'Clients and live features', icon: SlidersHorizontal },
 ];
 
 export function Sidebar({ mode, mobile = false, onNavigate }: { mode: NavMode; mobile?: boolean; onNavigate?: () => void }) {
@@ -88,8 +90,8 @@ export function Sidebar({ mode, mobile = false, onNavigate }: { mode: NavMode; m
       </nav>
 
       <div className="mx-5 mb-5 border-t border-[#e5e9e7] pt-4 text-[11px] leading-4 text-[#667781]">
-        <span className="inline-flex items-center gap-2 font-medium text-[#075e54]"><span className="h-2 w-2 rounded-full bg-[#00a884]" /> {mode === 'admin' ? 'Ops console' : 'Reception desk'}</span>
-        <p className="mt-1">{mode === 'admin' ? 'Client controls and launch proof stay internal.' : 'Inbox, appointments, and handoffs in one place.'}</p>
+        <span className="inline-flex items-center gap-2 font-medium text-[#075e54]"><span className="h-2 w-2 rounded-full bg-[#00a884]" /> {mode === 'admin' ? 'Agency control' : 'Reception desk'}</span>
+        <p className="mt-1">{mode === 'admin' ? 'Switch clients, inspect workspaces, and control live replies.' : 'Chats, leads, appointments, and support in one place.'}</p>
       </div>
     </aside>
   );

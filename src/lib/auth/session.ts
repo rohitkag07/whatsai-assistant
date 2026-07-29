@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
+import { ACTIVE_BUSINESS_COOKIE } from '@/lib/auth/active-business';
 import {
   defaultLandingForRole,
   getUserPlatformRole,
@@ -65,7 +67,13 @@ export async function getAuthSession(): Promise<AuthSession | null> {
   const userPlatformRole = getUserPlatformRole(user);
   const membershipRole = memberships.map((membership) => platformRoleFromMembershipRole(membership.role)).find(Boolean);
   const platformRole = isAdminPlatformRole(userPlatformRole) ? userPlatformRole : membershipRole ?? userPlatformRole;
-  const activeBusinessId = memberships[0]?.business_id ?? null;
+  const cookieStore = await cookies();
+  const selectedBusinessId = cookieStore.get(ACTIVE_BUSINESS_COOKIE)?.value ?? null;
+  const activeBusinessId = isAdminPlatformRole(platformRole)
+    ? selectedBusinessId
+    : memberships.some((membership) => membership.business_id === selectedBusinessId)
+      ? selectedBusinessId
+      : memberships[0]?.business_id ?? null;
 
   return {
     user,
