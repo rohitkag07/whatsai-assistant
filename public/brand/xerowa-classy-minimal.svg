@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- XeroWA Minimalist Architectural SVG Mark -->
+  <defs>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Frame -->
+  <rect width="512" height="512" rx="112" fill="#0A192F"/>
+  
+  <!-- Handcrafted Precision Geometry for X + W + Speech Tail -->
+  <g fill="none" stroke="url(#emeraldGrad)" stroke-width="36" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Architectural X -->
+    <path d="M 136 156 L 276 356"/>
+    <path d="M 276 156 L 136 356"/>
+    
+    <!-- Connected Architectural W with Chat Tail Notch -->
+    <path d="M 266 226 L 326 356 L 376 246 L 426 356"/>
+  </g>
+
+  <!-- Accent Dot -->
+  <circle cx="426" cy="176" r="22" fill="#06B6D4"/>
+</svg>

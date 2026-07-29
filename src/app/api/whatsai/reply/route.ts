@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,50 +22,58 @@ export async function POST(request: Request) {
   }
 
   const payload = parsed.data;
-  const sent = await sendWhatsAppText(payload.phone, payload.body);
   const supabase = serviceClientOrNull();
+  if (!supabase) {
+    return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
+  }
+
+  const context = await requireDashboardBusinessContext(supabase, payload.business_id).catch((error) => error);
+  if (context instanceof Error) {
+    const status = context instanceof BusinessContextError ? context.status : 500;
+    return NextResponse.json({ ok: false, error: context.message }, { status });
+  }
+
+  const businessId = context.businessId;
+  const builderId = context.business.builder_id ?? payload.builder_id;
+  const sent = await sendWhatsAppText(payload.phone, payload.body);
   let messageRow = null;
 
-  if (supabase) {
-    const inserted = await (supabase.from('whatsapp_messages') as any)
-      .insert({
-        builder_id: payload.builder_id,
-        lead_id: payload.lead_id ?? null,
-        direction: 'outbound',
-        phone: normalizePhone(payload.phone),
-        wa_message_id: sent.message_id ?? null,
-        message_type: 'text',
-        body: payload.body,
-        status: sent.ok ? 'sent' : 'failed',
-        error: sent.ok ? null : sent.error ?? sent.reason ?? 'whatsapp_send_failed',
-        agent: payload.agent ?? 'whatsai-operator',
-        template_params: payload.business_id ? [{ business_id: payload.business_id }] : [],
-      })
-      .select()
-      .single();
-
-    messageRow = inserted.data ?? null;
-
-    await (supabase.from('agent_runs') as any).insert({
-      builder_id: payload.builder_id,
+  const inserted = await (supabase.from('whatsapp_messages') as any)
+    .insert({
+      builder_id: builderId,
       lead_id: payload.lead_id ?? null,
-      agent: 'whatsai-assistant',
-      action: 'manual-reply',
-      input: payload,
-      output: { sent, message_id: messageRow?.id ?? null },
-      status: sent.ok ? 'success' : 'partial',
+      direction: 'outbound',
+      phone: normalizePhone(payload.phone),
+      wa_message_id: sent.message_id ?? null,
+      message_type: 'text',
+      body: payload.body,
+      status: sent.ok ? 'sent' : 'failed',
       error: sent.ok ? null : sent.error ?? sent.reason ?? 'whatsapp_send_failed',
-    });
+      agent: payload.agent ?? 'whatsai-operator',
+      template_params: [{ business_id: businessId }],
+    })
+    .select()
+    .single();
 
-    if (payload.business_id) {
-      await upsertConversationMirror({
-        supabase,
-        payload,
-        whatsappMessageId: messageRow?.id ?? null,
-        status: sent.ok ? 'sent' : 'failed',
-      });
-    }
-  }
+  messageRow = inserted.data ?? null;
+
+  await (supabase.from('agent_runs') as any).insert({
+    builder_id: builderId,
+    lead_id: payload.lead_id ?? null,
+    agent: 'whatsai-assistant',
+    action: 'manual-reply',
+    input: { ...payload, business_id: businessId, builder_id: builderId },
+    output: { sent, message_id: messageRow?.id ?? null },
+    status: sent.ok ? 'success' : 'partial',
+    error: sent.ok ? null : sent.error ?? sent.reason ?? 'whatsapp_send_failed',
+  });
+
+  await upsertConversationMirror({
+    supabase,
+    payload: { ...payload, business_id: businessId, builder_id: builderId },
+    whatsappMessageId: messageRow?.id ?? null,
+    status: sent.ok ? 'sent' : 'failed',
+  });
 
   return NextResponse.json({
     ok: sent.ok,
@@ -167,6 +176,7 @@ async function upsertConversationMirror({
     const existingThread = await (supabase.from('conversation_threads') as any)
       .select('*')
       .eq('contact_id', contactId)
+      .eq('business_id', payload.business_id)
       .eq('channel', 'whatsapp')
       .maybeSingle();
 

@@ -114,7 +114,7 @@ type OperatorLeadsResponse = {
 
 const now = new Date();
 
-export async function loadOperatorLeadsData(): Promise<WhatsAiInboxData> {
+export async function loadOperatorLeadsData({ businessId }: { businessId?: string } = {}): Promise<WhatsAiInboxData> {
   const tenantClient = serviceClientOrNull();
   if (!tenantClient) {
     return buildOperatorLeadError('Supabase service access is not configured for the operator pipeline.');
@@ -122,7 +122,7 @@ export async function loadOperatorLeadsData(): Promise<WhatsAiInboxData> {
 
   let business;
   try {
-    business = await resolveDashboardBusiness(tenantClient);
+    business = await resolveDashboardBusiness(tenantClient, businessId);
   } catch (error) {
     return buildOperatorLeadError(
       error instanceof Error ? error.message : 'The dashboard business context could not be resolved.',
@@ -160,22 +160,20 @@ export async function loadOperatorLeadsData(): Promise<WhatsAiInboxData> {
   });
 }
 
-export async function loadWhatsAiInboxData(selectedPhone?: string | null): Promise<WhatsAiInboxData> {
+export async function loadWhatsAiInboxData({ businessId, selectedPhone = null }: { businessId: string; selectedPhone?: string | null }): Promise<WhatsAiInboxData> {
   const client = await getReadClientOrNull();
   if (!client) return buildDemoInbox(selectedPhone);
 
-  const [threadsResult, messagesResult, contactsResult, leadsResult, qualificationResult, appointmentsResult, businessResult, handoffsResult] = await Promise.all([
-    (client.from('conversation_threads') as any).select('*').order('last_message_at', { ascending: false, nullsFirst: false }).limit(200),
-    (client.from('conversation_messages') as any).select('*').order('created_at', { ascending: false }).limit(1000),
-    (client.from('conversation_contacts') as any).select('*').order('last_message_at', { ascending: false, nullsFirst: false }).limit(500),
-    (client.from('leads') as any).select('*').order('created_at', { ascending: false }).limit(300),
-    (client.from('lead_qualification_answers') as any).select('*').order('extracted_at', { ascending: false }).limit(1000),
-    (client.from('appointments') as any).select('*').order('scheduled_at', { ascending: false }).limit(300),
-    (client.from('businesses') as any).select('id,name,category,status,plan,trial_ends_at,daily_message_limit').order('created_at', { ascending: false }).limit(1).maybeSingle(),
-    (client.from('handoff_events') as any).select('*').in('status', ['open', 'pending']).limit(200),
+  const [threadsResult, messagesResult, contactsResult, appointmentsResult, businessResult, handoffsResult] = await Promise.all([
+    (client.from('conversation_threads') as any).select('*').eq('business_id', businessId).order('last_message_at', { ascending: false, nullsFirst: false }).limit(200),
+    (client.from('conversation_messages') as any).select('*').eq('business_id', businessId).order('created_at', { ascending: false }).limit(1000),
+    (client.from('conversation_contacts') as any).select('*').eq('business_id', businessId).order('last_message_at', { ascending: false, nullsFirst: false }).limit(500),
+    (client.from('appointments') as any).select('*').eq('business_id', businessId).order('scheduled_at', { ascending: false }).limit(300),
+    (client.from('businesses') as any).select('id,name,category,status,plan,trial_ends_at,daily_message_limit').eq('id', businessId).maybeSingle(),
+    (client.from('handoff_events') as any).select('*').eq('business_id', businessId).in('status', ['open', 'pending']).limit(200),
   ]);
 
-  const fatalError = threadsResult.error || messagesResult.error || contactsResult.error || leadsResult.error;
+  const fatalError = threadsResult.error || messagesResult.error || contactsResult.error;
   if (fatalError) {
     return buildCanonicalInbox({
       source: 'error',
@@ -192,6 +190,17 @@ export async function loadWhatsAiInboxData(selectedPhone?: string | null): Promi
       selectedPhone,
     });
   }
+
+  const scopedThreads = (threadsResult.data ?? []) as ConversationThread[];
+  const scopedContacts = (contactsResult.data ?? []) as ConversationContact[];
+  const threadIds = scopedThreads.map((thread) => thread.id);
+  const leadIds = Array.from(new Set([...scopedThreads.map((thread) => thread.lead_id), ...scopedContacts.map((contact) => contact.lead_id)].filter(Boolean))) as string[];
+  const qualificationResult = threadIds.length
+    ? await (client.from('lead_qualification_answers') as any).select('*').in('thread_id', threadIds).order('extracted_at', { ascending: false }).limit(1000)
+    : { data: [], error: null };
+  const leadsResult = leadIds.length
+    ? await (client.from('leads') as any).select('*').in('id', leadIds).order('created_at', { ascending: false }).limit(300)
+    : { data: [], error: null };
 
   return buildCanonicalInbox({
     source: 'supabase',

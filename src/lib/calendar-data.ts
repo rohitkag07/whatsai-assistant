@@ -14,13 +14,13 @@ export type CalendarData = {
   error: string | null;
 };
 
-export async function loadCalendarData(): Promise<CalendarData> {
+export async function loadCalendarData(businessId: string): Promise<CalendarData> {
   const client = serviceClientOrNull();
   if (!client) return { source: 'demo', error: null, appointments: demoAppointments() };
 
   const [appointmentsResult, contactsResult] = await Promise.all([
-    (client.from('appointments') as any).select('id,thread_id,contact_id,title,appointment_type,scheduled_at,status,notes').order('scheduled_at', { ascending: true }).limit(500),
-    (client.from('conversation_contacts') as any).select('id,name,phone').limit(500),
+    (client.from('appointments') as any).select('id,thread_id,contact_id,title,appointment_type,scheduled_at,status,notes').eq('business_id', businessId).order('scheduled_at', { ascending: true }).limit(500),
+    (client.from('conversation_contacts') as any).select('id,name,phone').eq('business_id', businessId).limit(500),
   ]);
   if (appointmentsResult.error) return { source: 'error', error: appointmentsResult.error.message, appointments: [] };
 

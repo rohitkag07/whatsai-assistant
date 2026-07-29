@@ -561,9 +561,6 @@ function InboxEmptyState({ onRefresh }: { onRefresh: () => void }) {
       <h2 className="mt-5 text-xl font-semibold">No conversations yet</h2>
       <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">Send a WhatsApp test message or connect a business channel to start the inbox.</p>
       <div className="mt-6 flex justify-center gap-2">
-        <Button asChild>
-          <Link href="/assistant-setup">Open Assistant Setup</Link>
-        </Button>
         <Button variant="outline" onClick={onRefresh}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Refresh

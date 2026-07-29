@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/server';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,22 +27,22 @@ export async function POST(request: Request) {
   }
   if (file.size < 1 || file.size > MAX_BYTES) return fail('Files must be between 1 byte and 16 MB.', 400);
 
-  const verified = await verifiedBusinessAccess(businessId.data);
-  if (!verified.ok) return fail(verified.error, verified.status);
+  const supabase = createServiceClient();
+  const verified = await requireDashboardBusinessContext(supabase, businessId.data).catch((error) => error);
+  if (verified instanceof Error) return fail(verified.message, verified instanceof BusinessContextError ? verified.status : 500);
   const bytes = new Uint8Array(await file.arrayBuffer());
   const detectedMime = detectMime(bytes);
   if (!detectedMime || !mediaTypes.has(detectedMime)) return fail('Only JPEG, PNG, MP4, and PDF files are accepted.', 400);
 
-  const supabase = createServiceClient();
   const { data: playbook } = await (supabase.from('assistant_playbooks') as any)
     .select('id, business_id')
     .eq('id', playbookId.data)
-    .eq('business_id', businessId.data)
+    .eq('business_id', verified.businessId)
     .maybeSingle();
   if (!playbook) return fail('The selected playbook no longer belongs to this business.', 403);
 
   const safeName = safeFileName(file.name, detectedMime);
-  const storagePath = `${businessId.data}/${playbookId.data}/${ruleId.data}/${crypto.randomUUID()}-${safeName}`;
+  const storagePath = `${verified.businessId}/${playbookId.data}/${ruleId.data}/${crypto.randomUUID()}-${safeName}`;
   const upload = await supabase.storage.from(BUCKET).upload(storagePath, bytes, {
     contentType: detectedMime,
     upsert: false,
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
 
   const mediaType = mediaTypes.get(detectedMime)!;
   const inserted = await (supabase.from('playbook_media_assets') as any).insert({
-    business_id: businessId.data,
+    business_id: verified.businessId,
     playbook_id: playbookId.data,
     rule_id: ruleId.data,
     storage_bucket: BUCKET,
@@ -75,11 +76,11 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   const assetId = idSchema.safeParse(new URL(request.url).searchParams.get('asset_id'));
   if (!assetId.success) return fail('A valid asset_id is required.', 400);
-  const session = await sessionBuilderId();
-  if (!session.ok) return fail(session.error, session.status);
   const supabase = createServiceClient();
+  const context = await requireDashboardBusinessContext(supabase).catch((error) => error);
+  if (context instanceof Error) return fail(context.message, context instanceof BusinessContextError ? context.status : 500);
   const { data: asset } = await (supabase.from('playbook_media_assets') as any)
-    .select('*').eq('id', assetId.data).eq('business_id', session.builderId).eq('status', 'ready').maybeSingle();
+    .select('*').eq('id', assetId.data).eq('business_id', context.businessId).eq('status', 'ready').maybeSingle();
   if (!asset) return fail('Attachment not found.', 404);
   const preview = await supabase.storage.from(BUCKET).createSignedUrl(asset.storage_path, 15 * 60);
   return NextResponse.json({ ok: true, asset: toClientAsset(asset, preview.data?.signedUrl ?? null) });
@@ -89,36 +90,17 @@ export async function DELETE(request: Request) {
   const body = await request.json().catch(() => null);
   const assetId = idSchema.safeParse(body?.asset_id);
   if (!assetId.success) return fail('A valid asset_id is required.', 400);
-  const session = await sessionBuilderId();
-  if (!session.ok) return fail(session.error, session.status);
   const supabase = createServiceClient();
+  const context = await requireDashboardBusinessContext(supabase).catch((error) => error);
+  if (context instanceof Error) return fail(context.message, context instanceof BusinessContextError ? context.status : 500);
   const { data: asset } = await (supabase.from('playbook_media_assets') as any)
-    .select('*').eq('id', assetId.data).eq('business_id', session.builderId).eq('status', 'ready').maybeSingle();
+    .select('*').eq('id', assetId.data).eq('business_id', context.businessId).eq('status', 'ready').maybeSingle();
   if (!asset) return fail('Attachment not found.', 404);
   const remove = await supabase.storage.from(BUCKET).remove([asset.storage_path]);
   if (remove.error) return fail(`Could not remove attachment: ${remove.error.message}`, 502);
   const archived = await (supabase.from('playbook_media_assets') as any).update({ status: 'deleted' }).eq('id', asset.id);
   if (archived.error) return fail('Attachment removed but audit status could not be updated. Contact support.', 502);
   return NextResponse.json({ ok: true });
-}
-
-async function verifiedBusinessAccess(businessId: string) {
-  const session = await sessionBuilderId();
-  if (!session.ok) return session;
-  if (session.builderId !== businessId) return { ok: false as const, status: 403, error: 'You can only upload media for your own business.' };
-  return session;
-}
-
-async function sessionBuilderId() {
-  try {
-    const client = await createClient();
-    const { data: { user }, error } = await client.auth.getUser();
-    const builderId = typeof user?.app_metadata?.builder_id === 'string' ? user.app_metadata.builder_id : null;
-    if (error || !user || !builderId) return { ok: false as const, status: 401, error: 'Sign in with your business account to manage attachments.' };
-    return { ok: true as const, builderId };
-  } catch {
-    return { ok: false as const, status: 503, error: 'Authentication is not configured for this environment.' };
-  }
 }
 
 function detectMime(bytes: Uint8Array) {

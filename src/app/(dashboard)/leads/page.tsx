@@ -1,14 +1,18 @@
+import { redirect } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { LeadPipeline } from '@/components/leads/LeadPipeline';
 import { Button } from '@/components/ui/button';
+import { requireBusinessAccess } from '@/lib/auth/session';
 import { loadOperatorLeadsData } from '@/lib/whatsai-data';
 
 export const metadata = { title: 'Leads' };
 export const dynamic = 'force-dynamic';
 
 export default async function LeadsPage() {
-  const data = await loadOperatorLeadsData();
+  const session = await requireBusinessAccess();
+  if (!session.activeBusinessId) redirect('/admin');
+  const data = await loadOperatorLeadsData({ businessId: session.activeBusinessId });
 
   return (
     <>

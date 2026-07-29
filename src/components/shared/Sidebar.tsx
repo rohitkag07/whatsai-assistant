@@ -7,13 +7,14 @@ import {
   BookOpen,
   Home,
   MessageCircle,
-  Megaphone,
-  Settings,
   SlidersHorizontal,
   Users,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_NAME, APP_TAGLINE } from '@/lib/constants';
+
+export type NavMode = 'client' | 'admin';
 
 type Item = {
   href: string;
@@ -22,19 +23,22 @@ type Item = {
   icon: React.ComponentType<{ className?: string }>;
 };
 
-const items: Item[] = [
-  { href: '/dashboard', label: 'Dashboard', description: 'Morning overview', icon: Home },
-  { href: '/chats', label: 'Chats', description: 'WhatsApp inbox', icon: MessageCircle },
-  { href: '/calendar', label: 'Calendar', description: 'Appointments', icon: CalendarDays },
+const clientItems: Item[] = [
+  { href: '/dashboard', label: 'Home', description: 'Morning overview', icon: Home },
+  { href: '/chats', label: 'Customer Chats', description: 'WhatsApp inbox', icon: MessageCircle },
+  { href: '/calendar', label: 'Appointments', description: 'Booked calls', icon: CalendarDays },
   { href: '/leads', label: 'Leads', description: 'Active leads', icon: Users },
-  { href: '/knowledge', label: 'Knowledge', description: 'Approved answers', icon: BookOpen },
-  { href: '/campaigns', label: 'Campaigns', description: 'Broadcast messages', icon: Megaphone },
-  { href: '/assistant-setup', label: 'Setup', description: 'Connect WhatsApp', icon: SlidersHorizontal },
-  { href: '/settings', label: 'Settings', description: 'Business setup', icon: Settings },
+  { href: '/knowledge', label: 'Approved Replies', description: 'Published answers', icon: BookOpen },
+  { href: '/bookings', label: 'Handoffs', description: 'Owner actions', icon: ShieldCheck },
 ];
 
-export function Sidebar({ mobile = false, onNavigate }: { mobile?: boolean; onNavigate?: () => void }) {
+const adminItems: Item[] = [
+  { href: '/admin', label: 'Client Controls', description: 'Tenants and modules', icon: SlidersHorizontal },
+];
+
+export function Sidebar({ mode, mobile = false, onNavigate }: { mode: NavMode; mobile?: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const items = mode === 'admin' ? adminItems : clientItems;
 
   return (
     <aside className={cn('h-full w-[272px] shrink-0 flex-col border-r border-[#d8dee4] bg-white', mobile ? 'flex' : 'sticky top-0 hidden lg:flex h-screen')}>
@@ -84,8 +88,8 @@ export function Sidebar({ mobile = false, onNavigate }: { mobile?: boolean; onNa
       </nav>
 
       <div className="mx-5 mb-5 border-t border-[#e5e9e7] pt-4 text-[11px] leading-4 text-[#667781]">
-        <span className="inline-flex items-center gap-2 font-medium text-[#075e54]"><span className="h-2 w-2 rounded-full bg-[#00a884]" /> Reception desk</span>
-        <p className="mt-1">Inbox, appointments, and handoffs in one place.</p>
+        <span className="inline-flex items-center gap-2 font-medium text-[#075e54]"><span className="h-2 w-2 rounded-full bg-[#00a884]" /> {mode === 'admin' ? 'Ops console' : 'Reception desk'}</span>
+        <p className="mt-1">{mode === 'admin' ? 'Client controls and launch proof stay internal.' : 'Inbox, appointments, and handoffs in one place.'}</p>
       </div>
     </aside>
   );

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createBroadcastSchema } from '@/lib/broadcast-schema';
 import { callSalesAgent, serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, resolveDashboardBusiness } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const supabase = serviceClientOrNull();
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
   try {
-    const business = await resolveDashboardBusiness(supabase, new URL(request.url).searchParams.get('business_id'));
+    const { business } = await requireDashboardBusinessContext(supabase, new URL(request.url).searchParams.get('business_id'));
     const [templatesResult, campaignsResult] = await Promise.all([
       (supabase.from('whatsapp_templates') as any)
         .select('*')
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
 
   try {
-    const business = await resolveDashboardBusiness(supabase);
+    const { business } = await requireDashboardBusinessContext(supabase);
     const { data: template, error: templateError } = await (supabase.from('whatsapp_templates') as any)
       .select('*')
       .eq('id', parsed.data.template_id)

@@ -1,6 +1,64 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
+import {
+  defaultLandingForRole,
+  getUserPlatformRole,
+  isAdminPlatformRole,
+  platformRoleFromMembershipRole,
+  type BusinessMemberRole,
+  type PlatformRole,
+} from '@/lib/auth/roles';
+
+const CLIENT_ONLY_PATHS = [
+  '/dashboard',
+  '/chats',
+  '/calendar',
+  '/leads',
+  '/knowledge',
+  '/bookings',
+];
+
+const DEV_ONLY_PATHS = [
+  '/admin',
+  '/assistant-setup',
+  '/campaigns',
+  '/colony',
+  '/content',
+  '/ghost-closer',
+  '/reports',
+  '/settings',
+];
+
+const CLIENT_ROUTE_ALIASES: Record<string, string> = {
+  '/conversations': '/chats',
+  '/site-visits': '/calendar',
+};
+
+function matchesPath(pathname: string, paths: string[]) {
+  return paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+}
+
+function redirectTo(request: NextRequest, pathname: string) {
+  const redirect = request.nextUrl.clone();
+  redirect.pathname = pathname;
+  redirect.search = '';
+  return NextResponse.redirect(redirect);
+}
+
+async function resolvePlatformRole(supabase: ReturnType<typeof createServerClient<Database>>, userId: string, fallbackRole: PlatformRole) {
+  if (isAdminPlatformRole(fallbackRole)) return fallbackRole;
+
+  const { data } = await (supabase.from('business_members') as any)
+    .select('role')
+    .eq('user_id', userId)
+    .eq('active', true)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  return platformRoleFromMembershipRole(data?.role as BusinessMemberRole | undefined) ?? fallbackRole;
+}
 
 /**
  * Edge middleware helper — keeps Supabase session cookies fresh on
@@ -39,19 +97,35 @@ export async function updateSession(request: NextRequest) {
   const pathname  = request.nextUrl.pathname;
   const isAuthPg  = pathname.startsWith('/login');
   const isGuard   = pathname.startsWith('/guard');
-  const isPublic  = isAuthPg || isGuard || pathname.startsWith('/_next') || pathname.startsWith('/api/health');
+  const isPublic  = isAuthPg || isGuard;
 
   if (!user && !isPublic) {
     const redirect = request.nextUrl.clone();
     redirect.pathname = '/login';
-    redirect.searchParams.set('next', pathname);
+    redirect.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(redirect);
   }
 
-  if (user && isAuthPg) {
-    const redirect = request.nextUrl.clone();
-    redirect.pathname = '/';
-    return NextResponse.redirect(redirect);
+  if (!user) return response;
+
+  const platformRole = await resolvePlatformRole(supabase, user.id, getUserPlatformRole(user));
+  const landingPath = defaultLandingForRole(platformRole);
+  const clientAlias = Object.entries(CLIENT_ROUTE_ALIASES).find(([source]) => pathname === source || pathname.startsWith(`${source}/`));
+
+  if (isAuthPg || pathname === '/') {
+    return redirectTo(request, landingPath);
+  }
+
+  if (clientAlias) {
+    return redirectTo(request, clientAlias[1]);
+  }
+
+  if (matchesPath(pathname, DEV_ONLY_PATHS) && !isAdminPlatformRole(platformRole)) {
+    return redirectTo(request, '/dashboard');
+  }
+
+  if (matchesPath(pathname, CLIENT_ONLY_PATHS) && isAdminPlatformRole(platformRole) && pathname === '/dashboard') {
+    return redirectTo(request, '/admin');
   }
 
   return response;

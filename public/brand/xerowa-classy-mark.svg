@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- XeroWA Classy Human-Designed Vector Mark -->
+  <rect width="100" height="100" rx="20" fill="#0A192F"/>
+  <path d="M 28 30 L 52 70 M 52 30 L 28 70" stroke="#10B981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 48 45 L 60 70 L 72 45 L 84 70" stroke="#10B981" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="84" cy="32" r="4.5" fill="#06B6D4"/>
+</svg>
