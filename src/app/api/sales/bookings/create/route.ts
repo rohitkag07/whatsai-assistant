@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { buildUpiLink } from '@/lib/utils';
-import { DEMO_PROJECT } from '@/lib/sales-data';
+import { legacyProjectDefaults } from '@/lib/sales-data';
 import { logAgentRun, serviceClientOrNull } from '@/lib/sales-server';
 
 const schema = z.object({
@@ -26,10 +26,10 @@ export async function POST(request: Request) {
   const payload = parsed.data;
   const upiLink = payload.payment_mode === 'upi'
     ? buildUpiLink({
-        pa: DEMO_PROJECT.paymentVpa,
-        pn: DEMO_PROJECT.paymentName,
+        pa: legacyProjectDefaults.paymentVpa,
+        pn: legacyProjectDefaults.paymentName,
         am: payload.token_amount,
-        tn: `${DEMO_PROJECT.name} token ${payload.plot_number} for ${payload.lead_name}`,
+        tn: `${legacyProjectDefaults.name} token ${payload.plot_number} for ${payload.lead_name}`,
       })
     : null;
 
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
   const receiptUrl = `/api/sales/bookings/receipt?${new URLSearchParams({
     buyer_name: payload.lead_name,
     plot_label: payload.plot_number,
-    project_name: DEMO_PROJECT.name,
+    project_name: legacyProjectDefaults.name,
     token_amount: String(payload.token_amount),
     total_amount: String(payload.total_amount),
     payment_mode: payload.payment_mode,

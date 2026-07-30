@@ -2,11 +2,10 @@ import 'server-only';
 
 import { callSalesAgent, serviceClientOrNull } from '@/lib/sales-server';
 import { createClient } from '@/lib/supabase/server';
-import { DEMO_BUILDER_ID } from '@/lib/sales-data';
 import { resolveDashboardBusiness } from '@/lib/whatsai-business';
 import type { AiMode, Appointment, Business, ConversationStage, ConversationContact, ConversationMessage, ConversationStatus, ConversationThread, HandoffEvent, Lead, LeadQualificationAnswer } from '@/types/database';
 
-export type WhatsAiReadSource = 'supabase' | 'demo' | 'error';
+export type WhatsAiReadSource = 'supabase' | 'error';
 
 export type WhatsAiThread = {
   id: string;
@@ -112,8 +111,6 @@ type OperatorLeadsResponse = {
   handoffs: HandoffEvent[];
 };
 
-const now = new Date();
-
 export async function loadOperatorLeadsData({ businessId }: { businessId?: string } = {}): Promise<WhatsAiInboxData> {
   const tenantClient = serviceClientOrNull();
   if (!tenantClient) {
@@ -162,7 +159,22 @@ export async function loadOperatorLeadsData({ businessId }: { businessId?: strin
 
 export async function loadWhatsAiInboxData({ businessId, selectedPhone = null }: { businessId: string; selectedPhone?: string | null }): Promise<WhatsAiInboxData> {
   const client = await getReadClientOrNull();
-  if (!client) return buildDemoInbox(selectedPhone);
+  if (!client) {
+    return buildCanonicalInbox({
+      source: 'error',
+      error: 'Supabase is not configured. Live WhatsApp data could not be loaded.',
+      threads: [],
+      messages: [],
+      contacts: [],
+      leads: [],
+      qualificationAnswers: [],
+      appointments: [],
+      handoffs: [],
+      business: null,
+      humanHandoffs: 0,
+      selectedPhone,
+    });
+  }
 
   const [threadsResult, messagesResult, contactsResult, appointmentsResult, businessResult, handoffsResult] = await Promise.all([
     (client.from('conversation_threads') as any).select('*').eq('business_id', businessId).order('last_message_at', { ascending: false, nullsFirst: false }).limit(200),
@@ -303,7 +315,7 @@ function buildCanonicalThread(thread: ConversationThread, rows: ConversationMess
     phone,
     contactName: contact?.name ?? lead?.name ?? (phone === 'unknown' ? 'WhatsApp Contact' : `WhatsApp ${phone.slice(-4)}`),
     leadId: thread.lead_id ?? contact?.lead_id ?? lead?.id ?? null,
-    builderId: thread.builder_id ?? contact?.builder_id ?? lead?.builder_id ?? DEMO_BUILDER_ID,
+    builderId: thread.builder_id ?? contact?.builder_id ?? lead?.builder_id ?? businessId ?? '',
     businessId: thread.business_id ?? contact?.business_id ?? businessId,
     contactId: thread.contact_id ?? contact?.id ?? null,
     stage: thread.stage ?? contact?.stage ?? stageFromLegacyLead(lead?.lead_stage),
@@ -395,144 +407,6 @@ async function getReadClientOrNull(): Promise<any> {
   } catch {
     return null;
   }
-}
-
-function buildDemoInbox(selectedPhone?: string | null) {
-  const business: WhatsAiBusinessSummary['business'] = {
-    id: 'demo-whatsai-business',
-    name: 'Shree Krishna Developers',
-    category: 'real_estate',
-    status: 'trial',
-    plan: 'trial',
-    trial_ends_at: new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString(),
-    daily_message_limit: 500,
-  };
-
-  const contactA = makeDemoContact('demo-contact-1', '+919811112201', 'Rajesh Sharma', 'hot', ['meta_ad', '25-40L']);
-  const contactB = makeDemoContact('demo-contact-2', '+919811112203', 'Sunil Yadav', 'hot', ['google_ad', '40L+']);
-  const contactC = makeDemoContact('demo-contact-3', '+919811112206', 'Manisha Kulkarni', 'hot', ['ghost_closer', '40L+']);
-
-  const threadA = makeDemoThread('demo-thread-1', contactA, 'open', 'assistant', 'Arjun Sales', -44, 'Customer wants Sunday 4 PM visit and location pin.');
-  const threadB = makeDemoThread('demo-thread-2', contactB, 'pending_human', 'paused', 'Ritika Closer', -176, 'Needs RERA and price-sheet confirmation before next reply.');
-  const threadC = makeDemoThread('demo-thread-3', contactC, 'open', 'manual', 'Owner Desk', -236, 'Adjacent plot hold request needs owner confirmation.');
-
-  const messages = [
-    makeDemoConversationMessage('demo-msg-1', threadA, contactA, 'inbound', 'Budget 25-40L hai. Sunday site visit possible hai kya?', -55, 'received', 'summoner-webhook'),
-    makeDemoConversationMessage('demo-msg-2', threadA, contactA, 'outbound', 'Rajesh ji, Sunday ke liye 11:00 AM ya 4:00 PM slot hold kar sakta hoon. Kaunsa better rahega?', -52, 'sent', 'sales-agent-qualify'),
-    makeDemoConversationMessage('demo-msg-3', threadA, contactA, 'inbound', '4 PM best hai. Location pin bhej do.', -44, 'received', 'summoner-webhook'),
-    makeDemoConversationMessage('demo-msg-4', threadB, contactB, 'inbound', 'RERA number aur price sheet bhejiye.', -180, 'received', 'summoner-webhook'),
-    makeDemoConversationMessage('demo-msg-5', threadB, contactB, 'outbound', 'Sunil ji, RERA details aur latest price sheet ready hai. Main shortlist bhi share kar raha hoon.', -176, 'delivered', 'sales-agent-follow-up'),
-    makeDemoConversationMessage('demo-msg-6', threadC, contactC, 'inbound', 'Do adjacent plots hold kar sakte ho?', -240, 'received', 'summoner-webhook'),
-    makeDemoConversationMessage('demo-msg-7', threadC, contactC, 'outbound', 'Manisha ji, 24 hours ke liye hold possible hai. Token steps aur map share kar deta hoon.', -236, 'read', 'whatsai-operator'),
-  ];
-
-  return buildCanonicalInbox({
-    source: 'demo',
-    threads: [threadA, threadB, threadC],
-    messages,
-    contacts: [contactA, contactB, contactC],
-    leads: [],
-    qualificationAnswers: [],
-    appointments: [],
-    handoffs: [],
-    business,
-    humanHandoffs: 2,
-    selectedPhone,
-  });
-}
-
-function makeDemoContact(id: string, phone: string, name: string, temperature: Lead['temperature'], tags: string[]): ConversationContact {
-  const time = new Date(now.getTime() - 44 * 60 * 1000).toISOString();
-  return {
-    id,
-    business_id: 'demo-whatsai-business',
-    builder_id: DEMO_BUILDER_ID,
-    lead_id: null,
-    phone,
-    name,
-    source: tags[0] ?? 'whatsapp',
-    lifecycle_stage: 'lead',
-    temperature,
-    stage: temperature === 'cold' ? 'cold' : 'new',
-    tags,
-    last_message_at: time,
-    last_handoff_at: null,
-    metadata: {},
-    created_at: time,
-    updated_at: time,
-  };
-}
-
-function makeDemoThread(id: string, contact: ConversationContact, status: ConversationStatus, aiMode: AiMode, assignedTo: string, minutesAgo: number, summary: string): ConversationThread {
-  const time = new Date(now.getTime() + minutesAgo * 60 * 1000).toISOString();
-  return {
-    id,
-    business_id: contact.business_id,
-    business_channel_id: null,
-    contact_id: contact.id,
-    builder_id: contact.builder_id,
-    lead_id: null,
-    channel: 'whatsapp',
-    status,
-    assigned_to: assignedTo,
-    assigned_user_id: null,
-    ai_mode: aiMode,
-    stage: contact.stage,
-    unread_count: status === 'pending_human' ? 1 : 0,
-    last_message_at: time,
-    summary,
-    metadata: {
-      internal_note: status === 'pending_human' ? 'Owner ko price-sheet approval dena hai.' : '',
-      handoff_reason: status === 'pending_human' ? 'Pricing/RERA confirmation requested' : null,
-      qualification_step: {
-        answered: status === 'pending_human' ? 4 : 2,
-        total: 5,
-        next_question: status === 'pending_human' ? null : 'visit_slot',
-        qualified: status === 'pending_human',
-      },
-      appointment_status:
-        status === 'pending_human'
-          ? {
-              id: `${id}-appointment`,
-              status: 'scheduled',
-              scheduled_at: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-              type: 'site_visit',
-            }
-          : null,
-      hot_handoff:
-        status === 'pending_human'
-          ? {
-              id: `${id}-handoff`,
-              reason: 'Qualified hot lead needs owner confirmation',
-              priority: 'high',
-              status: 'pending',
-            }
-          : null,
-    },
-    created_at: time,
-    updated_at: time,
-  };
-}
-
-function makeDemoConversationMessage(id: string, thread: ConversationThread, contact: ConversationContact, direction: 'inbound' | 'outbound', body: string, minutesAgo: number, status: ConversationMessage['status'], agent: string): ConversationMessage {
-  const time = new Date(now.getTime() + minutesAgo * 60 * 1000).toISOString();
-  return {
-    id,
-    thread_id: thread.id,
-    contact_id: contact.id,
-    business_id: contact.business_id,
-    builder_id: contact.builder_id,
-    lead_id: null,
-    whatsapp_message_id: null,
-    direction,
-    channel: 'whatsapp',
-    message_type: 'text',
-    body,
-    status,
-    agent,
-    metadata: {},
-    created_at: time,
-  };
 }
 
 function pickSelectedThread(threads: WhatsAiThread[], selectedPhone?: string | null) {

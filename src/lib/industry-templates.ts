@@ -28,6 +28,23 @@ const rule = (
 });
 
 export const industryTemplatePacks: Record<Exclude<BusinessCategory, 'other'>, IndustryTemplatePack> = {
+  software_saas: {
+    title: 'Software and SaaS starter pack',
+    fallback: 'Thank you for contacting [Business name]. Our product team will reply shortly.',
+    qualificationQuestions: ['Business category?', 'Primary WhatsApp challenge?', 'Monthly lead volume?', 'Preferred demo time?'],
+    rules: [
+      rule('saas-pricing', 'Pricing', ['price', 'fees', 'cost', 'charges', 'kitna'], '[Product name] starts at Rs [monthly price]. Setup fee: Rs [setup fee].', 'price'),
+      rule('saas-demo', 'Product demo', ['demo', 'try', 'dekhna', 'dikhao'], 'Share your business category and preferred time to book a [duration]-minute demo.', 'booking'),
+      rule('saas-features', 'Product features', ['features', 'details', 'kya karta hai'], '[Product name] helps with [top three outcomes].'),
+      rule('saas-integration', 'Integrations', ['integration', 'connect', 'whatsapp'], 'Supported integrations: [integration list].'),
+      rule('saas-onboarding', 'Setup and onboarding', ['setup', 'onboarding', 'start'], 'Setup takes [time] and includes [onboarding scope].'),
+      rule('saas-support', 'Support', ['support', 'help', 'training'], 'Support is available via [channels] during [hours].'),
+      rule('saas-location', 'Office and service area', ['location', 'office', 'address', 'kahan'], 'We are based in [city] and support customers across [service area].', 'location'),
+      rule('saas-comparison', 'Competitor comparison', ['compare', 'alternative', 'difference'], '[Product name] is best for [ideal customer] because [approved differentiators].'),
+      rule('saas-security', 'Security and privacy', ['security', 'privacy', 'data'], 'Your data is protected through [approved security controls].'),
+      rule('saas-offer', 'Current offer', ['offer', 'discount', 'deal'], '[Offer details] are valid until [end date].', 'offers'),
+    ],
+  },
   clinic: {
     title: 'Clinic starter pack',
     fallback: 'Thank you for contacting [Clinic name]. Our team will reply shortly. For emergencies, please contact local emergency services.',

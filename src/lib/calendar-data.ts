@@ -10,13 +10,19 @@ export type CalendarAppointment = Pick<Appointment, 'id' | 'thread_id' | 'contac
 
 export type CalendarData = {
   appointments: CalendarAppointment[];
-  source: 'supabase' | 'demo' | 'error';
+  source: 'supabase' | 'error';
   error: string | null;
 };
 
 export async function loadCalendarData(businessId: string): Promise<CalendarData> {
   const client = serviceClientOrNull();
-  if (!client) return { source: 'demo', error: null, appointments: demoAppointments() };
+  if (!client) {
+    return {
+      source: 'error',
+      error: 'Supabase is not configured. Live appointments could not be loaded.',
+      appointments: [],
+    };
+  }
 
   const [appointmentsResult, contactsResult] = await Promise.all([
     (client.from('appointments') as any).select('id,thread_id,contact_id,title,appointment_type,scheduled_at,status,notes').eq('business_id', businessId).order('scheduled_at', { ascending: true }).limit(500),
@@ -34,10 +40,4 @@ export async function loadCalendarData(businessId: string): Promise<CalendarData
       phone: contacts.get(appointment.contact_id)?.phone ?? 'Phone unavailable',
     })),
   };
-}
-
-function demoAppointments(): CalendarAppointment[] {
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  tomorrow.setHours(11, 0, 0, 0);
-  return [{ id: 'demo-appointment-1', thread_id: null, contact_id: 'demo-contact-1', title: 'Property site visit', appointment_type: 'site_visit', scheduled_at: tomorrow.toISOString(), status: 'scheduled', notes: 'Bring the latest price sheet.', contactName: 'Rajesh Sharma', phone: '+91 98111 12201' }];
 }

@@ -3,23 +3,18 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { serviceClientOrNull } from '@/lib/sales-server';
 import {
-  DEMO_PROJECT,
-  demoBookings,
-  demoLeads,
-  demoPlots,
-  demoSiteVisits,
   type BookingWorkbenchItem,
   type PlotInventoryItem,
   type VisitBoardItem,
 } from '@/lib/sales-data';
 import type { Booking, Lead, Plot, Project, SiteVisit } from '@/types/database';
 
-export type SalesReadSource = 'supabase' | 'demo';
+export type SalesReadSource = 'supabase' | 'error';
 
 export function salesReadSourceLabel(source: SalesReadSource) {
   return source === 'supabase'
-    ? 'Live Supabase records loaded for this Phase 2 view.'
-    : 'Supabase unavailable, so the Phase 2 fallback demo dataset is being shown.';
+    ? 'Live Supabase records loaded.'
+    : 'Live Supabase records could not be loaded. No sample data is being shown.';
 }
 
 export async function loadLeadsPageData(): Promise<{
@@ -27,14 +22,14 @@ export async function loadLeadsPageData(): Promise<{
   source: SalesReadSource;
 }> {
   const client = await getReadClientOrNull();
-  if (!client) return { leads: demoLeads, source: 'demo' };
+  if (!client) return { leads: [], source: 'error' };
 
   const leadsResult = await (client.from('leads') as any)
     .select('*')
     .order('created_at', { ascending: false })
     .limit(120);
 
-  if (leadsResult.error) return { leads: demoLeads, source: 'demo' };
+  if (leadsResult.error) return { leads: [], source: 'error' };
 
   return {
     leads: (leadsResult.data ?? []) as Lead[],
@@ -48,7 +43,7 @@ export async function loadSiteVisitsPageData(): Promise<{
   source: SalesReadSource;
 }> {
   const client = await getReadClientOrNull();
-  if (!client) return { leads: demoLeads, visits: demoSiteVisits, source: 'demo' };
+  if (!client) return { leads: [], visits: [], source: 'error' };
 
   const [leadsResult, visitsResult, projectsResult] = await Promise.all([
     (client.from('leads') as any).select('*').order('created_at', { ascending: false }).limit(120),
@@ -57,7 +52,7 @@ export async function loadSiteVisitsPageData(): Promise<{
   ]);
 
   if (leadsResult.error || visitsResult.error || projectsResult.error) {
-    return { leads: demoLeads, visits: demoSiteVisits, source: 'demo' };
+    return { leads: [], visits: [], source: 'error' };
   }
 
   const leads = (leadsResult.data ?? []) as Lead[];
@@ -80,10 +75,10 @@ export async function loadBookingsPageData(): Promise<{
   const client = await getReadClientOrNull();
   if (!client) {
     return {
-      leads: demoLeads,
-      plots: demoPlots,
-      bookings: demoBookings,
-      source: 'demo',
+      leads: [],
+      plots: [],
+      bookings: [],
+      source: 'error',
     };
   }
 
@@ -96,10 +91,10 @@ export async function loadBookingsPageData(): Promise<{
 
   if (leadsResult.error || plotsResult.error || bookingsResult.error || projectsResult.error) {
     return {
-      leads: demoLeads,
-      plots: demoPlots,
-      bookings: demoBookings,
-      source: 'demo',
+      leads: [],
+      plots: [],
+      bookings: [],
+      source: 'error',
     };
   }
 
@@ -141,7 +136,7 @@ function buildVisitBoardItems(
         ...visit,
         lead_name: lead?.name ?? 'Unknown lead',
         lead_phone: lead?.phone ?? '',
-        project_name: project?.name ?? DEMO_PROJECT.name,
+        project_name: project?.name ?? 'Project',
         budget_range: lead?.budget_range ?? null,
       };
     })
@@ -183,7 +178,7 @@ function buildBookingWorkbenchItems(
       ...booking,
       buyer_name: lead?.name ?? 'Unknown buyer',
       plot_label: plot?.plot_number ?? 'Plot TBD',
-      project_name: project?.name ?? DEMO_PROJECT.name,
+      project_name: project?.name ?? 'Project',
     };
   });
 }

@@ -51,21 +51,21 @@ type WizardForm = {
 };
 
 const storageKey = 'whatsai-setup-wizard-v2';
-const realEstateStarter = getIndustryTemplatePack('real_estate');
+const generalStarter = getIndustryTemplatePack('other');
 
 const defaults: WizardForm = {
-  name: 'Shree Krishna Developers',
-  category: 'real_estate',
-  city: 'Indore',
-  owner_name: 'Rohit',
+  name: '',
+  category: 'other',
+  city: '',
+  owner_name: '',
   owner_whatsapp: '',
-  core_offer: 'Premium plotted development near Super Corridor, Indore with site-visit booking and owner handoff for hot buyers.',
+  core_offer: '',
   phone_number_id: '',
   business_account_id: '',
-  verify_token: 'x7-whatsapp-test-2026',
-  qualification_questions_text: 'Budget range?\nPreferred location?\nTimeline for purchase?\nSite visit preferred date/time?\nLoan required?',
-  keyword_replies: realEstateStarter.rules,
-  fallback_reply: realEstateStarter.fallback,
+  verify_token: '',
+  qualification_questions_text: generalStarter.qualificationQuestions.join('\n'),
+  keyword_replies: generalStarter.rules,
+  fallback_reply: generalStarter.fallback,
   knowledge_items: [],
   followup_enabled: true,
   followup_steps: [
@@ -312,7 +312,7 @@ function BusinessProfileStep({ form, update, onCategoryChange }: StepProps & { o
   return (
     <div className="grid gap-5 md:grid-cols-2">
       <Field label="Business name" helper="Customer-facing brand name.">
-        <Input value={form.name} onChange={(event) => update('name', event.target.value)} placeholder="e.g. Shree Krishna Developers" />
+        <Input value={form.name} onChange={(event) => update('name', event.target.value)} placeholder="e.g. Acme Dental Clinic" />
       </Field>
       <Field label="Industry" helper="Helps the assistant ask the right questions.">
         <Select value={form.category} onValueChange={(value) => onCategoryChange(value as BusinessCategory)}>
@@ -323,6 +323,7 @@ function BusinessProfileStep({ form, update, onCategoryChange }: StepProps & { o
             <SelectItem value="coaching">Coaching</SelectItem>
             <SelectItem value="gym">Gym / dietitian</SelectItem>
             <SelectItem value="local_service">Local service</SelectItem>
+            <SelectItem value="software_saas">Software / SaaS</SelectItem>
             <SelectItem value="other">Salon, spa, or other</SelectItem>
           </SelectContent>
         </Select>

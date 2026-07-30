@@ -9,6 +9,7 @@ export const starterKeywordRules: Record<BusinessCategory, StarterRules> = {
   coaching: getStarterKeywordRules('coaching'),
   gym: getStarterKeywordRules('gym'),
   local_service: getStarterKeywordRules('local_service'),
+  software_saas: getStarterKeywordRules('software_saas'),
   other: getStarterKeywordRules('other'),
 };
 

@@ -68,7 +68,7 @@ export type VisitorType       = 'guest' | 'delivery' | 'service' | 'frequent' | 
 export type VisitorApproval   = 'pending' | 'approved' | 'denied' | 'expired';
 export type VisitorApprovalMethod = 'whatsapp' | 'dashboard' | 'phone_call' | 'pre_approved';
 
-export type BusinessCategory = 'real_estate' | 'clinic' | 'coaching' | 'gym' | 'local_service' | 'other';
+export type BusinessCategory = 'real_estate' | 'clinic' | 'coaching' | 'gym' | 'local_service' | 'software_saas' | 'other';
 export type BusinessStatus = 'trial' | 'active' | 'paused' | 'cancelled';
 export type BusinessPlan = 'trial' | 'starter' | 'growth' | 'pro' | 'enterprise';
 export type AssistantVertical = BusinessCategory;

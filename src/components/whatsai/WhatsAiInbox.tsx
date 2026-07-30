@@ -221,7 +221,7 @@ export function WhatsAiInbox({ data }: Props) {
                   <Inbox className="h-4 w-4 text-[#00a884]" />
                   Conversations
                 </CardTitle>
-                <p className="mt-1 text-xs text-[#667781]">{data.source === 'supabase' ? 'Live WhatsApp threads' : 'Demo conversations'}</p>
+                <p className="mt-1 text-xs text-[#667781]">Live WhatsApp threads</p>
               </div>
               <Button variant="secondary" size="icon" onClick={refresh} aria-label="Refresh inbox" disabled={pending}>
                 <RefreshCw className={cn('h-4 w-4', pending && 'animate-spin')} />
@@ -558,8 +558,8 @@ function InboxEmptyState({ onRefresh }: { onRefresh: () => void }) {
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d9fdd3] text-[#075e54]">
         <Inbox className="h-8 w-8" />
       </div>
-      <h2 className="mt-5 text-xl font-semibold">No conversations yet</h2>
-      <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">Send a WhatsApp test message or connect a business channel to start the inbox.</p>
+      <h2 className="mt-5 text-xl font-semibold">No customer chats yet</h2>
+      <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">Messages sent to your XeroWA WhatsApp number will appear here live.</p>
       <div className="mt-6 flex justify-center gap-2">
         <Button variant="outline" onClick={onRefresh}>
           <RefreshCw className="mr-2 h-4 w-4" />

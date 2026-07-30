@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatDate, formatINR, buildUpiLink } from '@/lib/utils';
-import { DEMO_PROJECT } from '@/lib/sales-data';
+import { legacyProjectDefaults } from '@/lib/sales-data';
 import type { Lead } from '@/types/database';
 import type { BookingWorkbenchItem, PlotInventoryItem } from '@/lib/sales-data';
 import { toast } from 'sonner';
@@ -48,10 +48,10 @@ export function BookingWorkbench({ leads, plots, bookings }: BookingWorkbenchPro
   function bookingLink() {
     if (!selectedLead || !selectedPlot) return '';
     return buildUpiLink({
-      pa: DEMO_PROJECT.paymentVpa,
-      pn: DEMO_PROJECT.paymentName,
+      pa: legacyProjectDefaults.paymentVpa,
+      pn: legacyProjectDefaults.paymentName,
       am: Number(tokenAmount || 0),
-      tn: `${DEMO_PROJECT.name} token ${selectedPlot.plot_number} for ${selectedLead.name}`,
+      tn: `${legacyProjectDefaults.name} token ${selectedPlot.plot_number} for ${selectedLead.name}`,
     });
   }
 
@@ -66,7 +66,7 @@ export function BookingWorkbench({ leads, plots, bookings }: BookingWorkbenchPro
           body: JSON.stringify({
             lead_id: selectedLead.id,
             builder_id: selectedLead.builder_id,
-            project_id: DEMO_PROJECT.id,
+            project_id: legacyProjectDefaults.id,
             plot_id: selectedPlot.id,
             plot_number: selectedPlot.plot_number,
             lead_name: selectedLead.name,
@@ -82,7 +82,7 @@ export function BookingWorkbench({ leads, plots, bookings }: BookingWorkbenchPro
         const newBooking: BookingWorkbenchItem = {
           id: String(payload.booking?.id ?? `bk-${crypto.randomUUID()}`),
           lead_id: selectedLead.id,
-          project_id: DEMO_PROJECT.id,
+          project_id: legacyProjectDefaults.id,
           plot_id: selectedPlot.id,
           token_amount: Number(payload.booking?.token_amount ?? Number(tokenAmount || 0)),
           total_amount: Number(payload.booking?.total_amount ?? selectedPlot.total_price),
@@ -98,7 +98,7 @@ export function BookingWorkbench({ leads, plots, bookings }: BookingWorkbenchPro
           updated_at: new Date().toISOString(),
           buyer_name: selectedLead.name,
           plot_label: selectedPlot.plot_number,
-          project_name: DEMO_PROJECT.name,
+          project_name: legacyProjectDefaults.name,
         };
 
         setInventory((current) => current.map((plot) => (
@@ -295,7 +295,7 @@ export function BookingWorkbench({ leads, plots, bookings }: BookingWorkbenchPro
                   href={receiptUrlFor({
                     id: 'preview',
                     lead_id: selectedLead.id,
-                    project_id: DEMO_PROJECT.id,
+                    project_id: legacyProjectDefaults.id,
                     plot_id: selectedPlot.id,
                     token_amount: Number(tokenAmount || 0),
                     total_amount: selectedPlot.total_price ?? 0,
@@ -311,7 +311,7 @@ export function BookingWorkbench({ leads, plots, bookings }: BookingWorkbenchPro
                     updated_at: new Date().toISOString(),
                     buyer_name: selectedLead.name,
                     plot_label: selectedPlot.plot_number,
-                    project_name: DEMO_PROJECT.name,
+                    project_name: legacyProjectDefaults.name,
                   })}
                   target="_blank"
                   rel="noreferrer"
