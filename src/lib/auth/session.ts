@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import type { User } from '@supabase/supabase-js';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { ACTIVE_BUSINESS_COOKIE } from '@/lib/auth/active-business';
 import {
   defaultLandingForRole,
@@ -57,7 +57,14 @@ export async function getAuthSession(): Promise<AuthSession | null> {
 
   if (userError || !user) return null;
 
-  const membershipsResult = await (supabase.from('business_members') as any)
+  let membershipClient: any = supabase;
+  try {
+    membershipClient = createServiceClient();
+  } catch {
+    // The user-scoped client remains the fail-closed fallback.
+  }
+
+  const membershipsResult = await (membershipClient.from('business_members') as any)
     .select('id,business_id,user_id,display_name,role,active,created_at')
     .eq('user_id', user.id)
     .eq('active', true)

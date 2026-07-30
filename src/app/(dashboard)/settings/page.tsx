@@ -6,12 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { getOpsReadiness } from '@/lib/ops-readiness';
+import { requirePlatformRole } from '@/lib/auth/session';
 import Link from 'next/link';
 
 export const metadata = { title: 'Settings' };
 export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
+  await requirePlatformRole(['admin', 'dev']);
   const readiness = await getOpsReadiness();
 
   return (

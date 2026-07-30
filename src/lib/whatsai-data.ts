@@ -11,6 +11,8 @@ export type WhatsAiThread = {
   id: string;
   phone: string;
   contactName: string;
+  profilePictureUrl: string | null;
+  firstSeenAt: string;
   leadId: string | null;
   builderId: string;
   businessId: string | null;
@@ -35,6 +37,11 @@ export type WhatsAiThread = {
     total: number;
     nextQuestion: string | null;
     qualified: boolean;
+    answers: Array<{
+      question: string;
+      answer: string;
+      confidence: number | null;
+    }>;
   };
   appointment: {
     id: string;
@@ -43,12 +50,22 @@ export type WhatsAiThread = {
     type: Appointment['appointment_type'];
     title: string;
   } | null;
+  appointments: Array<{
+    id: string;
+    status: Appointment['status'];
+    scheduledAt: string;
+    type: Appointment['appointment_type'];
+    title: string;
+    notes: string | null;
+  }>;
   hotHandoff: {
     id: string;
     reason: string;
+    summary: string;
     priority: string;
     status: string;
   } | null;
+  aiRecommendation: string;
 };
 
 export type WhatsAiMessage = {
@@ -114,7 +131,7 @@ type OperatorLeadsResponse = {
 export async function loadOperatorLeadsData({ businessId }: { businessId?: string } = {}): Promise<WhatsAiInboxData> {
   const tenantClient = serviceClientOrNull();
   if (!tenantClient) {
-    return buildOperatorLeadError('Supabase service access is not configured for the operator pipeline.');
+    return buildOperatorLeadError('Your lead pipeline is temporarily unavailable. Please try again.');
   }
 
   let business;
@@ -139,7 +156,7 @@ export async function loadOperatorLeadsData({ businessId }: { businessId?: strin
 
   if (!response?.ok) {
     return buildOperatorLeadError(
-      'The Summoner-led operator pipeline could not load live Supabase records. Check Summoner and Sales Agent health, then retry.',
+      'Live lead data could not be loaded. Please try again shortly.',
     );
   }
 
@@ -162,7 +179,7 @@ export async function loadWhatsAiInboxData({ businessId, selectedPhone = null }:
   if (!client) {
     return buildCanonicalInbox({
       source: 'error',
-      error: 'Supabase is not configured. Live WhatsApp data could not be loaded.',
+      error: 'Your customer inbox is temporarily unavailable. Please refresh the page.',
       threads: [],
       messages: [],
       contacts: [],
@@ -189,7 +206,7 @@ export async function loadWhatsAiInboxData({ businessId, selectedPhone = null }:
   if (fatalError) {
     return buildCanonicalInbox({
       source: 'error',
-      error: fatalError.message ?? 'Supabase canonical conversation fetch failed.',
+      error: fatalError.message ?? 'Customer conversations could not be loaded.',
       threads: [],
       messages: [],
       contacts: [],
@@ -307,6 +324,7 @@ function buildCanonicalThread(thread: ConversationThread, rows: ConversationMess
   const metadataHandoff = asRecord(metadata.hot_handoff);
   const latestAppointment = [...appointmentRows].sort((left, right) => right.scheduled_at.localeCompare(left.scheduled_at))[0] ?? null;
   const latestHandoff = [...handoffRows].sort((left, right) => right.created_at.localeCompare(left.created_at))[0] ?? null;
+  const sortedAppointments = [...appointmentRows].sort((left, right) => right.scheduled_at.localeCompare(left.scheduled_at));
   const qualificationTotal = numberValue(metadataQualification.total) || Math.max(qualificationRows.length, 4);
   const qualificationAnswered = numberValue(metadataQualification.answered) || qualificationRows.length;
 
@@ -314,6 +332,12 @@ function buildCanonicalThread(thread: ConversationThread, rows: ConversationMess
     id: thread.id,
     phone,
     contactName: contact?.name ?? lead?.name ?? (phone === 'unknown' ? 'WhatsApp Contact' : `WhatsApp ${phone.slice(-4)}`),
+    profilePictureUrl: stringValue(
+      contactMetadata.profile_picture_url ??
+      contactMetadata.profile_pic_url ??
+      contactMetadata.avatar_url,
+    ) || null,
+    firstSeenAt: contact?.created_at ?? thread.created_at,
     leadId: thread.lead_id ?? contact?.lead_id ?? lead?.id ?? null,
     builderId: thread.builder_id ?? contact?.builder_id ?? lead?.builder_id ?? businessId ?? '',
     businessId: thread.business_id ?? contact?.business_id ?? businessId,
@@ -338,6 +362,13 @@ function buildCanonicalThread(thread: ConversationThread, rows: ConversationMess
       total: qualificationTotal,
       nextQuestion: stringValue(metadataQualification.next_question),
       qualified: Boolean(metadataQualification.qualified) || qualificationAnswered >= Math.min(qualificationTotal, 3),
+      answers: [...qualificationRows]
+        .sort((left, right) => left.extracted_at.localeCompare(right.extracted_at))
+        .map((answer) => ({
+          question: humanizeKey(answer.question_key),
+          answer: answer.answer_value,
+          confidence: answer.confidence,
+        })),
     },
     appointment: latestAppointment
       ? {
@@ -356,10 +387,19 @@ function buildCanonicalThread(thread: ConversationThread, rows: ConversationMess
             title: 'Appointment',
           }
         : null,
+    appointments: sortedAppointments.map((appointment) => ({
+      id: appointment.id,
+      status: appointment.status,
+      scheduledAt: appointment.scheduled_at,
+      type: appointment.appointment_type,
+      title: appointment.title,
+      notes: appointment.notes,
+    })),
     hotHandoff: latestHandoff
       ? {
           id: latestHandoff.id,
           reason: latestHandoff.reason,
+          summary: latestHandoff.summary,
           priority: latestHandoff.priority,
           status: latestHandoff.status,
         }
@@ -367,10 +407,18 @@ function buildCanonicalThread(thread: ConversationThread, rows: ConversationMess
         ? {
             id: stringValue(metadataHandoff.id) || 'metadata-handoff',
             reason: stringValue(metadataHandoff.reason) || 'Hot lead needs handoff',
+            summary: stringValue(metadataHandoff.summary) || stringValue(metadata.handoff_reason),
             priority: stringValue(metadataHandoff.priority) || 'high',
             status: stringValue(metadataHandoff.status) || 'pending',
           }
         : null,
+    aiRecommendation: buildRecommendation({
+      stage: thread.stage ?? contact?.stage ?? stageFromLegacyLead(lead?.lead_stage),
+      qualificationAnswered,
+      qualificationTotal,
+      latestAppointment,
+      latestHandoff,
+    }),
   };
 }
 
@@ -433,6 +481,44 @@ function stringValue(value: unknown) {
 
 function numberValue(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+function humanizeKey(value: string) {
+  return value
+    .replaceAll('_', ' ')
+    .replaceAll('-', ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function buildRecommendation({
+  stage,
+  qualificationAnswered,
+  qualificationTotal,
+  latestAppointment,
+  latestHandoff,
+}: {
+  stage: ConversationStage;
+  qualificationAnswered: number;
+  qualificationTotal: number;
+  latestAppointment: Appointment | null;
+  latestHandoff: HandoffEvent | null;
+}) {
+  if (latestHandoff) {
+    return 'Reply personally now. This customer needs a human decision before the conversation can move forward.';
+  }
+  if (latestAppointment?.status === 'scheduled') {
+    return 'Confirm the appointment details and keep the customer ready with a short reminder.';
+  }
+  if (stage === 'negotiating') {
+    return 'Review the customer requirement and send the strongest approved offer or callback option.';
+  }
+  if (qualificationAnswered < qualificationTotal) {
+    return 'Let XeroWA AI complete the remaining qualification questions before stepping in.';
+  }
+  if (stage === 'booked') {
+    return 'The customer is booked. Focus on confirmation and a smooth service experience.';
+  }
+  return 'No immediate owner action is required. XeroWA AI can continue handling this conversation.';
 }
 
 function normalizePhoneKey(value: string | null | undefined) {

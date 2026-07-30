@@ -1,4 +1,3 @@
-import '@fontsource-variable/outfit';
 import { DashboardShell } from '@/components/shared/DashboardShell';
 import { requirePlatformRole } from '@/lib/auth/session';
 import { loadShellBusinesses } from '@/lib/auth/shell-context';

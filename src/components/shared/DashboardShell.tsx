@@ -15,6 +15,7 @@ type DashboardShellProps = {
   platformRole: PlatformRole;
   activeBusinessId: string | null;
   businesses: ShellBusiness[];
+  unreadCount?: number;
 };
 
 export function DashboardShell({
@@ -23,6 +24,7 @@ export function DashboardShell({
   platformRole,
   activeBusinessId,
   businesses,
+  unreadCount = 0,
 }: DashboardShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   return <div className="flex min-h-screen bg-transparent">
@@ -42,6 +44,7 @@ export function DashboardShell({
         platformRole={platformRole}
         activeBusinessId={activeBusinessId}
         businesses={businesses}
+        unreadCount={unreadCount}
         onMenuClick={() => setMenuOpen(true)}
       />
       <main className="flex-1 overflow-x-hidden p-3 sm:p-5 lg:p-7"><RouteMotion>{children}</RouteMotion></main>

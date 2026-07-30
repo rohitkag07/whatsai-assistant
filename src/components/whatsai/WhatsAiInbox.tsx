@@ -3,9 +3,10 @@
 import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, Bot, CalendarDays, CheckCheck, ChevronLeft, Clock3, Flame, Inbox, MessageCircle, PanelRight, PauseCircle, RefreshCw, RotateCcw, Send, ShieldAlert, UserRoundCheck } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Bot, CalendarDays, Check, CheckCheck, ChevronLeft, Clock3, Flame, Inbox, MessageCircle, PanelRight, PauseCircle, RefreshCw, RotateCcw, Send, ShieldAlert, Sparkles, UserRoundCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { AutoRefreshIndicator } from '@/components/shared/AutoRefreshIndicator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +20,6 @@ import type { WhatsAiInboxData, WhatsAiMessage, WhatsAiThread } from '@/lib/what
 import type { AiMode, ConversationStage } from '@/types/database';
 
 type Props = { data: WhatsAiInboxData };
-const ownerOptions = ['Owner Desk', 'Arjun Sales', 'Ritika Closer', 'Ghost Closer Desk'];
 type TeamMember = {
   user_id: string;
   display_name: string | null;
@@ -30,7 +30,7 @@ export function WhatsAiInbox({ data }: Props) {
   const router = useRouter();
   const [draft, setDraft] = useState('');
   const [search, setSearch] = useState('');
-  const [owner, setOwner] = useState(data.selectedThread?.assignedTo ?? 'Owner Desk');
+  const [owner, setOwner] = useState(data.selectedThread?.assignedTo ?? 'Unassigned');
   const [note, setNote] = useState(data.selectedThread?.internalNote ?? '');
   const [leadOpen, setLeadOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -128,6 +128,32 @@ export function WhatsAiInbox({ data }: Props) {
     });
   }
 
+  function markResolved() {
+    if (!selected) return;
+    startTransition(async () => {
+      const response = await fetch('/api/whatsai/thread-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          thread_id: selected.id,
+          ai_mode: 'assistant',
+          status: 'resolved',
+          handoff_reason: null,
+          internal_note: note,
+        }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.ok) {
+        toast.error(payload?.error || 'Conversation could not be resolved.');
+        return;
+      }
+      toast.success('Conversation marked as resolved.');
+      setLeadOpen(false);
+      router.push('/chats');
+      refresh();
+    });
+  }
+
   function saveContext() {
     if (!selected) return;
     startTransition(async () => {
@@ -172,24 +198,10 @@ export function WhatsAiInbox({ data }: Props) {
     });
   }
 
-  function draftSummary() {
-    startTransition(async () => {
-      const response = await fetch('/api/whatsai/owner-summary', {
-        method: 'POST',
-      });
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || !payload?.ok) {
-        toast.error(payload?.error || 'Summary draft failed');
-        return;
-      }
-      toast.success('Daily owner summary drafted.');
-    });
-  }
-
   if (data.source === 'error') return <InboxErrorState message={data.error ?? 'Canonical conversation data could not be loaded.'} onRetry={refresh} />;
   if (!data.threads.length) return <InboxEmptyState onRefresh={refresh} />;
 
-  const panel = selected ? <LeadPanel selected={selected} owner={owner} setOwner={setOwner} teamMembers={teamMembers} onAssign={assignTeamMember} note={note} setNote={setNote} onSave={saveContext} onPause={() => updateThreadState('paused', 'AI paused. Human is in control.')} onResume={() => updateThreadState('assistant', 'AI resumed for this thread.')} onStageChange={updateStage} pending={pending} /> : null;
+  const panel = selected ? <LeadPanel selected={selected} owner={owner} teamMembers={teamMembers} onAssign={assignTeamMember} note={note} setNote={setNote} onSave={saveContext} onPause={() => updateThreadState('paused', 'Sent to owner. Auto-replies are paused.')} onResume={() => updateThreadState('assistant', 'Auto-replies resumed for this conversation.')} onResolve={markResolved} onStageChange={updateStage} pending={pending} /> : null;
 
   return (
     <div className="space-y-4">
@@ -221,7 +233,7 @@ export function WhatsAiInbox({ data }: Props) {
                   <Inbox className="h-4 w-4 text-[#00a884]" />
                   Conversations
                 </CardTitle>
-                <p className="mt-1 text-xs text-[#667781]">Live WhatsApp threads</p>
+                <AutoRefreshIndicator className="mt-1" />
               </div>
               <Button variant="secondary" size="icon" onClick={refresh} aria-label="Refresh inbox" disabled={pending}>
                 <RefreshCw className={cn('h-4 w-4', pending && 'animate-spin')} />
@@ -235,7 +247,7 @@ export function WhatsAiInbox({ data }: Props) {
         </Card>
 
         <Card id="chat-view" className={cn('min-h-[calc(100dvh-112px)] overflow-hidden rounded-none border-0 bg-white shadow-none md:min-h-[720px]', !selected && 'hidden md:block')}>
-          <ChatHeader selected={selected} isPaused={isPaused} pending={pending} onPause={() => updateThreadState('paused', 'AI paused. Human is in control.')} onResume={() => updateThreadState('assistant', 'AI resumed for this thread.')} />
+          <ChatHeader selected={selected} isPaused={isPaused} pending={pending} onOpenLead={() => setLeadOpen(true)} onPause={() => updateThreadState('paused', 'Sent to owner. Auto-replies are paused.')} onResume={() => updateThreadState('assistant', 'Auto-replies resumed for this conversation.')} />
           <CardContent className="flex min-h-[540px] flex-col p-0">
             {isPaused ? (
               <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
@@ -301,20 +313,21 @@ export function WhatsAiInbox({ data }: Props) {
   );
 }
 
-function ChatHeader({ selected, isPaused, pending, onPause, onResume }: { selected: WhatsAiThread | null; isPaused: boolean; pending: boolean; onPause: () => void; onResume: () => void }) {
+function ChatHeader({ selected, isPaused, pending, onOpenLead, onPause, onResume }: { selected: WhatsAiThread | null; isPaused: boolean; pending: boolean; onOpenLead: () => void; onPause: () => void; onResume: () => void }) {
   return (
     <CardHeader className="border-b border-[#d8dee4] bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {selected ? (
-          <div className="flex items-center gap-3">
+          <button type="button" onClick={onOpenLead} className="group flex items-center gap-3 rounded-xl text-left transition-all duration-200 hover:bg-[#edf8f4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00a884]/30">
             <Avatar className="h-11 w-11 border border-[#d8dee4]">
+              {selected.profilePictureUrl ? <AvatarImage src={selected.profilePictureUrl} alt="" /> : null}
               <AvatarFallback className="bg-[#00a884] text-white">{initials(selected.contactName)}</AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="text-lg">{selected.contactName}</CardTitle>
+              <CardTitle className="text-lg group-hover:text-[#075e54]">{selected.contactName}</CardTitle>
               <p className="text-sm text-muted-foreground">{selected.phone}</p>
             </div>
-          </div>
+          </button>
         ) : (
           <CardTitle>Conversation</CardTitle>
         )}{' '}
@@ -384,7 +397,7 @@ function MessageBubble({ message }: { message: WhatsAiMessage }) {
           <div className="whitespace-pre-wrap leading-relaxed">{message.body}</div>
           <div className="mt-2 flex items-center justify-end gap-1 text-[10px] text-[#667781]">
             <span>{formatTime(message.createdAt)}</span>
-            {outbound ? <CheckCheck className="h-3 w-3" /> : null}
+            {outbound ? <MessageStatusIndicator status={message.status} /> : null}
           </div>
         </div>
       </div>
@@ -392,7 +405,15 @@ function MessageBubble({ message }: { message: WhatsAiMessage }) {
   );
 }
 
-function LeadPanel({ selected, owner, setOwner, teamMembers, onAssign, note, setNote, onSave, onPause, onResume, onStageChange, pending }: { selected: WhatsAiThread; owner: string; setOwner: (value: string) => void; teamMembers: TeamMember[]; onAssign: (userId: string) => void; note: string; setNote: (value: string) => void; onSave: () => void; onPause: () => void; onResume: () => void; onStageChange: (stage: ConversationStage) => void; pending: boolean }) {
+function MessageStatusIndicator({ status }: { status: WhatsAiMessage['status'] }) {
+  if (status === 'read') return <CheckCheck className="h-3.5 w-3.5 text-[#168ad4]" aria-label="Read" />;
+  if (status === 'delivered') return <CheckCheck className="h-3.5 w-3.5 text-[#667781]" aria-label="Delivered" />;
+  if (status === 'sent') return <Check className="h-3.5 w-3.5 text-[#667781]" aria-label="Sent" />;
+  if (status === 'failed') return <AlertCircle className="h-3.5 w-3.5 text-red-600" aria-label="Failed" />;
+  return <Clock3 className="h-3.5 w-3.5 text-[#667781]" aria-label="Queued" />;
+}
+
+function LeadPanel({ selected, owner, teamMembers, onAssign, note, setNote, onSave, onPause, onResume, onResolve, onStageChange, pending }: { selected: WhatsAiThread; owner: string; teamMembers: TeamMember[]; onAssign: (userId: string) => void; note: string; setNote: (value: string) => void; onSave: () => void; onPause: () => void; onResume: () => void; onResolve: () => void; onStageChange: (stage: ConversationStage) => void; pending: boolean }) {
   const isPaused = selected.aiMode === 'manual' || selected.aiMode === 'paused';
   return (
     <div className="space-y-4">
@@ -406,13 +427,22 @@ function LeadPanel({ selected, owner, setOwner, teamMembers, onAssign, note, set
         </CardHeader>
         <CardContent className="space-y-4 p-4">
           <div className="rounded-2xl border border-[#d8dee4] bg-[#f0f2f5] p-3">
-            <div className="font-semibold">{selected.contactName}</div>
-            <div className="mt-1 text-xs text-muted-foreground">{selected.phone}</div>
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 border border-white">
+                {selected.profilePictureUrl ? <AvatarImage src={selected.profilePictureUrl} alt="" /> : null}
+                <AvatarFallback className="bg-[#d9fdd3] text-[#075e54]">{initials(selected.contactName)}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <div className="truncate font-semibold">{selected.contactName}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{selected.phone}</div>
+              </div>
+            </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <MiniMetric label="Temperature" value={selected.temperature} />
               <StageSelector stage={selected.stage} onChange={onStageChange} disabled={pending} />
             </div>
           </div>
+          <ContextLine icon={Clock3} label="First seen" value={formatDate(selected.firstSeenAt)} />
           <ContextLine icon={Clock3} label="Last message" value={formatTime(selected.lastMessageAt)} />
           <ContextLine icon={MessageCircle} label="Messages" value={`${selected.inboundCount} in / ${selected.outboundCount} out`} />
           <Separator />
@@ -435,25 +465,45 @@ function LeadPanel({ selected, owner, setOwner, teamMembers, onAssign, note, set
               </div>
               <p className="mt-2 text-xs text-muted-foreground">{selected.qualification.qualified ? 'Qualified for the next step.' : selected.qualification.nextQuestion ? `Next: ${selected.qualification.nextQuestion}` : 'AI is collecting the next answer.'}</p>
             </div>
+            {selected.qualification.answers.length ? (
+              <div className="mt-2 space-y-2">
+                {selected.qualification.answers.map((item, index) => (
+                  <div key={`${item.question}-${index}`} className="rounded-xl border border-[#e4e9ed] bg-white p-3">
+                    <div className="text-[10px] font-semibold uppercase tracking-wide text-[#667781]">{item.question}</div>
+                    <div className="mt-1 text-sm leading-5 text-[#111b21]">{item.answer}</div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
           <div>
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
               <CalendarDays className="h-4 w-4 text-[#00a884]" />
-              Appointment
+              Appointment history
             </div>
-            <div className="rounded-xl border bg-[#f8fafb] p-3 text-sm">
-              {selected.appointment ? (
-                <>
-                  <div className="font-semibold">{selected.appointment.title}</div>
-                  <div className="mt-1 text-muted-foreground">{formatTime(selected.appointment.scheduledAt)}</div>
-                  <Badge className="mt-2" variant={selected.appointment.status === 'cancelled' ? 'destructive' : 'success'}>
-                    {selected.appointment.status.replace('_', ' ')}
-                  </Badge>
-                </>
-              ) : (
-                <p className="text-muted-foreground">No appointment booked yet.</p>
-              )}
+            {selected.appointments.length ? (
+              <div className="space-y-2">
+                {selected.appointments.slice(0, 3).map((appointment) => (
+                  <div key={appointment.id} className="rounded-xl border bg-[#f8fafb] p-3 text-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-semibold">{appointment.title}</div>
+                      <Badge variant={appointment.status === 'cancelled' ? 'destructive' : 'success'}>
+                        {appointment.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">{formatDateTime(appointment.scheduledAt)}</div>
+                    <div className="mt-1 text-xs capitalize text-muted-foreground">{appointment.type.replace('_', ' ')}</div>
+                  </div>
+                ))}
+              </div>
+            ) : <div className="rounded-xl border bg-[#f8fafb] p-3 text-sm text-muted-foreground">No appointment booked yet.</div>}
+          </div>
+          <div className="rounded-xl border border-[#b7ddd2] bg-[#edf8f4] p-3 text-sm text-[#183e35]">
+            <div className="flex items-center gap-2 font-semibold">
+              <Sparkles className="h-4 w-4 text-[#00a884]" />
+              Recommended next step
             </div>
+            <p className="mt-1 text-xs leading-5">{selected.aiRecommendation}</p>
           </div>
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
             <div className="flex items-center gap-2 font-semibold">
@@ -499,13 +549,17 @@ function LeadPanel({ selected, owner, setOwner, teamMembers, onAssign, note, set
             ) : (
               <Button className="flex-1" variant="destructive" onClick={onPause} disabled={pending}>
                 <PauseCircle className="mr-2 h-4 w-4" />
-                Take over
+                Send to owner
               </Button>
             )}
             <Button variant="outline" onClick={onSave} disabled={pending}>
               Save
             </Button>
           </div>
+          <Button className="w-full" variant="outline" onClick={onResolve} disabled={pending}>
+            <Check className="mr-2 h-4 w-4" />
+            Mark resolved
+          </Button>
         </CardContent>
       </Card>
     </div>
@@ -554,13 +608,21 @@ function stageTone(stage: ConversationStage) {
 
 function InboxEmptyState({ onRefresh }: { onRefresh: () => void }) {
   return (
-    <div className="rounded-3xl border border-dashed border-[#b7bdc3] bg-gradient-to-br from-white via-[#e7fce3] to-[#f0f2f5] p-8 text-center shadow-sm">
+    <div className="rounded-3xl border border-[#b7ddd2] bg-gradient-to-br from-white via-[#edf8f4] to-[#d9fdd3] p-6 shadow-[0_18px_50px_rgba(17,27,33,0.07)] sm:p-10">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d9fdd3] text-[#075e54]">
-        <Inbox className="h-8 w-8" />
+        <Sparkles className="h-8 w-8" />
       </div>
-      <h2 className="mt-5 text-xl font-semibold">No customer chats yet</h2>
-      <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">Messages sent to your XeroWA WhatsApp number will appear here live.</p>
-      <div className="mt-6 flex justify-center gap-2">
+      <h2 className="mt-5 text-center text-2xl font-semibold tracking-[-0.03em]">Your live inbox is ready</h2>
+      <p className="mx-auto mt-2 max-w-xl text-center text-sm leading-6 text-muted-foreground">Send one test message to your connected business number. The customer, reply, and lead status will appear here automatically.</p>
+      <div className="mx-auto mt-7 grid max-w-3xl gap-3 sm:grid-cols-3">
+        <EmptyStep number="1" title="Connect WhatsApp" body="Confirm your business number is active." />
+        <EmptyStep number="2" title="Send a message" body="Ask a common customer question." />
+        <EmptyStep number="3" title="Watch it arrive" body="The full conversation appears here." />
+      </div>
+      <div className="mt-7 flex flex-col justify-center gap-2 sm:flex-row">
+        <Button asChild>
+          <Link href="/whatsapp-status">Check WhatsApp status</Link>
+        </Button>
         <Button variant="outline" onClick={onRefresh}>
           <RefreshCw className="mr-2 h-4 w-4" />
           Refresh
@@ -569,6 +631,19 @@ function InboxEmptyState({ onRefresh }: { onRefresh: () => void }) {
     </div>
   );
 }
+
+function EmptyStep({ number, title, body }: { number: string; title: string; body: string }) {
+  return (
+    <div className="rounded-2xl border border-white bg-white/85 p-4 text-left">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[#075e54]">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d9fdd3] text-xs">{number}</span>
+        {title}
+      </div>
+      <p className="mt-2 text-xs leading-5 text-[#667781]">{body}</p>
+    </div>
+  );
+}
+
 function InboxErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-red-950">
@@ -577,7 +652,7 @@ function InboxErrorState({ message, onRetry }: { message: string; onRetry: () =>
         <div>
           <h2 className="text-lg font-semibold">Inbox could not load</h2>
           <p className="mt-1 text-sm">{message}</p>
-          <p className="mt-2 text-xs">Check Supabase credentials and the canonical conversation tables, then retry.</p>
+          <p className="mt-2 text-xs">Your saved customer conversations are safe. Refresh now, or try again in a few minutes.</p>
           <Button className="mt-5" variant="destructive" onClick={onRetry}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry
@@ -622,5 +697,23 @@ function formatTime(value: string) {
     minute: '2-digit',
     day: '2-digit',
     month: 'short',
+  }).format(new Date(value));
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(value));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(new Date(value));
 }

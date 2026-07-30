@@ -10,7 +10,7 @@ import { knowledgeItemsInputSchema, type KnowledgeItemInput } from '@/lib/knowle
 
 type ApiItem = KnowledgeItemInput & { id: string; type: KnowledgeItemInput['kind']; is_active: boolean };
 
-export function KnowledgeWorkspace() {
+export function KnowledgeWorkspace({ showOkfTools = false }: { showOkfTools?: boolean }) {
   const [items, setItems] = useState<KnowledgeItemInput[]>([]);
   const [business, setBusiness] = useState<{ id: string; name: string } | null>(null);
   const [playbookId, setPlaybookId] = useState<string | null>(null);
@@ -79,9 +79,9 @@ export function KnowledgeWorkspace() {
         <Metric label="Drafts to review" value={counts.draft} />
         <Metric label="Total knowledge" value={counts.total} />
       </div>
-      <Card className="border-[#d8dee4]"><CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"><div><div className="flex items-center gap-2 font-semibold text-[#111b21]"><BookCheck className="h-5 w-5 text-[#00a884]" />{business?.name ?? 'Business knowledge'}</div><p className="mt-1 text-sm text-[#667781]">Owner-approved answers are used immediately after publishing.</p></div><div className="flex flex-wrap gap-2"><input ref={importInput} type="file" accept="application/json,.json" className="sr-only" onChange={(event) => { void importOkf(event.target.files?.[0]); event.currentTarget.value = ''; }} /><Button variant="outline" onClick={() => importInput.current?.click()}><Upload className="mr-2 h-4 w-4" />Import OKF</Button><Button variant="outline" asChild><a href="/api/whatsai/knowledge/okf" download><Download className="mr-2 h-4 w-4" />Export OKF</a></Button><Button variant="outline" onClick={() => void load()}><RefreshCw className="h-4 w-4" /></Button></div></CardContent></Card>
+      <Card className="border-[#d8dee4] shadow-[0_12px_35px_rgba(17,27,33,0.05)]"><CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"><div><div className="flex items-center gap-2 font-semibold text-[#111b21]"><BookCheck className="h-5 w-5 text-[#00a884]" />{business?.name ?? 'Business knowledge'}</div><p className="mt-1 text-sm text-[#667781]">Owner-approved answers are used immediately after publishing.</p></div><div className="flex flex-wrap gap-2">{showOkfTools ? <><input ref={importInput} type="file" accept="application/json,.json" className="sr-only" onChange={(event) => { void importOkf(event.target.files?.[0]); event.currentTarget.value = ''; }} /><Button variant="outline" onClick={() => importInput.current?.click()}><Upload className="mr-2 h-4 w-4" />Import OKF</Button><Button variant="outline" asChild><a href="/api/whatsai/knowledge/okf" download><Download className="mr-2 h-4 w-4" />Export OKF</a></Button></> : null}<Button variant="outline" onClick={() => void load()} aria-label="Refresh replies"><RefreshCw className="h-4 w-4" /></Button></div></CardContent></Card>
       <KnowledgeBaseEditor items={items} onChange={setItems} />
-      <div className="sticky bottom-4 flex justify-end"><Button size="lg" className="bg-[#00a884] hover:bg-[#008f72]" onClick={save} disabled={pending}>{pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookCheck className="mr-2 h-4 w-4" />}Save knowledge</Button></div>
+      <div className="sticky bottom-4 flex justify-end"><Button size="lg" className="bg-[#00a884] hover:bg-[#008f72]" onClick={save} disabled={pending}>{pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookCheck className="mr-2 h-4 w-4" />}Publish Replies</Button></div>
     </div>
   );
 }

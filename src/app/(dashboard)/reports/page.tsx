@@ -2,6 +2,7 @@ import { Download, FileText, BarChart3, Activity, ArrowUpRight, CircleDot } from
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { requirePlatformRole } from '@/lib/auth/session';
 
 export const metadata = { title: 'Reports' };
 
@@ -12,7 +13,8 @@ const reportCards = [
   { title: 'Billing Usage Summary',    description: 'Usage-ready summary for SMB invoicing',         icon: FileText  },
 ];
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  await requirePlatformRole(['admin', 'dev']);
   return (
     <>
       <PageHeader

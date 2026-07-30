@@ -22,6 +22,7 @@ interface TopBarProps {
   platformRole: PlatformRole;
   activeBusinessId: string | null;
   businesses: ShellBusiness[];
+  unreadCount?: number;
   onMenuClick?: () => void;
 }
 
@@ -49,6 +50,7 @@ export function TopBar({
   platformRole,
   activeBusinessId,
   businesses,
+  unreadCount = 0,
   onMenuClick,
 }: TopBarProps) {
   const pathname = usePathname();
@@ -192,12 +194,17 @@ export function TopBar({
         ) : null}
 
         {mode === 'client' ? (
-          <Button asChild variant="ghost" size="icon" className="rounded-full">
+          <Button asChild variant="ghost" size="icon" className="relative rounded-full">
             <Link
               href="/chats"
               aria-label="Open conversations requiring attention"
             >
               <Bell className="h-5 w-5" />
+              {unreadCount > 0 ? (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              ) : null}
             </Link>
           </Button>
         ) : null}

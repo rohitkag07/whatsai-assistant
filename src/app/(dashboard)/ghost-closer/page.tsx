@@ -4,10 +4,12 @@ import { KPICard } from '@/components/shared/KPICard';
 import { HuntButton } from '@/components/ghost-closer/HuntButton';
 import { ProspectsTable } from '@/components/ghost-closer/ProspectsTable';
 import { loadGhostCloserPageData, marketingReadSourceLabel } from '@/lib/marketing-read';
+import { requirePlatformRole } from '@/lib/auth/session';
 
 export const metadata = { title: 'Ghost Closer' };
 
 export default async function GhostCloserPage() {
+  await requirePlatformRole(['admin', 'dev']);
   const { prospects, funnel, source } = await loadGhostCloserPageData();
   return (
     <>

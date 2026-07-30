@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   CalendarDays,
@@ -9,13 +11,19 @@ import {
   Clock3,
   MessageCircle,
   Siren,
+  Sparkles,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { AutoRefreshIndicator } from '@/components/shared/AutoRefreshIndicator';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { WhatsAiInboxData, WhatsAiThread } from '@/lib/whatsai-data';
 
 export function DashboardHome({ data }: { data: WhatsAiInboxData }) {
+  const router = useRouter();
+  const [pendingThreadId, setPendingThreadId] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
   const metrics = data.summary.metrics;
   const todayMessages = metrics.inboundToday + metrics.outboundToday;
   const hotLeads = data.threads.filter(
@@ -36,18 +44,49 @@ export function DashboardHome({ data }: { data: WhatsAiInboxData }) {
     .sort((left, right) => right.lastMessageAt.localeCompare(left.lastMessageAt))
     .slice(0, 3);
 
+  function markResolved(threadId: string) {
+    setPendingThreadId(threadId);
+    startTransition(async () => {
+      try {
+        const response = await fetch('/api/whatsai/thread-state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            thread_id: threadId,
+            status: 'resolved',
+            ai_mode: 'assistant',
+            handoff_reason: null,
+          }),
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || !payload?.ok) {
+          throw new Error(payload?.error || 'Conversation could not be resolved.');
+        }
+        toast.success('Conversation marked as resolved.');
+        router.refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Conversation could not be resolved.');
+      } finally {
+        setPendingThreadId(null);
+      }
+    });
+  }
+
   return (
     <div className="mx-auto max-w-[1500px] space-y-5">
       <header className="grid gap-5 border-b border-[#d8dee4] pb-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div>
           <p className="wa-kicker">{formatDate(new Date())}</p>
-          <h1 className="wa-page-title mt-2">Good morning. Your customer desk is ready.</h1>
+          <h1 className="wa-page-title mt-2 w-full max-w-5xl">{smartGreeting()}. Your customer desk is ready.</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#667781]">Start with the conversations that need you, then review bookings and recent customer activity.</p>
+          <AutoRefreshIndicator className="mt-3" />
         </div>
         <Button asChild size="lg" className="w-full bg-[#075e54] hover:bg-[#064e46] lg:w-auto">
           <Link href="/chats">Open customer inbox <ArrowRight className="ml-2 h-4 w-4" /></Link>
         </Button>
       </header>
+
+      {!data.threads.length ? <WelcomeState /> : null}
 
       <section aria-label="Today at a glance" className="wa-panel grid divide-y divide-[#e7ebe9] overflow-hidden sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         <Metric label="Messages today" value={todayMessages} icon={MessageCircle} />
@@ -59,7 +98,7 @@ export function DashboardHome({ data }: { data: WhatsAiInboxData }) {
         <div className="wa-panel overflow-hidden xl:col-span-8">
           <SectionHeader title="Needs attention" description="Customer conversations waiting for a human decision." icon={Siren} action={{ href: '/chats', label: 'Review inbox' }} />
           <div className="divide-y divide-[#edf0ef] px-2 pb-2">
-            {attention.length ? attention.map((thread) => <AttentionRow key={thread.id} thread={thread} />) : (
+            {attention.length ? attention.map((thread) => <AttentionRow key={thread.id} thread={thread} pending={pendingThreadId === thread.id} onResolve={() => markResolved(thread.id)} />) : (
               <PositiveState title="No handoffs waiting" body="XeroWA AI is handling active conversations. You will see urgent customer requests here." />
             )}
           </div>
@@ -106,13 +145,37 @@ function SectionHeader({ title, description, icon: Icon, action }: { title: stri
   );
 }
 
-function AttentionRow({ thread }: { thread: WhatsAiThread }) {
+function AttentionRow({ thread, pending, onResolve }: { thread: WhatsAiThread; pending: boolean; onResolve: () => void }) {
   return (
-    <Link href={`/chats?phone=${encodeURIComponent(thread.phone)}`} className="wa-row group flex items-center gap-3 rounded-xl px-3 py-3.5">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#fff0dc] text-xs font-semibold text-[#a84f0f]">{initials(thread.contactName)}</div>
-      <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><span className="truncate text-sm font-semibold text-[#111b21]">{thread.contactName}</span><span className="h-1.5 w-1.5 rounded-full bg-[#d97706]" /></div><p className="mt-1 truncate text-xs text-[#667781]">{thread.hotHandoff?.reason || thread.lastBody}</p></div>
-      <div className="text-right"><Badge variant="warning">Needs you</Badge><div className="mt-1 text-[10px] text-[#8696a0]">{formatTime(thread.lastMessageAt)}</div></div>
-    </Link>
+    <article className="wa-row rounded-2xl px-3 py-4 transition-all duration-200 hover:bg-[#fffaf3] sm:px-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#fff0dc] text-xs font-semibold text-[#a84f0f]">{initials(thread.contactName)}</div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="truncate text-sm font-semibold text-[#111b21]">{thread.contactName}</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#d97706]" />
+            <Badge variant="warning">Needs you</Badge>
+            <span className="ml-auto text-[10px] text-[#8696a0]">{formatTime(thread.lastMessageAt)}</span>
+          </div>
+          <div className="mt-3 rounded-xl border border-amber-200 bg-[#fff8ee] p-3">
+            <p className="text-xs font-semibold text-[#8a4b12]">Why this needs you</p>
+            <p className="mt-1 text-sm leading-5 text-[#4b3522]">{handoffReason(thread)}</p>
+            <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-[#667781]">
+              <span className="rounded-full bg-white px-2.5 py-1 capitalize">Stage: {thread.stage}</span>
+              <span className="rounded-full bg-white px-2.5 py-1">Qualification: {thread.qualification.answered}/{thread.qualification.total}</span>
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button asChild size="sm" className="bg-[#075e54] hover:bg-[#064e46]">
+              <Link href={`/chats?phone=${encodeURIComponent(thread.phone)}`}>Reply Now</Link>
+            </Button>
+            <Button type="button" size="sm" variant="outline" disabled={pending} onClick={onResolve}>
+              {pending ? 'Updating...' : 'Mark Resolved'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -139,6 +202,59 @@ function AppointmentRow({ thread, appointment }: { thread: WhatsAiThread; appoin
 
 function PositiveState({ title, body, compact = false }: { title: string; body: string; compact?: boolean }) {
   return <div className={cn('m-2 flex flex-col items-center justify-center rounded-xl bg-[#f7faf8] px-5 text-center', compact ? 'min-h-36' : 'min-h-44')}><CheckCircle2 className="h-7 w-7 text-[#00a884]" /><p className="mt-3 text-sm font-semibold text-[#111b21]">{title}</p><p className="mt-1 max-w-sm text-xs leading-5 text-[#667781]">{body}</p></div>;
+}
+
+function WelcomeState() {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-[#b7ddd2] bg-[linear-gradient(135deg,#ffffff_0%,#edf8f4_58%,#d9fdd3_100%)] p-5 shadow-[0_12px_35px_rgba(17,27,33,0.05)] sm:p-7">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#075e54] text-white">
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <h2 className="mt-5 text-2xl font-semibold tracking-[-0.035em] text-[#111b21]">Welcome to XeroWA AI</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#52615c]">Your WhatsApp receptionist is ready. Send one test message to see the complete customer journey appear here.</p>
+          <ol className="mt-5 grid gap-3 text-sm text-[#23312d] sm:grid-cols-3">
+            <WelcomeStep number="1" title="WhatsApp connected" detail="Your business number is ready." />
+            <WelcomeStep number="2" title="Instant replies" detail="Customers receive approved answers." />
+            <WelcomeStep number="3" title="Live inbox" detail="Every conversation appears here." />
+          </ol>
+        </div>
+        <Button asChild size="lg" className="w-full bg-[#075e54] hover:bg-[#064e46] lg:w-auto">
+          <Link href="/whatsapp-status">Send a Test Message <ArrowRight className="ml-2 h-4 w-4" /></Link>
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+function WelcomeStep({ number, title, detail }: { number: string; title: string; detail: string }) {
+  return (
+    <li className="rounded-xl border border-white/80 bg-white/80 p-3">
+      <div className="flex items-center gap-2 font-semibold text-[#075e54]">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d9fdd3] text-xs">{number}</span>
+        {title}
+      </div>
+      <p className="mt-1 pl-8 text-xs leading-5 text-[#667781]">{detail}</p>
+    </li>
+  );
+}
+
+function handoffReason(thread: WhatsAiThread) {
+  const reason = thread.hotHandoff?.summary || thread.hotHandoff?.reason || thread.handoffReason;
+  if (!reason) return 'This customer asked for a decision that needs the business owner.';
+  return reason.replaceAll('_', ' ').replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function smartGreeting(): string {
+  const hour = Number(new Intl.DateTimeFormat('en-IN', {
+    hour: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'Asia/Kolkata',
+  }).format(new Date()));
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
 }
 
 function activityStatus(thread: WhatsAiThread) { if (thread.hotHandoff || thread.status === 'pending_human') return 'Needs you'; if (thread.appointment) return 'Booked'; if (thread.qualification.answered > 0 && !thread.qualification.qualified) return 'Qualifying'; return 'AI handling'; }

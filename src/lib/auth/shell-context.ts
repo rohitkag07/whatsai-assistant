@@ -34,3 +34,21 @@ export async function loadShellBusinesses(
     status: String(business.status || 'active'),
   }));
 }
+
+export async function loadShellUnreadCount(
+  session: AuthSession,
+): Promise<number> {
+  if (!session.activeBusinessId) return 0;
+
+  const supabase = serviceClientOrNull();
+  if (!supabase) return 0;
+
+  const { count, error } = await (supabase.from('conversation_threads') as any)
+    .select('id', { count: 'exact', head: true })
+    .eq('business_id', session.activeBusinessId)
+    .gt('unread_count', 0)
+    .neq('status', 'resolved')
+    .neq('status', 'archived');
+
+  return error ? 0 : Number(count ?? 0);
+}

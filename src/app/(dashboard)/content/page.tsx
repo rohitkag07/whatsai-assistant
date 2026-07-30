@@ -5,10 +5,12 @@ import { KPICard } from '@/components/shared/KPICard';
 import { ContentBoard } from '@/components/content/ContentBoard';
 import { GenerateCalendarDialog } from '@/components/content/GenerateCalendarDialog';
 import { loadContentPageData, contentReadSourceLabel } from '@/lib/content-read';
+import { requirePlatformRole } from '@/lib/auth/session';
 
 export const metadata = { title: 'Content' };
 
 export default async function ContentPage() {
+  await requirePlatformRole(['admin', 'dev']);
   const { entries, stats, source } = await loadContentPageData();
 
   return (

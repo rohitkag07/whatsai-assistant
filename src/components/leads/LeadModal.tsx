@@ -141,10 +141,10 @@ export function LeadModal({ lead, open, onClose }: LeadModalProps) {
                   </div>
                 </div>
                 <div className="rounded-lg border bg-background p-4 space-y-3">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sales Agent Notes</div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Team Notes</div>
                   <Textarea
                     defaultValue={currentLead.notes ?? ''}
-                    placeholder="Notes from sales agent..."
+                    placeholder="Private notes for your team..."
                     rows={6}
                   />
                 </div>
@@ -176,7 +176,7 @@ export function LeadModal({ lead, open, onClose }: LeadModalProps) {
                         <div className="text-sm leading-6">{message.body}</div>
                       </div>
                       <div className="mt-1 px-2 text-[11px] text-muted-foreground">
-                        {message.direction === 'outbound' ? 'Sales Agent' : 'Lead'} · {formatRelative(message.at)}
+                        {message.direction === 'outbound' ? 'Your team' : 'Customer'} · {formatRelative(message.at)}
                       </div>
                     </div>
                   </div>
@@ -184,7 +184,7 @@ export function LeadModal({ lead, open, onClose }: LeadModalProps) {
               </div>
             ) : (
               <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground text-center py-12">
-                WhatsApp conversation history will appear here once the Sales Agent starts writing to `whatsapp_messages`.
+                WhatsApp conversation history will appear here after the first customer response.
               </div>
             )}
           </TabsContent>

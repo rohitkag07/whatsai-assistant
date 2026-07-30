@@ -15,8 +15,10 @@ import {
   loadVisitorsPageData,
 } from '@/lib/colony-read';
 import { formatDate, formatINR } from '@/lib/utils';
+import { requirePlatformRole } from '@/lib/auth/session';
 
 export default async function ColonyIndex() {
+  await requirePlatformRole(['admin', 'dev']);
   const [{ kpis, source }, { notices }, { complaints }, { visitors }, { amenities }, workspace] = await Promise.all([
     loadResidentsPageData(),
     loadNoticesPageData(),

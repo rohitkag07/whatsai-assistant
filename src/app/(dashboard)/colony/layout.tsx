@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CalendarDays, Users, Wrench, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { requirePlatformRole } from '@/lib/auth/session';
 
 const tabs = [
   { href: '/colony/residents',  label: 'Residents',  hi: 'निवासी',  icon: Users },
@@ -9,7 +10,9 @@ const tabs = [
   { href: '/colony/amenities',  label: 'Amenities',  hi: 'सुविधाएं', icon: CalendarDays },
 ];
 
-export default function ColonyLayout({ children }: { children: React.ReactNode }) {
+export default async function ColonyLayout({ children }: { children: React.ReactNode }) {
+  await requirePlatformRole(['admin', 'dev']);
+
   return (
     <>
       <PageHeader
