@@ -35,6 +35,13 @@ const pageNames: Record<string, { title: string; eyebrow: string }> = {
   'whatsapp-status': { title: 'WhatsApp status', eyebrow: 'Connection' },
   'plan-support': { title: 'Plan and support', eyebrow: 'Account' },
   admin: { title: 'Agency control room', eyebrow: 'Platform operations' },
+  'admin/clients': { title: 'Client directory', eyebrow: 'Platform operations' },
+  'admin/conversations': { title: 'Conversation monitor', eyebrow: 'Platform operations' },
+  'admin/knowledge': { title: 'Knowledge editor', eyebrow: 'Platform operations' },
+  'admin/playbooks': { title: 'Playbook manager', eyebrow: 'Platform operations' },
+  'admin/webhooks': { title: 'Webhook log', eyebrow: 'Platform operations' },
+  'admin/team': { title: 'Team and access', eyebrow: 'Platform operations' },
+  'admin/system': { title: 'System health', eyebrow: 'Platform operations' },
 };
 
 export function TopBar({
@@ -48,7 +55,10 @@ export function TopBar({
   const router = useRouter();
   const [switching, setSwitching] = useState(false);
   const [switchError, setSwitchError] = useState<string | null>(null);
-  const route = pathname.split('/').filter(Boolean)[0] ?? 'dashboard';
+  const segments = pathname.split('/').filter(Boolean);
+  const route = segments[0] === 'admin' && segments[1]
+    ? `admin/${segments[1]}`
+    : segments[0] ?? 'dashboard';
   const page = pageNames[route] ?? {
     title: 'XeroWA AI workspace',
     eyebrow: 'Workspace',

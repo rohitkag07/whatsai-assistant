@@ -3,14 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  Activity,
+  Building2,
   CalendarDays,
   BookOpen,
   CreditCard,
+  FileText,
   Home,
+  LayoutDashboard,
   MessageCircle,
-  SlidersHorizontal,
+  MessageSquare,
+  Shield,
   Smartphone,
   Users,
+  Webhook,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_NAME, APP_TAGLINE } from '@/lib/constants';
@@ -35,7 +41,14 @@ const clientItems: Item[] = [
 ];
 
 const adminItems: Item[] = [
-  { href: '/admin', label: 'Client Control Room', description: 'Clients and live features', icon: SlidersHorizontal },
+  { href: '/admin', label: 'Overview', description: 'Platform stats and activity', icon: LayoutDashboard },
+  { href: '/admin/clients', label: 'Clients', description: 'All business accounts', icon: Building2 },
+  { href: '/admin/conversations', label: 'Conversations', description: 'Global message feed', icon: MessageSquare },
+  { href: '/admin/knowledge', label: 'Knowledge Base', description: 'Approved replies editor', icon: BookOpen },
+  { href: '/admin/playbooks', label: 'Playbooks', description: 'Response playbooks', icon: FileText },
+  { href: '/admin/webhooks', label: 'Webhook Log', description: 'Inbound and delivery events', icon: Webhook },
+  { href: '/admin/team', label: 'Team & Access', description: 'Users and permissions', icon: Shield },
+  { href: '/admin/system', label: 'System Health', description: 'Environment and probes', icon: Activity },
 ];
 
 export function Sidebar({ mode, mobile = false, onNavigate }: { mode: NavMode; mobile?: boolean; onNavigate?: () => void }) {
@@ -60,8 +73,8 @@ export function Sidebar({ mode, mobile = false, onNavigate }: { mode: NavMode; m
       <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1">
         {items.map((item) => {
           const isActive =
-            item.href === '/'
-              ? pathname === '/'
+            item.href === '/admin'
+              ? pathname === '/admin'
               : pathname === item.href || pathname.startsWith(item.href + '/');
           const Icon = item.icon;
           return (

@@ -1,3 +1,4 @@
+import '@fontsource-variable/outfit';
 import { DashboardShell } from '@/components/shared/DashboardShell';
 import { requirePlatformRole } from '@/lib/auth/session';
 import { loadShellBusinesses } from '@/lib/auth/shell-context';
@@ -8,13 +9,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await requirePlatformRole(['admin', 'dev']);
   const businesses = await loadShellBusinesses(session);
   return (
-    <DashboardShell
-      navMode="admin"
-      platformRole={session.platformRole}
-      activeBusinessId={session.activeBusinessId}
-      businesses={businesses}
-    >
-      {children}
-    </DashboardShell>
+    <div className="font-admin">
+      <DashboardShell
+        navMode="admin"
+        platformRole={session.platformRole}
+        activeBusinessId={session.activeBusinessId}
+        businesses={businesses}
+      >
+        {children}
+      </DashboardShell>
+    </div>
   );
 }

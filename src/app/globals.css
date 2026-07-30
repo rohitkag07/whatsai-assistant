@@ -123,6 +123,10 @@
 }
 
 @layer components {
+  .font-admin {
+    font-family: "Outfit Variable", var(--font-geist-sans), system-ui, sans-serif;
+  }
+
   .wa-panel {
     @apply border border-[var(--wa-line)] bg-white;
     border-radius: 18px;

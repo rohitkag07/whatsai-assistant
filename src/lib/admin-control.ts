@@ -2,91 +2,16 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { BusinessContextError, requirePlatformApiSession } from '@/lib/whatsai-business';
 import type { Database } from '@/types/database';
+import {
+  ADMIN_MODULES,
+  type AdminModuleId,
+  type AdminModuleState,
+} from '@/lib/admin-modules';
 
 type ServiceClient = SupabaseClient<Database>;
 
-export type AdminModuleId =
-  | 'whatsapp'
-  | 'assistant'
-  | 'knowledge'
-  | 'calendar'
-  | 'handoffs'
-  | 'followups'
-  | 'broadcasts';
-
-export type AdminModuleState = {
-  enabled: boolean;
-  updated_at: string | null;
-  updated_by: string | null;
-};
-
-export type AdminModuleDefinition = {
-  id: AdminModuleId;
-  label: string;
-  description: string;
-  contract: string;
-  enforcement: 'runtime' | 'configuration_only';
-  defaultEnabled: boolean;
-};
-
-export const ADMIN_MODULES: AdminModuleDefinition[] = [
-  {
-    id: 'whatsapp',
-    label: 'WhatsApp channel',
-    description: 'Inbound/outbound Meta WhatsApp routing for this business.',
-    contract: 'business_channels.status',
-    enforcement: 'runtime',
-    defaultEnabled: true,
-  },
-  {
-    id: 'assistant',
-    label: 'AI replies',
-    description: 'Active assistant playbooks and keyword replies.',
-    contract: 'assistant_playbooks.is_active',
-    enforcement: 'runtime',
-    defaultEnabled: true,
-  },
-  {
-    id: 'knowledge',
-    label: 'Knowledge base',
-    description: 'Owner-approved FAQs, policies, offers, and OKF-backed answers. Configuration only; runtime disablement is not enforced yet.',
-    contract: 'not runtime-enforced; assistant_knowledge_items does not consume this module state',
-    enforcement: 'configuration_only',
-    defaultEnabled: true,
-  },
-  {
-    id: 'calendar',
-    label: 'Appointments',
-    description: 'Booked callbacks, visits, and follow-up slots. Configuration only; runtime disablement is not enforced yet.',
-    contract: 'not runtime-enforced; appointments does not consume this module state',
-    enforcement: 'configuration_only',
-    defaultEnabled: true,
-  },
-  {
-    id: 'handoffs',
-    label: 'Owner handoffs',
-    description: 'Human takeover and urgent owner-action workflow. Configuration only; runtime disablement is not enforced yet.',
-    contract: 'not runtime-enforced; handoff_events does not consume this module state',
-    enforcement: 'configuration_only',
-    defaultEnabled: true,
-  },
-  {
-    id: 'followups',
-    label: 'Follow-up sequence',
-    description: 'Durable lead follow-up jobs for active conversations.',
-    contract: 'followup_sequences.active',
-    enforcement: 'runtime',
-    defaultEnabled: true,
-  },
-  {
-    id: 'broadcasts',
-    label: 'Broadcasts',
-    description: 'Template-based audience campaigns for approved contacts. Configuration only; runtime disablement is not enforced yet.',
-    contract: 'not runtime-enforced; broadcast_campaigns does not consume this module state',
-    enforcement: 'configuration_only',
-    defaultEnabled: false,
-  },
-];
+export { ADMIN_MODULES };
+export type { AdminModuleId, AdminModuleState };
 
 export const adminModuleSchema = z.object({
   business_id: z.string().uuid(),
@@ -96,9 +21,12 @@ export const adminModuleSchema = z.object({
 
 export const adminMemberCreateSchema = z.object({
   business_id: z.string().uuid(),
-  user_id: z.string().uuid(),
+  user_id: z.string().uuid().optional(),
+  email: z.string().trim().email().optional(),
   display_name: z.string().trim().min(1).max(120),
   role: z.enum(['owner', 'manager', 'agent', 'client', 'admin', 'dev']).default('client'),
+}).refine((value) => Boolean(value.user_id || value.email), {
+  message: 'Provide an email address or user ID.',
 });
 
 export const adminMemberUpdateSchema = z.object({
