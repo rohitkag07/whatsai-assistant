@@ -82,15 +82,18 @@ function checkEnv(name, fix, aliases = []) {
 }
 
 async function checkServerlessHealth() {
-  const result = await fetchJson(`${appUrl}/api/agent-mesh/health`);
+  const result = await fetchJson(`${appUrl}/api/ping`);
   const payload = result.json || {};
   record({
-    ok: result.status === 200 && payload.mode === 'vercel-serverless' && payload.ok === true,
+    ok:
+      result.status === 200
+      && payload.service === 'dashboard'
+      && payload.ok === true,
     label: 'Vercel serverless runtime',
     detail: result.status === 200
-      ? `HTTP 200, mode=${payload.mode || 'unknown'}, healthy=${Boolean(payload.ok)}`
+      ? `HTTP 200, service=${payload.service || 'unknown'}, healthy=${Boolean(payload.ok)}`
       : result.error || `HTTP ${result.status}`,
-    fix: `Start the dashboard or set WHATSAI_APP_URL to the live deployment, then check ${appUrl}/api/agent-mesh/health.`,
+    fix: `Start the dashboard or set WHATSAI_APP_URL to the live deployment, then check ${appUrl}/api/ping.`,
   });
 }
 

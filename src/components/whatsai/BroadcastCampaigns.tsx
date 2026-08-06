@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BarChart3, CalendarClock, Check, ChevronLeft, ChevronRight, FileText, Megaphone, MessageSquareReply, Plus, Send, Users } from 'lucide-react';
+import { ArrowRight, BarChart3, CalendarClock, Check, ChevronLeft, ChevronRight, FileText, Megaphone, MessageSquareReply, Plus, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

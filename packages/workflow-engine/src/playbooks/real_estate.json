@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "id": "real-estate-sales",
+  "version": "1.0.0",
+  "vertical": "real_estate",
+  "name": "Real-estate lead qualification and site visit",
+  "initialState": "new",
+  "states": [
+    {
+      "id": "new",
+      "transitions": [
+        {
+          "id": "real-estate-start-qualification",
+          "event": "message_received",
+          "to": "qualifying",
+          "guards": [
+            { "type": "field_present", "field": "contact.phone" }
+          ],
+          "actions": [
+            {
+              "type": "set_context",
+              "key": "stage",
+              "value": "qualifying"
+            },
+            {
+              "type": "emit_event",
+              "name": "lead.qualification.started",
+              "payload": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qualifying",
+      "transitions": [
+        {
+          "id": "real-estate-qualification-complete",
+          "event": "qualification_completed",
+          "to": "qualified",
+          "guards": [
+            { "type": "boolean_is_true", "field": "explicitIntent" },
+            { "type": "number_gte", "field": "leadScore", "value": 55 }
+          ],
+          "actions": [
+            {
+              "type": "set_context",
+              "key": "stage",
+              "value": "qualified"
+            },
+            { "type": "append_tag", "tag": "qualified" },
+            {
+              "type": "emit_event",
+              "name": "lead.qualified",
+              "payload": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qualified",
+      "transitions": [
+        {
+          "id": "real-estate-site-visit",
+          "event": "site_visit_requested",
+          "to": "visit_scheduled",
+          "guards": [
+            {
+              "type": "boolean_is_true",
+              "field": "siteVisitRequested"
+            },
+            { "type": "field_present", "field": "appointmentId" }
+          ],
+          "actions": [
+            { "type": "append_tag", "tag": "site-visit" },
+            {
+              "type": "escalate_owner",
+              "reason": "Qualified lead requested a site visit",
+              "slaMinutes": 10
+            },
+            {
+              "type": "schedule_follow_up",
+              "delayMinutes": 120,
+              "reason": "Confirm site visit logistics"
+            }
+          ]
+        },
+        {
+          "id": "real-estate-human-handoff",
+          "event": "human_handoff_requested",
+          "to": "handoff",
+          "guards": [],
+          "actions": [
+            {
+              "type": "escalate_owner",
+              "reason": "Lead explicitly requested a human",
+              "slaMinutes": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "visit_scheduled",
+      "transitions": [
+        {
+          "id": "real-estate-visit-complete",
+          "event": "site_visit_completed",
+          "to": "follow_up",
+          "guards": [
+            { "type": "field_present", "field": "visitFeedback" }
+          ],
+          "actions": [
+            {
+              "type": "schedule_follow_up",
+              "delayMinutes": 1440,
+              "reason": "Post-visit sales follow-up"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "follow_up",
+      "terminal": true,
+      "transitions": []
+    },
+    {
+      "id": "handoff",
+      "terminal": true,
+      "transitions": []
+    }
+  ]
+}

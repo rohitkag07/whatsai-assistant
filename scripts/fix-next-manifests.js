@@ -5,8 +5,15 @@ const distDir = process.env.VERCEL ? '.next' : '.next-dev';
 const appDir = path.join(process.cwd(), distDir, 'server', 'app');
 const rootManifest = path.join(appDir, 'page_client-reference-manifest.js');
 const dashboardManifest = path.join(appDir, '(dashboard)', 'page_client-reference-manifest.js');
+const dashboardPage = path.join(
+  process.cwd(),
+  'src',
+  'app',
+  '(dashboard)',
+  'page.tsx',
+);
 
-if (!fs.existsSync(rootManifest)) {
+if (!fs.existsSync(rootManifest) || !fs.existsSync(dashboardPage)) {
   process.exit(0);
 }
 

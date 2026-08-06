@@ -17,7 +17,7 @@ import { MediaPreview } from '@/components/content/MediaPreview';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { Image as ImageIcon } from 'lucide-react';
 import { formatDate, cn } from '@/lib/utils';
-import type { ContentCalendarEntry, ContentStatus } from '@/types/database';
+import type { ContentCalendarEntry } from '@/types/database';
 
 const TABS: { value: string; label: string; filter: (e: ContentCalendarEntry) => boolean }[] = [
   { value: 'all',       label: 'All',             filter: () => true },

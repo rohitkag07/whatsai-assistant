@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { formatRelative, cn } from '@/lib/utils';
 import { EmptyState } from '@/components/shared/EmptyState';

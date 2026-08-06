@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "dental-care",
+  "version": "1.0.0",
+  "vertical": "dental",
+  "name": "Dental enquiry to appointment",
+  "initialState": "new",
+  "states": [
+    {
+      "id": "new",
+      "transitions": [
+        {
+          "id": "dental-start-triage",
+          "event": "message_received",
+          "to": "triage",
+          "guards": [
+            { "type": "field_present", "field": "contact.phone" }
+          ],
+          "actions": [
+            { "type": "set_context", "key": "stage", "value": "triage" },
+            {
+              "type": "emit_event",
+              "name": "dental.triage.started",
+              "payload": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "triage",
+      "transitions": [
+        {
+          "id": "dental-urgent-handoff",
+          "event": "urgent_symptom_detected",
+          "to": "urgent_handoff",
+          "guards": [
+            { "type": "boolean_is_true", "field": "urgentSymptoms" }
+          ],
+          "actions": [
+            { "type": "append_tag", "tag": "urgent" },
+            {
+              "type": "escalate_owner",
+              "reason": "Urgent dental symptom requires human triage",
+              "slaMinutes": 10
+            }
+          ]
+        },
+        {
+          "id": "dental-details-complete",
+          "event": "details_collected",
+          "to": "booking_ready",
+          "guards": [
+            { "type": "field_present", "field": "treatmentInterest" },
+            { "type": "field_present", "field": "preferredDate" }
+          ],
+          "actions": [
+            {
+              "type": "set_context",
+              "key": "stage",
+              "value": "booking_ready"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "booking_ready",
+      "transitions": [
+        {
+          "id": "dental-book-appointment",
+          "event": "appointment_confirmed",
+          "to": "appointment_booked",
+          "guards": [
+            { "type": "field_present", "field": "appointmentId" }
+          ],
+          "actions": [
+            { "type": "append_tag", "tag": "appointment-booked" },
+            {
+              "type": "schedule_follow_up",
+              "delayMinutes": 1440,
+              "reason": "Appointment reminder"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "appointment_booked",
+      "terminal": true,
+      "transitions": []
+    },
+    {
+      "id": "urgent_handoff",
+      "terminal": true,
+      "transitions": []
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { requireSelectedAdminBusiness } from '@/lib/admin-control';
+import { adminKnowledgeSchema } from '@/lib/admin-knowledge-schema';
 import { normalizeKnowledgeKeywords } from '@/lib/knowledge-schema';
 import { serviceClientOrNull } from '@/lib/sales-server';
 import { BusinessContextError } from '@/lib/whatsai-business';
-import { knowledgeSchema } from '@/app/api/admin/knowledge/route';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,7 +12,9 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
-  const parsed = knowledgeSchema.safeParse(await request.json().catch(() => null));
+  const parsed = adminKnowledgeSchema.safeParse(
+    await request.json().catch(() => null),
+  );
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: 'Complete the title, reply, and at least one keyword.' }, { status: 400 });
   }

@@ -95,7 +95,14 @@ export function WhatsAiInbox({ data }: Props) {
         const payload = await response.json().catch(() => null);
         if (!payload?.sent) throw new Error(payload?.error || 'Reply failed');
         setDraft('');
-        payload.ok ? toast.success('Manual WhatsApp reply sent.') : toast.warning(payload.sent.reason || 'Reply saved, but WhatsApp send was not confirmed.');
+        if (payload.ok) {
+          toast.success('Manual WhatsApp reply sent.');
+        } else {
+          toast.warning(
+            payload.sent.reason
+              || 'Reply saved, but WhatsApp send was not confirmed.',
+          );
+        }
         refresh();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Reply failed');
