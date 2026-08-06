@@ -57,15 +57,18 @@ export const legacyProjectDefaults = {
   paymentName: process.env.NEXT_PUBLIC_BOOKING_PAYEE ?? '',
 };
 
-export function leadProfileById(_leadId: string): LeadProfile | null {
+export function leadProfileById(leadId: string): LeadProfile | null {
+  void leadId;
   return null;
 }
 
-export function leadById(_leadId: string): Lead | null {
+export function leadById(leadId: string): Lead | null {
+  void leadId;
   return null;
 }
 
-export function plotById(_plotId: string | null | undefined): PlotInventoryItem | null {
+export function plotById(plotId: string | null | undefined): PlotInventoryItem | null {
+  void plotId;
   return null;
 }
 

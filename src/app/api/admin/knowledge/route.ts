@@ -1,23 +1,12 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { requireSelectedAdminBusiness } from '@/lib/admin-control';
+import { adminKnowledgeSchema } from '@/lib/admin-knowledge-schema';
 import { normalizeKnowledgeKeywords, slugifyKnowledgeTitle } from '@/lib/knowledge-schema';
 import { serviceClientOrNull } from '@/lib/sales-server';
 import { BusinessContextError, requirePlatformApiSession } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const knowledgeSchema = z.object({
-  business_id: z.string().uuid(),
-  title: z.string().trim().min(2).max(120),
-  type: z.enum(['faq', 'service', 'pricing', 'policy', 'location', 'offer', 'document', 'other']),
-  question: z.string().trim().max(280).nullable().optional(),
-  content: z.string().trim().min(2).max(4000),
-  keywords: z.array(z.string().trim().min(1).max(80)).min(1).max(30),
-  locale: z.enum(['en-IN', 'hi-IN', 'hinglish']).default('hinglish'),
-  status: z.enum(['draft', 'published', 'archived']).default('draft'),
-});
 
 export async function GET(request: Request) {
   const supabase = serviceClientOrNull();
@@ -40,7 +29,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const parsed = knowledgeSchema.safeParse(await request.json().catch(() => null));
+  const parsed = adminKnowledgeSchema.safeParse(
+    await request.json().catch(() => null),
+  );
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: 'Complete the title, reply, and at least one keyword.' }, { status: 400 });
   }
@@ -77,5 +68,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : 'Knowledge create failed.' }, { status });
   }
 }
-
-export { knowledgeSchema };
