@@ -2,7 +2,9 @@
 /.next
 /.next-dev
 /.codex-runtime
-/apps
+/apps/*
+!/apps/landing
+!/apps/landing/**
 /agents
 /supabase
 /remotion
