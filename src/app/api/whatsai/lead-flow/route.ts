@@ -17,7 +17,7 @@ const schema = z.object({
   lead_id: z.string().optional().nullable(),
   phone: z.string().min(8),
   name: z.string().optional().nullable(),
-  source: z.enum(['meta_ad', 'google_ad', 'website', 'whatsapp', 'referral', 'walk_in', 'ghost_closer', 'telegram', 'manual']).default('whatsapp'),
+  source: z.enum(['meta_ad', 'google_ad', 'website', 'whatsapp', 'referral', 'walk_in', 'telegram', 'manual']).default('whatsapp'),
   body: z.string().optional().nullable(),
   meta_lead_id: z.string().optional().nullable(),
   wa_message_id: z.string().optional().nullable(),

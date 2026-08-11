@@ -1,60 +1,37 @@
-# WhatsAI Assistant - Project Overview
+# XeroWA Project Overview
 
-## What This Project Is Now
+XeroWA is a WhatsApp-first receptionist and lead-conversion platform for Indian
+businesses. It captures inbound messages, sends business-approved replies,
+qualifies leads, books appointments or callbacks, follows up, and hands important
+conversations to the owner.
 
-WhatsAI Assistant is a WhatsApp-first AI receptionist and lead conversion platform for Indian businesses.
+## Product Boundary
 
-It is a pivot from WhatsAI Assistant. The existing real-estate product remains the first vertical pack, but the core product direction is now horizontal.
+XeroWA is industry-agnostic. Industry-specific behavior is tenant data stored in
+assistant playbooks; it is not implemented as a separate product runtime inside
+this repository.
 
-## Product Goal
+The `real_estate` tenant category remains supported through its own approved
+keyword rules and qualification questions. Site visits use the generic
+`appointments` and Calendar flow, plus tenant-scoped handoff and reminder state.
 
-Replace missed WhatsApp replies and manual follow-up with one assistant stack:
+## Supported Runtime
 
-1. capture every inbound WhatsApp message
-2. answer basic business questions instantly
-3. qualify the lead using a vertical playbook
-4. book an appointment, site visit, demo, or callback
-5. hand off hot or confused leads to the owner
-6. send follow-up reminders
-7. summarize the day for the owner
+- root Next.js dashboard and serverless WhatsApp path
+- Supabase business, channel, contact, conversation, lead, appointment, handoff,
+  usage, and playbook records
+- `xerowa-summoner` for local routing and orchestration
+- `xerowa-sales-agent` for qualification and approved replies
+- `xerowa-tool-gateway` for controlled external side effects
 
-## First Customers
+## Launch Goal
 
-Prioritize WhatsApp-heavy Indian SMBs:
+Prove one real business flow end to end:
 
-- real-estate builders and brokers
-- clinics and healthcare practices
-- coaching institutes
-- gyms and dietitians
-- local service businesses
-
-## Current Reality
-
-The repo already contains:
-
-- a working dashboard shell
-- major real-estate sales flows
-- WhatsApp-oriented webhook and send paths
-- major colony/society flows that can become a later vertical pack
-- a Phase 6 local agent mesh with Summoner orchestration
-- Supabase-backed persistence paths
-- readiness and integration status surfaces
-
-The remaining pivot work is mainly:
-
-- create a generic business/profile/playbook layer
-- generalize lead, conversation, appointment, and handoff language
-- keep real estate as the first vertical playbook
-- prove one 7-day trial flow end-to-end
-- reduce dependency on fallback/demo behavior
-
-## Current Business Strategy
-
-Do not sell AI SaaS first. Sell a simple trial:
-
-> 7-day WhatsApp AI receptionist trial for missed lead recovery and appointment/site-visit booking.
-
-Target conversion:
-
-- intro trial: free or Rs 999
-- paid plan: Rs 2,999 to Rs 14,999 per month depending on volume and handoff needs
+1. signed WhatsApp inbound webhook
+2. phone-number-to-business resolution
+3. tenant-scoped approved reply
+4. persisted conversation and lead state
+5. appointment or owner handoff
+6. scheduled follow-up
+7. operator-visible evidence

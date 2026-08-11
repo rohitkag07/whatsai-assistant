@@ -43,14 +43,6 @@ print_group() {
 }
 
 print_group "Dashboard" \
-  "apps/dashboard/.env.local" "NEXT_PUBLIC_SUPABASE_URL" \
-  "apps/dashboard/.env.local" "NEXT_PUBLIC_SUPABASE_ANON_KEY" \
-  "apps/dashboard/.env.local" "SUPABASE_SERVICE_ROLE_KEY" \
-  "apps/dashboard/.env.local" "DEFAULT_BUILDER_ID" \
-  "apps/dashboard/.env.local" "DEFAULT_PROJECT_ID" \
-  "apps/dashboard/.env.local" "AGENT_SECRET"
-
-print_group "Root Dashboard" \
   ".env.local" "NEXT_PUBLIC_SUPABASE_URL" \
   ".env.local" "NEXT_PUBLIC_SUPABASE_ANON_KEY" \
   ".env.local" "SUPABASE_SERVICE_ROLE_KEY" \
@@ -64,46 +56,18 @@ print_group "Landing" \
   "apps/landing/.env.local" "SUPABASE_SERVICE_ROLE_KEY"
 
 print_group "Summoner" \
-  "agents/x7-re-summoner/.env" "SUPABASE_URL" \
-  "agents/x7-re-summoner/.env" "SUPABASE_SERVICE_ROLE_KEY" \
-  "agents/x7-re-summoner/.env" "DEFAULT_BUILDER_ID" \
-  "agents/x7-re-summoner/.env" "DEFAULT_PROJECT_ID" \
-  "agents/x7-re-summoner/.env" "AGENT_SECRET"
+  "agents/xerowa-summoner/.env" "SUPABASE_URL" \
+  "agents/xerowa-summoner/.env" "SUPABASE_SERVICE_ROLE_KEY" \
+  "agents/xerowa-summoner/.env" "DEFAULT_BUSINESS_ID" \
+  "agents/xerowa-summoner/.env" "AGENT_SECRET"
 
 print_group "Sales Agent" \
-  "agents/x7-re-sales-agent/.env" "SUPABASE_URL" \
-  "agents/x7-re-sales-agent/.env" "SUPABASE_SERVICE_ROLE_KEY" \
-  "agents/x7-re-sales-agent/.env" "DEFAULT_BUILDER_ID" \
-  "agents/x7-re-sales-agent/.env" "DEFAULT_PROJECT_ID" \
-  "agents/x7-re-sales-agent/.env" "AGENT_SECRET"
-
-print_group "Content Agent" \
-  "agents/x7-re-content-agent/.env" "SUPABASE_URL" \
-  "agents/x7-re-content-agent/.env" "SUPABASE_SERVICE_ROLE_KEY" \
-  "agents/x7-re-content-agent/.env" "AGENT_SECRET"
-
-print_group "Ads Agent" \
-  "agents/x7-re-ads-agent/.env" "SUPABASE_URL" \
-  "agents/x7-re-ads-agent/.env" "SUPABASE_SERVICE_ROLE_KEY" \
-  "agents/x7-re-ads-agent/.env" "AGENT_SECRET"
-
-print_group "Ghost Closer" \
-  "agents/x7-re-ghost-closer/.env" "SUPABASE_URL" \
-  "agents/x7-re-ghost-closer/.env" "SUPABASE_SERVICE_ROLE_KEY" \
-  "agents/x7-re-ghost-closer/.env" "AGENT_SECRET"
-
-print_group "Colony Agent" \
-  "agents/x7-re-colony-agent/.env" "SUPABASE_URL" \
-  "agents/x7-re-colony-agent/.env" "SUPABASE_SERVICE_ROLE_KEY" \
-  "agents/x7-re-colony-agent/.env" "AGENT_SECRET"
-
-print_group "Finance Agent" \
-  "agents/x7-re-finance-agent/.env" "SUPABASE_URL" \
-  "agents/x7-re-finance-agent/.env" "SUPABASE_SERVICE_ROLE_KEY" \
-  "agents/x7-re-finance-agent/.env" "AGENT_SECRET"
+  "agents/xerowa-sales-agent/.env" "SUPABASE_URL" \
+  "agents/xerowa-sales-agent/.env" "SUPABASE_SERVICE_ROLE_KEY" \
+  "agents/xerowa-sales-agent/.env" "DEFAULT_BUSINESS_ID" \
+  "agents/xerowa-sales-agent/.env" "AGENT_SECRET"
 
 print_group "Tool Gateway" \
-  "agents/x7-re-tool-gateway/.env" "AGENT_SECRET" \
-  "agents/x7-re-tool-gateway/.env" "REMOTION_MODE"
+  "agents/xerowa-tool-gateway/.env" "AGENT_SECRET"
 
-printf "\nTip: after changing env files, restart dashboard, landing, and all agents before trusting readiness JSON.\n"
+printf "\nTip: after changing env files, restart dashboard, landing, and the three XeroWA agents before trusting readiness JSON.\n"

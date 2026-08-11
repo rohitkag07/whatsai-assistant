@@ -13,10 +13,6 @@ import {
 const DEV_ONLY_PATHS = [
   '/admin',
   '/assistant-setup',
-  '/campaigns',
-  '/colony',
-  '/content',
-  '/ghost-closer',
   '/reports',
   '/settings',
 ];

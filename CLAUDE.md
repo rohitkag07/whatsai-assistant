@@ -2,20 +2,20 @@
 
 ## Current Mission
 
-This repo is pivoting from WhatsAI Assistant into WhatsAI Assistant: a WhatsApp-first receptionist, lead qualifier, follow-up, appointment, and owner handoff platform for Indian SMBs.
+This repo is XeroWA: a WhatsApp-first receptionist, lead qualifier, follow-up,
+appointment, and owner handoff platform for Indian SMBs.
 
-Do not rebuild from scratch. Preserve the existing real-estate implementation as the first vertical pack: WhatsAI SiteVisit.
+Do not add product-specific runtime services, routes, society modules, branding,
+or source code here. Industry behavior belongs in tenant playbooks.
 
 ## Read Order
 
-1. `WHATSAI_PIVOT_STRATEGY.md`
-2. `README.md`
-3. `project_overview.md`
-4. `.docs/ghost-ai/CURRENT_SYSTEM_MAP.md`
-5. `.docs/ghost-ai/NEXT_BUILD_PLAN.md`
-6. `.docs/ghost-ai/ENV_CONTRACT.md`
-7. `.docs/ghost-ai/PRODUCTION_READINESS.md`
-8. `.docs/legacy/realestate-vertical-blueprint.md` only for first vertical context
+1. `README.md`
+2. `project_overview.md`
+3. `.docs/ghost-ai/CURRENT_SYSTEM_MAP.md`
+4. `.docs/ghost-ai/NEXT_BUILD_PLAN.md`
+5. `.docs/ghost-ai/ENV_CONTRACT.md`
+6. `.docs/ghost-ai/PRODUCTION_READINESS.md`
 
 ## Architecture Rules
 
@@ -23,8 +23,14 @@ Do not rebuild from scratch. Preserve the existing real-estate implementation as
 - WhatsApp is the primary customer channel.
 - Supabase is the system of record.
 - Tool Gateway owns external side effects.
-- Generic business/playbook/conversation concepts should be added beside existing real-estate tables.
-- Keep old real-estate routes working until generic routes prove parity.
+- Generic business, playbook, conversation, contact, lead, appointment, and
+  handoff concepts are the supported product model.
+- Preserve `real_estate` as a tenant category with tenant-scoped property inquiry,
+  qualification, site-visit appointment, reminder, and owner-handoff behavior.
+- Never couple the real-estate tenant playbook to standalone property-management,
+  colony, resident, maintenance, or property-content services.
+- Legacy database columns may remain temporarily for migration compatibility,
+  but new runtime code must not depend on product-specific tables.
 
 ## Product Rules
 

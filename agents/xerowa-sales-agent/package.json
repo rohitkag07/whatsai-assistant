@@ -1,0 +1,18 @@
+{
+  "name": "xerowa-sales-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 2 WhatsApp sales agent for WhatsAI Assistant",
+  "scripts": {
+    "dev": "node --env-file=.env index.js",
+    "start": "node index.js",
+    "test": "node --test keyword-engine.test.js knowledge-engine.test.js playbook-store.test.js campaign-runner.test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "zod": "^3.23.8"
+  }
+}

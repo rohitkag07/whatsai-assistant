@@ -2,7 +2,7 @@
 
 ## Step 1: Type-check
 - Timestamp: 2026-07-09T05:04:54Z
-- apps/dashboard: PASS (0 errors fixed)
+- canonical root dashboard: PASS (0 errors fixed)
   - Command: `npm run type-check 2>&1 | tee /tmp/dashboard-typecheck.log`
   - Result: `tsc --noEmit` completed successfully.
 - apps/landing: PASS (0 errors fixed)
@@ -12,7 +12,7 @@
 ## Step 2: Supabase Tables
 - Timestamp: 2026-07-09T05:20:30.097Z
 - Result: 14/14 tables verified ✅
-- Env source: `agents/x7-re-summoner/.env`
+- Env source: `agents/xerowa-summoner/.env`
 - Table checks:
   - ✅ businesses - EXISTS
   - ✅ business_profiles - EXISTS
@@ -41,8 +41,8 @@
   - assistant_playbooks: inserted
 - checklist seeded confirmation: 8 rows
 - Env updated:
-  - `agents/x7-re-summoner/.env` DEFAULT_BUSINESS_ID
-  - `agents/x7-re-sales-agent/.env` DEFAULT_BUSINESS_ID
+  - `agents/xerowa-summoner/.env` DEFAULT_BUSINESS_ID
+  - `agents/xerowa-sales-agent/.env` DEFAULT_BUSINESS_ID
 
 ## Step 4: Agent Health
 - Timestamp: 2026-07-09T05:26:59Z
@@ -52,16 +52,11 @@
   - sales-agent: 200
   - tool-gateway: 200
   - summoner: 200
-  - content-agent: 200
-  - ads-agent: 200
-  - ghost-closer: 200
-  - colony-agent: 200
-  - finance-agent: 200
 - Non-agent note:
   - dashboard-mesh: 000 because dashboard dev server is not running in this agent-stack step.
 - Playbook qualify test:
   - Endpoint: `POST http://localhost:8080/playbook/qualify`
-  - Auth: `x-agent-secret` header loaded from `agents/x7-re-sales-agent/.env`
+  - Auth: `x-agent-secret` header loaded from `agents/xerowa-sales-agent/.env`
   - business_id: `6a427b8d-ec8e-418d-9eea-c8eae278e451`
   - response type: `ask_qualification`
   - question_key: `course_interest`
@@ -124,7 +119,7 @@
 
 ## Step 7: Dashboard Live Data
 - Timestamp: 2026-07-09T09:37:36Z
-- Dashboard command: `cd apps/dashboard && npm run dev`
+- Dashboard command: `npm run dev` from the repository root
 - Dashboard URL: `http://localhost:3000`
 - Page HTTP status:
   - `/`: 200
@@ -138,14 +133,9 @@
   - `/api/settings/checklist`: 200
   - `/api/agent-mesh/health`: 200
 - Agent mesh summary:
-  - service: `x7-re-summoner`
+  - service: `xerowa-summoner`
   - supabase: true
   - sales: 200
-  - content: 200
-  - ads: 200
-  - colony: 200
-  - finance: 200
-  - ghost_closer: 200
 - Settings checklist:
   - source: `supabase`
   - business_id: `11111111-1111-1111-1111-111111111111`

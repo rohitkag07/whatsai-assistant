@@ -94,7 +94,7 @@ export function LeadSourceChart({ data }: { data?: SourcePoint[] }) {
     { source: 'Google Ad',    count: 31 },
     { source: 'Referral',     count: 22 },
     { source: 'Walk-in',      count: 9  },
-    { source: 'Ghost Closer', count: 6  },
+    { source: 'Referral', count: 6  },
   ];
   const palette = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#0EA5E9'];
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DASHBOARD_DIR="$ROOT_DIR/apps/dashboard"
+DASHBOARD_DIR="$ROOT_DIR"
 PORT="${PORT:-3000}"
 HOST="${HOST:-127.0.0.1}"
 NODE_BIN="${NODE_BIN:-$(command -v node)}"

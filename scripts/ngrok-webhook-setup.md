@@ -23,27 +23,27 @@ https://abc123.ngrok-free.app
 https://abc123.ngrok-free.app/webhook
 ```
 
-5. Verify Token: use the value from `WHATSAPP_VERIFY_TOKEN` in `agents/x7-re-summoner/.env`.
+5. Verify Token: use the value from `WHATSAPP_VERIFY_TOKEN` in `agents/xerowa-summoner/.env`.
 6. Click Verify and Save.
 
 To print the verify token locally:
 
 ```bash
-grep '^WHATSAPP_VERIFY_TOKEN=' agents/x7-re-summoner/.env
+grep '^WHATSAPP_VERIFY_TOKEN=' agents/xerowa-summoner/.env
 ```
 
 ## Step 3: Get Fresh Access Token
 
 1. Go to WhatsApp -> API Setup in Meta Developer Portal.
 2. Copy the temporary access token shown by Meta.
-3. Update `WHATSAPP_ACCESS_TOKEN` in `agents/x7-re-summoner/.env`.
-4. Update `WHATSAPP_ACCESS_TOKEN` in `agents/x7-re-tool-gateway/.env`.
+3. Update `WHATSAPP_ACCESS_TOKEN` in `agents/xerowa-summoner/.env`.
+4. Update `WHATSAPP_ACCESS_TOKEN` in `agents/xerowa-tool-gateway/.env`.
 
 Example:
 
 ```bash
 # Edit both files and replace the old token value.
-code agents/x7-re-summoner/.env agents/x7-re-tool-gateway/.env
+code agents/xerowa-summoner/.env agents/xerowa-tool-gateway/.env
 ```
 
 ## Step 4: Restart Local Stack
@@ -125,8 +125,8 @@ If inbound works but outbound fails:
 
 1. Get a fresh Meta WhatsApp access token.
 2. Update both `.env` files:
-   - `agents/x7-re-summoner/.env`
-   - `agents/x7-re-tool-gateway/.env`
+   - `agents/xerowa-summoner/.env`
+   - `agents/xerowa-tool-gateway/.env`
 3. Restart the local stack.
 
 If dashboard does not show the message:

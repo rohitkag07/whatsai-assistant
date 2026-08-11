@@ -118,10 +118,10 @@ Verified against the canonical repository on 12 July 2026.
 | Setup wizard | Collects assistant goal, knowledge, qualification questions, and persona/instructions | `src/components/whatsai/WhatsAiSetupForm.tsx:29-60`, `326-340` | UI implies free-form intelligence that the runtime does not use |
 | Setup API | Writes a business, channel, playbook, and knowledge item to Supabase | `src/app/api/whatsai/setup/route.ts:91-170` | Saved configuration is not the sales-agent runtime source |
 | Playbook schema | Migration defines `system_prompt`, `qualification_questions`, `handoff_rules`, and `is_active` | `supabase/migrations/009_generic_core_layer.sql:91-102` | Setup route/types use a different field vocabulary (`goal`, `tone`, `active`, etc.); schema drift must be reconciled first |
-| Summoner | Resolves `phone_number_id` to business context, finds the active playbook, creates canonical contact/thread/message records | `agents/x7-re-summoner/index.js:400-416`, `900-1033` | This part is directionally correct and must remain tenant-scoped |
-| Summoner routing | Non-real-estate goes to `/playbook/qualify`; real estate goes to `/qualify` | `agents/x7-re-summoner/index.js:1035-1060`, `1089-1102` | Two runtime paths make consistent dynamic behaviour harder |
-| Sales Agent | Imports `getPlaybook`, `getNextQuestion`, and `computeTemperature` from a JavaScript file | `agents/x7-re-sales-agent/index.js:6-10` | Hardcoded code, not tenant data, controls replies |
-| Generic qualification | Calls `getPlaybook(vertical)` and hardcoded rule helpers | `agents/x7-re-sales-agent/index.js:666-770` | Unknown businesses or custom playbooks cannot work correctly |
+| Summoner | Resolves `phone_number_id` to business context, finds the active playbook, creates canonical contact/thread/message records | `agents/xerowa-summoner/index.js:400-416`, `900-1033` | This part is directionally correct and must remain tenant-scoped |
+| Summoner routing | Non-real-estate goes to `/playbook/qualify`; real estate goes to `/qualify` | `agents/xerowa-summoner/index.js:1035-1060`, `1089-1102` | Two runtime paths make consistent dynamic behaviour harder |
+| Sales Agent | Imports `getPlaybook`, `getNextQuestion`, and `computeTemperature` from a JavaScript file | `agents/xerowa-sales-agent/index.js:6-10` | Hardcoded code, not tenant data, controls replies |
+| Generic qualification | Calls `getPlaybook(vertical)` and hardcoded rule helpers | `agents/xerowa-sales-agent/index.js:666-770` | Unknown businesses or custom playbooks cannot work correctly |
 | Trial seed | Imports the hardcoded coaching playbook | `scripts/seed-trial-business.js:157-161` | Deleting the file immediately would break seed/proof tooling |
 
 ### Root cause
@@ -262,21 +262,21 @@ The wizard should ship with editable starter templates per category, but those t
 
 Add two small modules rather than growing `index.js` further:
 
-1. `agents/x7-re-sales-agent/playbook-store.js`
+1. `agents/xerowa-sales-agent/playbook-store.js`
    - `loadActivePlaybook({ businessId, playbookId })`
    - Select only the canonical fields.
    - Verify `playbook_id` belongs to `business_id`.
    - Return a structured `playbook_not_found`, `playbook_inactive`, or `playbook_query_failed` result.
    - Phase 1 reads Supabase on every inbound message as requested. Add timing metrics before considering a short TTL cache.
 
-2. `agents/x7-re-sales-agent/keyword-engine.js`
+2. `agents/xerowa-sales-agent/keyword-engine.js`
    - `normalizeMessage(text)`
    - `validateKeywordRules(value)`
    - `matchKeywordRule({ message, rules })`
    - No I/O and no business-specific constants.
    - Deterministic tie-breaking and safe Unicode handling.
 
-Refactor `agents/x7-re-sales-agent/index.js` so the inbound response function:
+Refactor `agents/xerowa-sales-agent/index.js` so the inbound response function:
 
 1. Requires `business_id` and `thread_id`.
 2. Loads the active playbook from Supabase.
@@ -334,8 +334,8 @@ Delete it only after:
 - `supabase/migrations/009_generic_core_layer.sql`
 - `src/types/database.ts`
 - `src/app/api/whatsai/setup/route.ts`
-- `agents/x7-re-summoner/index.js`
-- `agents/x7-re-sales-agent/index.js`
+- `agents/xerowa-summoner/index.js`
+- `agents/xerowa-sales-agent/index.js`
 
 ### T1 — Make the database contract canonical
 
@@ -359,16 +359,16 @@ Delete it only after:
 
 ### T3 — Build the deterministic engine as pure code
 
-- [ ] Create `agents/x7-re-sales-agent/keyword-engine.js`.
+- [ ] Create `agents/xerowa-sales-agent/keyword-engine.js`.
 - [ ] Add normalization, rule validation, priority sorting, exact/word/contains matching, and deterministic tie-breaking.
-- [ ] Create `agents/x7-re-sales-agent/keyword-engine.test.js` using Node's built-in test runner.
+- [ ] Create `agents/xerowa-sales-agent/keyword-engine.test.js` using Node's built-in test runner.
 - [ ] Add tests for English, Hindi, Hinglish, punctuation, casing, multiple matches, disabled rules, blank inputs, and unsafe regex-like characters.
 - [ ] Add a medical-emergency safety test proving safety rules run before business keywords.
 
 ### T4 — Connect the Sales Agent to Supabase playbooks
 
-- [ ] Create `agents/x7-re-sales-agent/playbook-store.js`.
-- [ ] Modify `agents/x7-re-sales-agent/index.js` to load the active playbook by tenant on every inbound request.
+- [ ] Create `agents/xerowa-sales-agent/playbook-store.js`.
+- [ ] Modify `agents/xerowa-sales-agent/index.js` to load the active playbook by tenant on every inbound request.
 - [ ] Add `POST /playbook/respond` and reuse existing Tool Gateway send logic.
 - [ ] Persist match metadata on canonical outbound messages.
 - [ ] Add fallback/handoff behavior for missing, invalid, inactive, or unavailable playbooks.
@@ -377,7 +377,7 @@ Delete it only after:
 
 ### T5 — Unify Summoner routing
 
-- [ ] Modify `agents/x7-re-summoner/index.js` to pass `playbook_id` and route all business inbound messages to `/playbook/respond`.
+- [ ] Modify `agents/xerowa-summoner/index.js` to pass `playbook_id` and route all business inbound messages to `/playbook/respond`.
 - [ ] Remove the real-estate versus non-real-estate runtime branch.
 - [ ] Preserve channel-to-business tenant resolution and canonical inbound writes.
 - [ ] Ensure one webhook event creates one inbound row and at most one automated outbound row.
@@ -389,7 +389,7 @@ Delete it only after:
 - [ ] Modify `scripts/seed-trial-business.js` to insert keyword rules directly instead of importing agent runtime code.
 - [ ] Update proof scripts and setup documentation.
 - [ ] Remove all imports of `vertical-playbooks.js`.
-- [ ] Delete `agents/x7-re-sales-agent/vertical-playbooks.js` only after the reference search returns zero.
+- [ ] Delete `agents/xerowa-sales-agent/vertical-playbooks.js` only after the reference search returns zero.
 
 ### T7 — Automated proof
 
@@ -423,17 +423,17 @@ Delete it only after:
 | 5 | `src/components/whatsai/KeywordReplyEditor.tsx` | Repeatable keyword/reply editor and tester |
 | 6 | `src/components/whatsai/WhatsAiSetupForm.tsx` | Replace persona/knowledge Step 3 and update validation/readiness |
 | 7 | `src/app/api/whatsai/setup/route.ts` | Validate and upsert canonical playbook fields |
-| 8 | `agents/x7-re-sales-agent/keyword-engine.js` | Pure deterministic matcher |
-| 9 | `agents/x7-re-sales-agent/keyword-engine.test.js` | Matcher unit tests |
-| 10 | `agents/x7-re-sales-agent/playbook-store.js` | Tenant-scoped Supabase playbook loader |
-| 11 | `agents/x7-re-sales-agent/index.js` | Dynamic respond endpoint and persistence integration |
-| 12 | `agents/x7-re-summoner/index.js` | Pass playbook identity and unify routing |
+| 8 | `agents/xerowa-sales-agent/keyword-engine.js` | Pure deterministic matcher |
+| 9 | `agents/xerowa-sales-agent/keyword-engine.test.js` | Matcher unit tests |
+| 10 | `agents/xerowa-sales-agent/playbook-store.js` | Tenant-scoped Supabase playbook loader |
+| 11 | `agents/xerowa-sales-agent/index.js` | Dynamic respond endpoint and persistence integration |
+| 12 | `agents/xerowa-summoner/index.js` | Pass playbook identity and unify routing |
 | 13 | `scripts/seed-trial-business.js` | Remove runtime playbook-file dependency |
 | 14 | `scripts/prove-dynamic-keyword-engine.js` | Multi-tenant end-to-end proof |
 | 15 | `package.json` | Add unit/proof commands |
 | 16 | `.env.example` and agent `.env.example` | Add rollout flag only; no LLM keys |
 | 17 | `README.md` and `WHATSAI_RUNBOOK.md` | Document rule-based positioning, setup, proof, and rollback |
-| 18 | `agents/x7-re-sales-agent/vertical-playbooks.js` | Delete last, after zero references and passing proof |
+| 18 | `agents/xerowa-sales-agent/vertical-playbooks.js` | Delete last, after zero references and passing proof |
 
 ---
 

@@ -241,7 +241,7 @@ export function LeadModal({ lead, open, onClose }: LeadModalProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
               <MiniField icon={Calendar} label="Stage target" value={currentLead.lead_stage === 'new' ? 'Move to Qualified' : currentLead.lead_stage === 'qualified' ? 'Book Visit' : 'Close Booking'} />
               <MiniField icon={MessageCircle} label="Preferred channel" value="WhatsApp + call assist" />
-              <MiniField icon={Clock} label="Best response window" value={currentLead.source === 'ghost_closer' ? 'After 8 PM IST' : '11 AM - 7 PM'} />
+              <MiniField icon={Clock} label="Best response window" value="11 AM - 7 PM" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

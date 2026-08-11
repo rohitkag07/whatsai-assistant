@@ -13,9 +13,9 @@ RUNTIME_SERVICE_ACCOUNT="whatsai-runtime"
 RUNTIME_SERVICE_ACCOUNT_EMAIL="${RUNTIME_SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
 VERCEL_PRODUCTION_URL="${VERCEL_PRODUCTION_URL:-x7-whatsai-dashboard.vercel.app}"
 
-TOOL_ENV_FILE="$ROOT/agents/x7-re-tool-gateway/.env"
-SALES_ENV_FILE="$ROOT/agents/x7-re-sales-agent/.env"
-SUMMONER_ENV_FILE="$ROOT/agents/x7-re-summoner/.env"
+TOOL_ENV_FILE="$ROOT/agents/xerowa-tool-gateway/.env"
+SALES_ENV_FILE="$ROOT/agents/xerowa-sales-agent/.env"
+SUMMONER_ENV_FILE="$ROOT/agents/xerowa-summoner/.env"
 
 require_command() {
   command -v "$1" >/dev/null 2>&1 || {
@@ -295,21 +295,21 @@ COMMON_SECRETS='AGENT_SECRET=whatsai-agent-secret:latest,SUPABASE_SERVICE_ROLE_K
 
 TOOL_GATEWAY_URL="$(deploy_candidate \
   whatsai-tool-gateway \
-  "$ROOT/agents/x7-re-tool-gateway" \
+  "$ROOT/agents/xerowa-tool-gateway" \
   8081 \
   "NODE_ENV=production,SUPABASE_URL=$SUPABASE_URL,WHATSAPP_PHONE_NUMBER_ID=$WHATSAPP_PHONE_NUMBER_ID,WHATSAPP_GRAPH_VERSION=$WHATSAPP_GRAPH_VERSION" \
   "$COMMON_SECRETS")"
 
 SALES_AGENT_URL="$(deploy_candidate \
   whatsai-sales-agent \
-  "$ROOT/agents/x7-re-sales-agent" \
+  "$ROOT/agents/xerowa-sales-agent" \
   8080 \
   "NODE_ENV=production,SUPABASE_URL=$SUPABASE_URL,WHATSAPP_PHONE_NUMBER_ID=$WHATSAPP_PHONE_NUMBER_ID,WHATSAPP_GRAPH_VERSION=$WHATSAPP_GRAPH_VERSION,DEFAULT_BUSINESS_ID=$DEFAULT_BUSINESS_ID,DEFAULT_BUILDER_ID=$DEFAULT_BUILDER_ID,DEFAULT_PROJECT_ID=$DEFAULT_PROJECT_ID,TOOL_GATEWAY_URL=$TOOL_GATEWAY_URL,DYNAMIC_KEYWORD_ENGINE_ENABLED=true,KNOWLEDGE_BASE_ENABLED=true" \
   "$COMMON_SECRETS,WHATSAPP_VERIFY_TOKEN=whatsai-whatsapp-verify-token:latest,META_APP_SECRET=whatsai-meta-app-secret:latest")"
 
 SUMMONER_URL="$(deploy_candidate \
   whatsai-summoner \
-  "$ROOT/agents/x7-re-summoner" \
+  "$ROOT/agents/xerowa-summoner" \
   8082 \
   "NODE_ENV=production,SUPABASE_URL=$SUPABASE_URL,WHATSAPP_PHONE_NUMBER_ID=$WHATSAPP_PHONE_NUMBER_ID,WHATSAPP_GRAPH_VERSION=$WHATSAPP_GRAPH_VERSION,DEFAULT_BUSINESS_ID=$DEFAULT_BUSINESS_ID,DEFAULT_BUILDER_ID=$DEFAULT_BUILDER_ID,DEFAULT_PROJECT_ID=$DEFAULT_PROJECT_ID,SALES_AGENT_URL=$SALES_AGENT_URL,TOOL_GATEWAY_URL=$TOOL_GATEWAY_URL" \
   "$COMMON_SECRETS,WHATSAPP_VERIFY_TOKEN=whatsai-whatsapp-verify-token:latest,META_APP_SECRET=whatsai-meta-app-secret:latest")"

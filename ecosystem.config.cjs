@@ -13,9 +13,9 @@ module.exports = {
     {
       ...common,
       name: 'whatsai-sales-agent',
-      cwd: `${root}/agents/x7-re-sales-agent`,
+      cwd: `${root}/agents/xerowa-sales-agent`,
       script: 'index.js',
-      interpreter_args: `--env-file=${root}/agents/x7-re-sales-agent/.env`,
+      interpreter_args: `--env-file=${root}/agents/xerowa-sales-agent/.env`,
       env: {
         TOOL_GATEWAY_URL: 'http://127.0.0.1:8081',
         DYNAMIC_KEYWORD_ENGINE_ENABLED: 'true',
@@ -24,16 +24,16 @@ module.exports = {
     {
       ...common,
       name: 'whatsai-tool-gateway',
-      cwd: `${root}/agents/x7-re-tool-gateway`,
+      cwd: `${root}/agents/xerowa-tool-gateway`,
       script: 'index.js',
-      interpreter_args: `--env-file=${root}/agents/x7-re-tool-gateway/.env`,
+      interpreter_args: `--env-file=${root}/agents/xerowa-tool-gateway/.env`,
     },
     {
       ...common,
       name: 'whatsai-summoner',
-      cwd: `${root}/agents/x7-re-summoner`,
+      cwd: `${root}/agents/xerowa-summoner`,
       script: 'index.js',
-      interpreter_args: `--env-file=${root}/agents/x7-re-summoner/.env`,
+      interpreter_args: `--env-file=${root}/agents/xerowa-summoner/.env`,
     },
     {
       name: 'whatsai-ngrok',

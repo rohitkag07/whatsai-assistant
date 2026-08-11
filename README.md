@@ -1,8 +1,7 @@
 # WhatsAI Assistant - WhatsApp-First Lead Conversion Platform
 
-This repo is the canonical WhatsAI Assistant codebase for a deterministic WhatsApp receptionist platform for Indian businesses.
-
-The existing real-estate system is not being discarded. It becomes the first vertical pack: `WhatsAI SiteVisit` for builders and brokers.
+This repo is the canonical XeroWA codebase for a deterministic WhatsApp
+receptionist platform for Indian businesses.
 
 ## Current Positioning
 
@@ -12,15 +11,14 @@ Primary buyer promise:
 
 > Customer WhatsApp message ka instant reply, lead qualification, follow-up, appointment/site-visit booking, aur owner ko daily hot-lead summary.
 
-## First Vertical Packs
+Industry-specific behavior is configured through tenant playbooks. The core
+runtime stays the same for every business.
 
-| Pack | Buyer | Main conversion goal |
-| --- | --- | --- |
-| WhatsAI SiteVisit | real-estate builders and brokers | qualified site visit |
-| WhatsAI Appointment | clinics and local healthcare providers | appointment booking |
-| WhatsAI Admission | coaching and education businesses | demo class or counselor callback |
-| WhatsAI Fitness Intake | gyms and dietitians | trial session or plan inquiry |
-| WhatsAI Callback | local service businesses | qualified callback |
+`real_estate` is a supported XeroWA tenant category. Its approved playbook
+qualifies budget, location, property type, purchase timeline, and loan readiness;
+collects a preferred site-visit slot; persists it as a tenant-scoped appointment;
+shows it in Calendar; queues reminders; and creates an owner handoff. This
+vertical has no runtime dependency on any standalone property-management product.
 
 ## What Already Exists
 
@@ -28,20 +26,18 @@ The repo already contains a meaningful base that should be reused:
 
 - Next.js dashboard shell
 - lead pipeline and manual CRM flows
-- site visit / booking style workflows
+- appointment, site-visit, and callback workflows
 - WhatsApp-oriented sales paths
 - follow-up queue concepts
 - Vercel-hosted WhatsApp webhook and deterministic sales runtime
 - direct Meta Cloud API sender with media and interactive message support
 - Supabase persistence
-- real-estate vertical implementation
-- deferred vertical modules for later expansion
 
 ## Main App
 
 | App | Path | Purpose |
 | --- | --- | --- |
-| Dashboard | root `src/` | Active Next.js operator dashboard for trials, leads, conversations, appointments, integrations, and real-estate vertical surfaces. |
+| Dashboard | root `src/` | Active Next.js operator dashboard for trials, leads, conversations, appointments, and integrations. |
 
 Canonical local repo path:
 
@@ -67,32 +63,19 @@ VPS, or always-on process is required for the production WhatsApp path.
 The older Express services remain in `agents/` as migration reference and a
 local fallback. They are not production launch blockers.
 
-Deferred agents are not launch blockers for WhatsAI MVP:
-
-- `x7-re-content-agent`
-- `x7-re-ads-agent`
-- `x7-re-ghost-closer`
-- `x7-re-colony-agent`
-- `x7-re-finance-agent`
+The supported agent services are `xerowa-summoner`, `xerowa-sales-agent`, and
+`xerowa-tool-gateway`.
 
 ## Documentation
 
 Start here:
 
-- `WHATSAI_PIVOT_STRATEGY.md`
 - `.docs/ghost-ai/DOCS_INDEX.md`
 - `.docs/ghost-ai/CURRENT_SYSTEM_MAP.md`
 - `.docs/ghost-ai/NEXT_BUILD_PLAN.md`
 - `.docs/ghost-ai/ENV_CONTRACT.md`
 - `.docs/ghost-ai/PRODUCTION_READINESS.md`
 - `.docs/ghost-ai/DEPLOYMENT_CHECKLIST.md`
-
-Long reference docs remain useful, but should be read as pre-pivot context:
-
-- `.docs/legacy/realestate-vertical-blueprint.md`
-- `.docs/legacy/evolution-blueprint.md`
-- `SSMA.md`
-- `.docs/legacy/revenue-engines.md`
 
 ## Local Setup
 
@@ -148,4 +131,5 @@ Launch blockers for the current WhatsAI MVP are only:
 - Public webhook verification cannot return `200`.
 - Supabase Cron and Vault are not configured for the secured follow-up route.
 
-Razorpay, content generation, colony management, finance workflows, OpenAI content, and advanced Meta Ads are deferred modules. They are not blockers for the WhatsAI lead-to-appointment MVP.
+Content generation, society management, finance workflows, and ad operations
+are outside the current XeroWA runtime. They are not launch dependencies.

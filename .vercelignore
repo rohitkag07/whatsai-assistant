@@ -7,7 +7,6 @@
 !/apps/landing/**
 /agents
 /supabase
-/remotion
 /.vercel
 tsconfig.tsbuildinfo
 *.log

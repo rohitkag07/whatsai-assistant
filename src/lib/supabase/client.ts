@@ -12,7 +12,7 @@ export function createClient() {
   if (!url || !anonKey) {
     throw new Error(
       '[supabase/client] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. ' +
-      'Copy apps/dashboard/.env.local.example → .env.local and fill in your Supabase keys.',
+      'Add the Supabase browser credentials to the root .env.local file.',
     );
   }
 

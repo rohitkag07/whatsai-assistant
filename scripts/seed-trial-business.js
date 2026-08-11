@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const repoRoot = path.resolve(__dirname, '..');
-const summonerEnvPath = path.join(repoRoot, 'agents/x7-re-summoner/.env');
-const salesAgentEnvPath = path.join(repoRoot, 'agents/x7-re-sales-agent/.env');
+const summonerEnvPath = path.join(repoRoot, 'agents/xerowa-summoner/.env');
+const salesAgentEnvPath = path.join(repoRoot, 'agents/xerowa-sales-agent/.env');
 const proofLogPath = path.join(repoRoot, '.docs/ghost-ai/PROOF_LOG.md');
 
 const BUSINESS_NAME = 'WhatsAI Test Coaching Center';
@@ -280,8 +280,8 @@ function appendProofLog(summary) {
     `  - assistant_playbooks: ${summary.actions.assistant_playbooks}`,
     `- checklist seeded confirmation: ${summary.checklistCount} rows`,
     '- Env updated:',
-    '  - `agents/x7-re-summoner/.env` DEFAULT_BUSINESS_ID',
-    '  - `agents/x7-re-sales-agent/.env` DEFAULT_BUSINESS_ID',
+    '  - `agents/xerowa-summoner/.env` DEFAULT_BUSINESS_ID',
+    '  - `agents/xerowa-sales-agent/.env` DEFAULT_BUSINESS_ID',
   ];
 
   fs.mkdirSync(path.dirname(proofLogPath), { recursive: true });
@@ -379,7 +379,7 @@ async function main() {
     console.log(`- ${table}: ${action}`);
   }
   console.log(`checklist_seeded=${(checklist?.length ?? 0) > 0} (${checklist?.length ?? 0} rows)`);
-  console.log('env_updated=agents/x7-re-summoner/.env, agents/x7-re-sales-agent/.env');
+  console.log('env_updated=agents/xerowa-summoner/.env, agents/xerowa-sales-agent/.env');
 }
 
 main().catch((error) => {

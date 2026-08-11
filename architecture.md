@@ -12,11 +12,12 @@ The system follows a WhatsApp-first, Summoner-routed, multi-agent architecture:
 - Tool Gateway owns external API/tool execution
 - Supabase is the system of record
 
-## Pivot Architecture Rule
+## Product Boundary
 
-Do not replace the real-estate implementation. Add a generic layer over it.
+XeroWA is industry-agnostic. Industry behavior belongs in tenant playbooks, not
+product-specific runtime modules.
 
-New generic concepts should be introduced as:
+Supported generic concepts are:
 
 - businesses
 - business profiles
@@ -28,18 +29,18 @@ New generic concepts should be introduced as:
 - owner summaries
 - trial accounts
 
-Real estate remains a vertical pack until generic routes prove parity.
+A real-estate company can be a XeroWA tenant without coupling the two products.
+
+For a `real_estate` tenant, property inquiry and qualification stay inside the
+tenant playbook. A chosen site-visit slot is represented as an appointment with
+`appointment_type = 'site_visit'`, then appears in the shared Calendar and owner
+handoff surfaces.
 
 ## Agent Roles
 
-- `x7-re-summoner`: routing, WhatsApp ingress, orchestration, cron fan-out
-- `x7-re-sales-agent`: current lead qualification engine and first generic assistant base
-- `x7-re-tool-gateway`: WhatsApp send, payment links, PDF/media helpers
-- `x7-re-content-agent`: deferred content generation
-- `x7-re-ads-agent`: deferred campaign operations
-- `x7-re-ghost-closer`: deferred outbound prospecting
-- `x7-re-colony-agent`: society/resident vertical pack, not first MVP wedge
-- `x7-re-finance-agent`: payment confirmation, receipts, subscription support
+- `xerowa-summoner`: routing, WhatsApp ingress, orchestration, cron fan-out
+- `xerowa-sales-agent`: current lead qualification engine and first generic assistant base
+- `xerowa-tool-gateway`: WhatsApp send, payment links, PDF/media helpers
 
 ## Data Flow
 

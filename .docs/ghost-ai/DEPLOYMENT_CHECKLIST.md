@@ -17,24 +17,21 @@ Use this file for production or near-production rollout verification.
 - verify `SUPABASE_URL` is correct in all backend services
 - verify `SUPABASE_SERVICE_ROLE_KEY` is set only where write access is needed
 - verify latest migrations, including orchestration tables, are applied
-- verify seed or baseline records exist for the current compatibility layer:
-  - `DEFAULT_BUILDER_ID` and `DEFAULT_PROJECT_ID` for real-estate vertical
-  - `DEFAULT_BUSINESS_ID` and `DEFAULT_ASSISTANT_PLAYBOOK_ID` once generic schema exists
+- verify `DEFAULT_BUSINESS_ID` and a tenant-scoped active assistant playbook exist
 
 ## 3. Service Deploy Order
 
 Recommended order:
 
-1. `x7-re-tool-gateway`
-2. `x7-re-sales-agent` / assistant-agent compatibility service
-3. `x7-re-summoner`
+1. `xerowa-tool-gateway`
+2. `xerowa-sales-agent` / assistant-agent compatibility service
+3. `xerowa-summoner`
 4. dashboard
 
 Reason:
 
 - Summoner depends on stable sales-agent and tool-gateway URLs.
 - Dashboard should deploy after backend URLs are stable.
-- Content, ads, ghost-closer, colony, finance, Razorpay, and content generation are deferred modules, not launch blockers.
 
 ## 4. Health Checks
 
@@ -87,24 +84,13 @@ Checklist:
 - confirm hot/confused lead creates owner handoff
 - confirm follow-up or daily summary is queued
 
-## 7. Real-Estate Vertical Proof
-
-Use WhatsAI SiteVisit as the first vertical pack.
-
-- inbound buyer inquiry enters WhatsApp
-- assistant asks budget/location/property/timeline questions
-- lead appears in dashboard
-- site visit or owner handoff is created
-- follow-up queue persists
-- owner receives summary or handoff
-
-## 8. Deferred Payment Proof
+## 7. Optional Payment Proof
 
 Razorpay/payment automation is not required for the WhatsAI lead-to-appointment MVP.
-Do not block launch on Razorpay, colony, finance, content-agent, or OpenAI content credentials.
+Do not block the receptionist launch on optional payment or content credentials.
 Verify payment workflows only when the payment module becomes active.
 
-## 9. Dashboard Proof
+## 8. Dashboard Proof
 
 - homepage loads without broken styling
 - dashboard navigation works across lead/conversation surfaces
@@ -112,7 +98,7 @@ Verify payment workflows only when the payment module becomes active.
 - at least one live data surface loads from Supabase instead of fallback/demo state
 - trial business can be inspected by owner/operator
 
-## 10. Evidence To Capture
+## 9. Evidence To Capture
 
 Keep a short evidence packet after rollout:
 

@@ -8,16 +8,11 @@ const rl = readline.createInterface({
 });
 
 const ENV_FILES = [
-  'apps/dashboard/.env.local',
+  '.env.local',
   'apps/landing/.env.local',
-  'agents/x7-re-summoner/.env',
-  'agents/x7-re-sales-agent/.env',
-  'agents/x7-re-content-agent/.env',
-  'agents/x7-re-ads-agent/.env',
-  'agents/x7-re-ghost-closer/.env',
-  'agents/x7-re-colony-agent/.env',
-  'agents/x7-re-finance-agent/.env',
-  'agents/x7-re-tool-gateway/.env'
+  'agents/xerowa-summoner/.env',
+  'agents/xerowa-sales-agent/.env',
+  'agents/xerowa-tool-gateway/.env'
 ];
 
 const promptUser = (question) => new Promise((resolve) => rl.question(question, resolve));
