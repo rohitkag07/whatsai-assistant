@@ -5,6 +5,7 @@
 
 # runtime
 .codex-runtime/
+.codex-worktrees/
 *.log
 
 # deps
