@@ -1,7 +1,9 @@
-# XeroWA AI deployment evidence
+# XeroWA AI pre-release deployment evidence
 
 Verified on: 13 August 2026 (Asia/Kolkata)
-Delivery type: protected Vercel preview; no production release
+Snapshot type: protected Vercel preview before PR #5 production release
+
+This is a time-bounded pre-release record. A separate date-stamped production-release report must record the squash-merge SHA, production deployment IDs, aliases and live smoke results after the release; this snapshot must not be used to imply that production was already changed.
 
 ## Source release
 

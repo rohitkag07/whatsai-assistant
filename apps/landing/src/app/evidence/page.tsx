@@ -37,16 +37,22 @@ const metrics = [
   },
 ] as const;
 
-const artifacts = [
-  ['Workflow engine and playbooks', 'Source + automated tests', 'DEMONSTRATED', 'Available in repository'],
-  ['Signed webhook and idempotency controls', 'Source + automated tests', 'DEMONSTRATED', 'Available in repository'],
-  ['RLS and composite-key controls', 'Migration contract tests', 'DEMONSTRATED', 'Live cross-tenant tests skipped without secure environment'],
-  ['Dashboard and workflow screenshots', 'Runtime capture', 'PLANNED', 'Private data-safe captures not yet supplied'],
-  ['Product-demo recording', 'Runtime recording', 'PLANNED', 'No verified recording URL supplied'],
-  ['Production deployment SHA', 'Hosting/Git evidence', 'PLANNED', 'Preview and production mapping pending for this branch'],
-] as const;
-
 export default function EvidencePage() {
+  const deploymentSha = process.env.VERCEL_GIT_COMMIT_SHA;
+  const deploymentEnvironment = process.env.VERCEL_ENV;
+  const deploymentStatus = deploymentSha ? 'VERIFIED' : 'PLANNED';
+  const deploymentEvidence = deploymentSha
+    ? `${deploymentEnvironment ?? 'Vercel'} build · ${deploymentSha.slice(0, 12)}`
+    : 'Exact hosting/Git mapping is recorded when built by Vercel';
+  const artifacts = [
+    ['Workflow engine and playbooks', 'Source + automated tests', 'DEMONSTRATED', 'Available in repository'],
+    ['Signed webhook and idempotency controls', 'Source + automated tests', 'DEMONSTRATED', 'Available in repository'],
+    ['RLS and composite-key controls', 'Migration contract tests', 'DEMONSTRATED', 'Live cross-tenant tests skipped without secure environment'],
+    ['Dashboard and workflow screenshots', 'Runtime capture', 'PLANNED', 'Private data-safe captures not yet supplied'],
+    ['Product-demo recording', 'Runtime recording', 'PLANNED', 'No verified recording URL supplied'],
+    ['Current deployment build', 'Vercel build environment', deploymentStatus, deploymentEvidence],
+  ] as const;
+
   return (
     <EvidencePageShell
       eyebrow="Product evidence centre"
