@@ -25,7 +25,7 @@ Last updated: 12 August 2026
 | C-017 | XeroWA is DPIIT recognized | PLANNED | no certificate supplied | Do not claim | Validated DPIIT certificate |
 | C-018 | XeroWA or Aviro is government/grant approved | PLANNED | none | Do not claim | Official sanction/approval document |
 | C-019 | XeroWA is ISO/SOC 2/CERT-In/pentest certified | PLANNED | none | “No independent certification claimed” | Corresponding valid report/certificate |
-| C-020 | Production deployment is current and release-tested | PLANNED | branch not deployed in this work | “Preview/deployment pending” | Deployment URLs, SHAs and route results |
+| C-020 | Production deployment is current and release-tested | PLANNED | protected Vercel previews passed at `19e9a47`; local production-mode smoke passed | “Protected preview deployed; production release pending” | Authenticated preview smoke, production URL/SHA and release results |
 
 ## Prohibited transformations
 

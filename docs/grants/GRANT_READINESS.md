@@ -50,7 +50,7 @@ The product has a coherent source-tested prototype, a clear Indian SMB problem, 
 - Independent application-security assessment.
 - API rate-limiting design and runtime evidence.
 - Approved retention schedule and subprocessor list.
-- Preview/production URLs, deployed SHAs, Vercel root directories and smoke report.
+- Authenticated preview product smoke, production URL/SHA and production release report. Protected preview deployments and local production-mode smoke are recorded in `DEPLOYMENT_EVIDENCE.md`.
 - Data-safe dashboard screenshots and product-demo recording.
 
 ## Actions to reach 85+
