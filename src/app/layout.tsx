@@ -7,7 +7,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'XeroWA AI — The 24/7 WhatsApp AI & Lead Intelligence Platform',
+    default: 'XeroWA AI — Structured WhatsApp Leads and Follow-ups',
     template: `%s · ${APP_NAME}`,
   },
   description: APP_TAGLINE,
