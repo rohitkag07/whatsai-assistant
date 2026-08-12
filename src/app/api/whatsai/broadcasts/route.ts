@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createBroadcastSchema } from '@/lib/broadcast-schema';
 import { callSalesAgent, serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessContext, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
 
   try {
-    const { business } = await requireDashboardBusinessContext(supabase);
+    const { business } = await requireDashboardBusinessMutationContext(supabase);
     const { data: template, error: templateError } = await (supabase.from('whatsapp_templates') as any)
       .select('*')
       .eq('id', parsed.data.template_id)

@@ -23,6 +23,9 @@ Dental is deferred to a second cohort because medical-data and clinical-claim ri
 | Onboarding | `PILOT_ONBOARDING_CHECKLIST.md` | Dated go/no-go record with named owners |
 | Baseline | `PILOT_BASELINE_MEASUREMENT_SHEET.md` | Frozen definitions, baseline and targets labeled as targets |
 | Security | `PILOT_SECURITY_REVIEW_CHECKLIST.md` | Independent runtime results and resolved/owned findings |
+| Security gate status | `../security/PILOT_SECURITY_GATE_REPORT.md` | Current GO/NO-GO decision, live synthetic results and release blockers |
+| Production release | `PRODUCTION_RELEASE_2026-08-13.md` | Exact merged SHA, both Vercel deployment IDs and live canary |
+| Evidence index | `EVIDENCE_INDEX.md` | Pilot artifacts bound to their verification status and missing proof |
 | Weekly operations | `PILOT_WEEKLY_EVIDENCE_REVIEW.md` | Dated weekly KPI/safety/change reviews |
 | Final results | `PILOT_RESULTS_TEMPLATE.md` | Frozen aggregate results, limitations and dual sign-off |
 | Evidence storage | `pilot-evidence/README.md` | Private pseudonymous folder and manifest; no raw PII in Git |

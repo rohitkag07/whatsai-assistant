@@ -2,6 +2,8 @@
 
 Status values: `NOT TESTED`, `PASS`, `FAIL`, `N/A`. Source tests alone cannot mark a live-runtime item `PASS`. The independent reviewer must keep sensitive evidence in the approved private location.
 
+Internal pre-review on 13 August 2026 is recorded in `../security/PILOT_SECURITY_GATE_REPORT.md`. It produced a **NO-GO** and does not change the independent-review statuses below.
+
 ## Review scope
 
 - Deployment SHA/environment: `[SHA and non-production/production scope]`
@@ -33,14 +35,17 @@ Status values: `NOT TESTED`, `PASS`, `FAIL`, `N/A`. Source tests alone cannot ma
 
 | Finding ID | Severity | Affected control | Description | Owner | Due date | Retest evidence/status |
 |---|---|---|---|---|---|---|
-| — | — | — | No assessment performed yet | — | — | NOT TESTED |
+| SG-01 | High | SEC-03 | Current production RLS allowed synthetic viewer insert/update/delete within its business. Source replacement policy is prepared but not deployed. | Engineering | Before pilot | OPEN — live retest required |
+| SG-02 | High | SEC-07 | Durable rate-limit RPC is absent from production; source middleware intentionally fails closed until migration deployment. | Engineering | Before pilot | OPEN — staging load test required |
+| SG-03 | High | SEC-04/09 | Editable `user_metadata` participated in platform-role resolution. Source now trusts privileged roles only from `app_metadata`. | Engineering | Before pilot | OPEN — deployed route matrix required |
+| SG-04 | Medium | SEC-11 | Controlled preview/delete/audit workflow exists only in the pending migration. | Engineering / privacy owner | Before pilot | OPEN — synthetic staging execution required |
 
 ## Decision
 
-- Critical findings open: `Not assessed`
-- High findings open: `Not assessed`
-- Launch decision: `[GO / CONDITIONAL GO / NO-GO]`
-- Conditions and expiry: `[details]`
+- Critical findings open: `Independent assessment pending`
+- High findings open: `3 internal pre-review findings; independent count pending`
+- Launch decision: `NO-GO`
+- Conditions and expiry: `Deploy/retest controls, verify rotation evidence, and obtain independent sign-off before pilot contact.`
 - Public assurance permitted: none until the signed report defines scope and limitations.
 
 Independent reviewer: `________________` Date: `________`

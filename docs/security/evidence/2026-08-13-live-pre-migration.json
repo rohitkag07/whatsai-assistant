@@ -1,0 +1,27 @@
+{
+  "assessment_date": "2026-08-13",
+  "environment": "production Supabase",
+  "data_scope": "synthetic fixtures created and cleaned by the proof runner",
+  "ok": false,
+  "passed": [
+    "owner_a_reads_business_a",
+    "owner_a_cannot_read_business_b",
+    "owner_a_cannot_insert_business_b",
+    "owner_a_cannot_update_business_b",
+    "owner_a_cannot_delete_business_b",
+    "viewer_can_read_own_business",
+    "first_webhook_message_is_accepted_once",
+    "replayed_webhook_is_marked_duplicate",
+    "replay_reuses_original_message"
+  ],
+  "failed": [
+    "viewer_cannot_insert",
+    "viewer_cannot_update",
+    "viewer_cannot_delete"
+  ],
+  "blocked": [
+    "rate_limit_runtime_migration_not_applied",
+    "retention_runtime_migration_not_applied"
+  ],
+  "failure": null
+}

@@ -10,6 +10,8 @@ export type DashboardBusinessContext = {
   session: NonNullable<Awaited<ReturnType<typeof getAuthSession>>>;
 };
 
+const BUSINESS_MUTATION_ROLES = new Set(['owner', 'manager', 'agent']);
+
 export async function resolveDashboardBusiness(supabase: SupabaseClient, requestedBusinessId?: string | null) {
   const configuredBusinessId = process.env.DEFAULT_BUSINESS_ID || null;
   const configuredBuilderId = process.env.DEFAULT_BUILDER_ID || null;
@@ -70,6 +72,27 @@ export async function requireDashboardBusinessContext(supabase: SupabaseClient, 
 
   const business = await fetchBusiness(supabase, businessId);
   return { business, businessId, session };
+}
+
+export function canMutateDashboardBusiness(
+  context: Pick<DashboardBusinessContext, 'businessId' | 'session'>,
+) {
+  if (isAdminPlatformRole(context.session.platformRole)) return true;
+  return context.session.memberships.some(
+    (membership) => membership.business_id === context.businessId
+      && BUSINESS_MUTATION_ROLES.has(membership.role),
+  );
+}
+
+export async function requireDashboardBusinessMutationContext(
+  supabase: SupabaseClient,
+  requestedBusinessId?: string | null,
+): Promise<DashboardBusinessContext> {
+  const context = await requireDashboardBusinessContext(supabase, requestedBusinessId);
+  if (!canMutateDashboardBusiness(context)) {
+    throw new BusinessContextError('business_mutation_denied', 403);
+  }
+  return context;
 }
 
 export async function requirePlatformApiSession(allowedRoles: PlatformRole[]) {

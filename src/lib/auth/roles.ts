@@ -30,13 +30,10 @@ export function getUserPlatformRole(user: User): PlatformRole {
 
   if (isPlatformRole(appRole)) return appRole;
 
-  const userRole =
-    user.user_metadata?.platform_role ??
-    user.user_metadata?.xero_role ??
-    user.user_metadata?.xerowa_role ??
-    user.user_metadata?.role;
-
-  return isPlatformRole(userRole) ? userRole : 'client';
+  // Supabase user_metadata is editable by the signed-in user. It must never
+  // participate in authorization decisions; privileged roles are assigned
+  // only through server-controlled app_metadata.
+  return 'client';
 }
 
 export function defaultLandingForRole(role: PlatformRole) {

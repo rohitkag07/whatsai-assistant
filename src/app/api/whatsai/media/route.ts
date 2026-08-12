@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessContext, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   if (file.size < 1 || file.size > MAX_BYTES) return fail('Files must be between 1 byte and 16 MB.', 400);
 
   const supabase = createServiceClient();
-  const verified = await requireDashboardBusinessContext(supabase, businessId.data).catch((error) => error);
+  const verified = await requireDashboardBusinessMutationContext(supabase, businessId.data).catch((error) => error);
   if (verified instanceof Error) return fail(verified.message, verified instanceof BusinessContextError ? verified.status : 500);
   const bytes = new Uint8Array(await file.arrayBuffer());
   const detectedMime = detectMime(bytes);
@@ -91,7 +91,7 @@ export async function DELETE(request: Request) {
   const assetId = idSchema.safeParse(body?.asset_id);
   if (!assetId.success) return fail('A valid asset_id is required.', 400);
   const supabase = createServiceClient();
-  const context = await requireDashboardBusinessContext(supabase).catch((error) => error);
+  const context = await requireDashboardBusinessMutationContext(supabase).catch((error) => error);
   if (context instanceof Error) return fail(context.message, context instanceof BusinessContextError ? context.status : 500);
   const { data: asset } = await (supabase.from('playbook_media_assets') as any)
     .select('*').eq('id', assetId.data).eq('business_id', context.businessId).eq('status', 'ready').maybeSingle();

@@ -8,7 +8,7 @@ import {
 } from '@/lib/sales-server';
 import { persistLeadToAppointmentFlow } from '@/lib/whatsai-lead-flow';
 import { sendWhatsAppCloudMessage } from '@/lib/whatsapp-cloud-api';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   }
 
   const payload = parsed.data;
-  const context = await requireDashboardBusinessContext(supabase, payload.business_id).catch((error) => error);
+  const context = await requireDashboardBusinessMutationContext(supabase, payload.business_id).catch((error) => error);
   if (context instanceof Error) {
     const status = context instanceof BusinessContextError ? context.status : 500;
     return NextResponse.json({ ok: false, error: context.message }, { status });

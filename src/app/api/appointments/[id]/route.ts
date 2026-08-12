@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 const appointmentUpdate = z.object({
   status: z.enum(['scheduled', 'completed', 'cancelled', 'no_show']).optional(),
@@ -13,7 +13,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!client) return NextResponse.json({ error: 'Supabase service credentials are not configured.' }, { status: 503 });
   const parsed = appointmentUpdate.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Invalid appointment update.' }, { status: 400 });
-  const context = await requireDashboardBusinessContext(client).catch((error) => error);
+  const context = await requireDashboardBusinessMutationContext(client).catch((error) => error);
   if (context instanceof Error) {
     const status = context instanceof BusinessContextError ? context.status : 500;
     return NextResponse.json({ error: context.message }, { status });
