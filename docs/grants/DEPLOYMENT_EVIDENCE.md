@@ -1,6 +1,6 @@
 # XeroWA AI deployment evidence
 
-Verified on: 13 August 2026 (Asia/Kolkata)  
+Verified on: 13 August 2026 (Asia/Kolkata)
 Delivery type: protected Vercel preview; no production release
 
 ## Source release

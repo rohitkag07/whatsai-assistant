@@ -2,7 +2,7 @@
 
 Date: `[date]`
 
-To: AVIRO TECHNOLOGIES PRIVATE LIMITED  
+To: AVIRO TECHNOLOGIES PRIVATE LIMITED
 Product: XeroWA AI
 
 `[Business legal name]` expresses its non-binding intent, subject to the definitive pilot agreement, to evaluate XeroWA AI for a controlled 30–60 day WhatsApp enquiry workflow.
@@ -30,5 +30,5 @@ Results may be used externally only after method, sample, window, anonymization 
 
 This LOI is non-binding except for confidentiality and the restriction on public claims until a definitive pilot agreement is signed.
 
-For `[Business legal name]`: `________________` Date: `________`  
+For `[Business legal name]`: `________________` Date: `________`
 For AVIRO TECHNOLOGIES PRIVATE LIMITED: `________________` Date: `________`

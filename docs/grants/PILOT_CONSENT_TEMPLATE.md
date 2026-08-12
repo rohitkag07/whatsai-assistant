@@ -59,5 +59,5 @@ No business/customer name, message, phone number or identifiable screenshot may 
 
 Pilot access ends on `[date/condition]`. Data return/deletion follows the schedule above. Commercial continuation requires a separate written agreement.
 
-Business authorized signatory: `________________` Date: `________`  
+Business authorized signatory: `________________` Date: `________`
 AVIRO TECHNOLOGIES PRIVATE LIMITED authorized signatory: `________________` Date: `________`

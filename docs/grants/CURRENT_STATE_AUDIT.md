@@ -1,8 +1,8 @@
 # XeroWA AI current-state forensic audit
 
-Audit date: 12 August 2026  
-Audit scope: canonical repository at `/Users/rohit/Projects/saas-products/whatsai-assistant`  
-Audit branch: `codex/grant-readiness-xerowa`  
+Audit date: 12 August 2026
+Audit scope: canonical repository at `/Users/rohit/Projects/saas-products/whatsai-assistant`
+Audit branch: `codex/grant-readiness-xerowa`
 Production changes during audit: none
 
 ## Repository identity proof

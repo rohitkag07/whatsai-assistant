@@ -42,5 +42,5 @@
 - Confounders or workflow changes: `[details]`
 - Recommended next action: `[stop / extend / commercialize / redesign]`
 
-Business owner approval: `________________` Date: `________`  
+Business owner approval: `________________` Date: `________`
 Aviro evidence owner: `________________` Date: `________`

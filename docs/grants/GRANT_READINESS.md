@@ -1,8 +1,8 @@
 # XeroWA AI grant readiness
 
-Applicant named for this project: AVIRO TECHNOLOGIES PRIVATE LIMITED  
-Product: XeroWA AI  
-Stage: pre-launch validation/staging  
+Applicant named for this project: AVIRO TECHNOLOGIES PRIVATE LIMITED
+Product: XeroWA AI
+Stage: pre-launch validation/staging
 Assessment date: 12 August 2026
 
 ## Verdict

@@ -1,7 +1,7 @@
 # XeroWA AI assisted pilot protocol
 
-Version: 1.0 draft  
-Duration: 30–60 days  
+Version: 1.0 draft
+Duration: 30–60 days
 Cohort: 3–5 Indian SMBs
 
 ## Purpose
