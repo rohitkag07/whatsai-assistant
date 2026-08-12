@@ -8,7 +8,7 @@ Delivery type: protected Vercel preview; no production release
 - Repository: `https://github.com/rohitkag07/whatsai-assistant`
 - Branch: `codex/grant-readiness-xerowa`
 - Pull request: `https://github.com/rohitkag07/whatsai-assistant/pull/5`
-- Head SHA: `19e9a47cb73f1724315377e01bd6c1e4f382ce93`
+- Application-artifact commit: `19e9a47cb73f1724315377e01bd6c1e4f382ce93` (the later PR commits update deployment documentation only)
 - Base SHA: `a9057ac327f8dc953b9c1020653a97c63fab6e51`
 - Review state: draft; not merged
 
@@ -32,4 +32,3 @@ The historical Vercel project name `x7-whatsai-dashboard` is hosting configurati
 ## Release decision
 
 **NO PRODUCTION RELEASE.** This is preview/review evidence only. Production merge and deployment remain blocked by the legal/company document gate, signed pilot evidence, secure live tenant-isolation proof and security review described in `GRANT_READINESS.md`.
-
