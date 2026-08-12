@@ -3,7 +3,7 @@
 Verified on: 13 August 2026 (Asia/Kolkata)
 Snapshot type: protected Vercel preview before PR #5 production release
 
-This is a time-bounded pre-release record. A separate date-stamped production-release report must record the squash-merge SHA, production deployment IDs, aliases and live smoke results after the release; this snapshot must not be used to imply that production was already changed.
+This is a time-bounded pre-release record. Production was subsequently released and verified; the authoritative date-stamped record is `PRODUCTION_RELEASE_2026-08-13.md`. This preview snapshot must not be used by itself to imply production state.
 
 ## Source release
 
@@ -31,6 +31,6 @@ The historical Vercel project name `x7-whatsai-dashboard` is hosting configurati
 - The same landing artifact was verified locally in production mode: all nine requested public/static routes returned HTTP 200, discovered internal links returned HTTP 200, and desktop/mobile/evidence browser runs reported zero product console errors.
 - Root and landing production builds passed at this branch head.
 
-## Release decision
+## Historical release decision
 
-**NO PRODUCTION RELEASE.** This is preview/review evidence only. Production merge and deployment remain blocked by the legal/company document gate, signed pilot evidence, secure live tenant-isolation proof and security review described in `GRANT_READINESS.md`.
+At the time of this snapshot, no production release had occurred. PR #5 was later squash-merged as `7c28a3abf491cdbf35f0080266fca1b90bbb96dd`, and both Vercel production projects were verified READY at that SHA. See `PRODUCTION_RELEASE_2026-08-13.md` for live proof and remaining pilot/security/documentary gaps.
