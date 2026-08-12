@@ -14,7 +14,7 @@ Last updated: 12 August 2026
 | End-to-end workflow simulation | Engineering | `tests/integration/workflow_end_to_end.test.ts` | Verified local simulation | 12 Aug 2026 | Scoring/escalation path | Real pilot/runtime proof |
 | Hinglish dataset card | Product / engineering | `datasets/hinglish-intents/dataset-card.md` | Versioned | 12 Aug 2026 | Indian language relevance | Held-out real-pilot evaluation set |
 | Hinglish dataset checksum | Engineering | dataset integration test | Verified local test result | 12 Aug 2026 | Dataset integrity | Signed release manifest |
-| Root test summary | Engineering | Vitest output | 51 passed, 2 skipped | 12 Aug 2026 | Source quality | CI and secure integration results |
+| Root test summary | Engineering | Vitest output | 52 passed, 2 skipped | 13 Aug 2026 | Source quality | CI and secure integration results |
 | Landing quality summary | Engineering | type-check, lint, build, HTTP/link and Playwright checks | Passed locally on desktop/mobile; zero product console errors | 13 Aug 2026 | Public-site quality | Authenticated preview and Lighthouse evidence |
 | Privacy and Terms | Legal owner / counsel | public pages and source | Draft, not legal-reviewed | 12 Aug 2026 | Governance | Counsel approval and executed agreements |
 | Architecture diagram | Engineering | `TECHNICAL_ARCHITECTURE.md` and public route | Demonstrated from source | 12 Aug 2026 | Technical feasibility | Deployed topology and data-flow review |
@@ -26,5 +26,5 @@ Last updated: 12 August 2026
 | DPIIT recognition certificate | Founder | private data room | Missing | — | Scheme eligibility | Required where applicable |
 | Pilot dashboard screenshots | Product | redacted runtime captures | Missing | — | Product evidence | Capture after safe pilot/staging setup |
 | Product-demo recording | Product | approved recording URL | Missing | — | Product evidence | Record without personal data |
-| Deployment evidence | Engineering | `DEPLOYMENT_EVIDENCE.md`, Vercel/GitHub PR checks | Protected preview deployments passed at `19e9a47`; not production | 13 Aug 2026 | Release readiness | Authenticated preview product smoke and production release |
+| Deployment evidence | Engineering | `DEPLOYMENT_EVIDENCE.md`, Vercel/GitHub PR checks | Protected preview deployments passed at the current PR head; not production | 13 Aug 2026 | Release readiness | Authenticated preview product smoke and production release |
 | Independent security report | Security owner | private data room | Missing | — | Security assurance | Independent assessment |

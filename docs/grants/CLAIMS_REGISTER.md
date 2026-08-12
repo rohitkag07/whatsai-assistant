@@ -18,14 +18,14 @@ Last updated: 12 August 2026
 | C-010 | Hinglish dataset contains 1,800 governed synthetic examples | VERIFIED | versioned dataset, dataset card and checksum test | Exact count with “synthetic” label | None for dataset integrity; performance still missing |
 | C-011 | Hinglish intent performance works for real customers | PLANNED | none | “Pilot validation pending” | Held-out real or consented evaluation set |
 | C-012 | Lead scoring and hot-lead escalation work end to end | DEMONSTRATED | integration test and scoring/escalation tests | “Demonstrated in local integration test” | Live pilot/runtime evidence |
-| C-013 | Root automated tests pass | VERIFIED | 12 Aug 2026 local test log: 51 passed, 2 skipped | State exact environment and date | CI and secure integration run |
+| C-013 | Root automated tests pass | VERIFIED | 13 Aug 2026 local test log: 52 passed, 2 skipped | State exact environment and date | CI and secure integration run |
 | C-014 | XeroWA has paying customers or revenue | PLANNED | none supplied | “No verified paying customers or revenue” | Contracts, invoices, bank/CA evidence |
 | C-015 | XeroWA has completed pilots | PLANNED | none supplied | “Pilot validation pending” | Signed LOIs, consent, raw/aggregated results |
 | C-016 | XeroWA improves conversion or response time | PLANNED | no measured baseline/results | “Expected outcome; not yet measured” | Defined metric, sample, window and signed result |
 | C-017 | XeroWA is DPIIT recognized | PLANNED | no certificate supplied | Do not claim | Validated DPIIT certificate |
 | C-018 | XeroWA or Aviro is government/grant approved | PLANNED | none | Do not claim | Official sanction/approval document |
 | C-019 | XeroWA is ISO/SOC 2/CERT-In/pentest certified | PLANNED | none | “No independent certification claimed” | Corresponding valid report/certificate |
-| C-020 | Production deployment is current and release-tested | PLANNED | protected Vercel previews passed at `19e9a47`; local production-mode smoke passed | “Protected preview deployed; production release pending” | Authenticated preview smoke, production URL/SHA and release results |
+| C-020 | Production deployment is current and release-tested | PLANNED | protected Vercel previews passed at the current PR head; local production-mode smoke passed | “Protected preview deployed; production release pending” | Authenticated preview smoke, production URL/SHA and release results |
 
 ## Prohibited transformations
 

@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 const metrics = [
   {
     metric: 'Automated source tests',
-    value: '51 passed · 2 skipped',
+    value: '52 passed · 2 skipped',
     definition: 'Root Vitest checks completed successfully during the local audit.',
     source: 'npm test / Vitest',
     window: 'Point-in-time run, 12 Aug 2026',
-    sample: '53 test cases',
+    sample: '54 test cases',
     environment: 'Local isolated worktree',
   },
   {

@@ -10,7 +10,7 @@ This is a time-bounded pre-release record. A separate date-stamped production-re
 - Repository: `https://github.com/rohitkag07/whatsai-assistant`
 - Branch: `codex/grant-readiness-xerowa`
 - Pull request: `https://github.com/rohitkag07/whatsai-assistant/pull/5`
-- Application-artifact commit: `19e9a47cb73f1724315377e01bd6c1e4f382ce93` (the later PR commits update deployment documentation only)
+- Application-artifact commit: the current PR head recorded by GitHub/Vercel checks (includes the release security regression fix)
 - Base SHA: `a9057ac327f8dc953b9c1020653a97c63fab6e51`
 - Review state: draft; not merged
 
