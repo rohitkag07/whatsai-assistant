@@ -27,3 +27,4 @@ coverage/
 dist/
 .vercel/
 .gstack/
+.env*.local
