@@ -3,9 +3,9 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILES=(
-  "$ROOT_DIR/agents/x7-re-summoner/.env"
-  "$ROOT_DIR/agents/x7-re-sales-agent/.env"
-  "$ROOT_DIR/agents/x7-re-tool-gateway/.env"
+  "$ROOT_DIR/agents/xerowa-summoner/.env"
+  "$ROOT_DIR/agents/xerowa-sales-agent/.env"
+  "$ROOT_DIR/agents/xerowa-tool-gateway/.env"
 )
 
 if [[ -n "${NEW_WHATSAPP_TOKEN:-}" ]]; then
@@ -58,5 +58,5 @@ PY
 done
 
 echo "Token synced. Restart agents with:"
-echo "  pkill -f 'agents/x7-re' || true"
+echo "  pm2 restart whatsai-sales-agent whatsai-tool-gateway whatsai-summoner --update-env"
 echo "  ./scripts/start-phase6-local.sh"

@@ -162,5 +162,5 @@ requests, and Supabase triggers the scheduler. Stay within each provider's free
 tier and monitor usage; ₹0 is a target, not a contractual guarantee from Meta,
 Vercel, or Supabase.
 
-Razorpay, content generation, colony, finance, OpenAI, and Cloud Run are not
+Optional payment, content generation, OpenAI, and Cloud Run integrations are not
 launch blockers for the WhatsAI lead-to-appointment runtime.

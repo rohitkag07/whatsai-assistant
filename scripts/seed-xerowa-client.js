@@ -5,9 +5,9 @@ const { createClient } = require('@supabase/supabase-js');
 const ROOT = path.resolve(__dirname, '..');
 const ENV_FILES = [
   '.env.local',
-  'agents/x7-re-summoner/.env',
-  'agents/x7-re-sales-agent/.env',
-  'agents/x7-re-tool-gateway/.env',
+  'agents/xerowa-summoner/.env',
+  'agents/xerowa-sales-agent/.env',
+  'agents/xerowa-tool-gateway/.env',
 ];
 
 for (const relativePath of ENV_FILES) {

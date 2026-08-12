@@ -6,8 +6,7 @@
 - local agent mesh exists
 - Summoner orchestration exists
 - central WhatsApp ingress exists
-- real-estate sales flow provides first vertical foundation
-- documentation layer for pivot, runbook, env contract, and deployment checklist exists
+- documentation, runbook, env contract, and deployment checklist exist
 
 ## Yellow
 
@@ -15,8 +14,7 @@
 - queue durability depends on live Supabase
 - some runtime proofs are local-only
 - some UI surfaces still degrade to fallback/demo data when backend data is unavailable
-- dashboard copy and route language still reflects builder OS in many places
-- generic business/playbook layer is not built yet
+- some compatibility database columns still use pre-generic names
 
 ## Red Until Proven
 
@@ -35,7 +33,7 @@ Do not call the pivot trial-ready until all of these are proven:
 2. live Summoner webhook ingress
 3. generic business context resolution
 4. generic conversation persistence
-5. one vertical playbook working end-to-end
+5. one tenant playbook working end-to-end
 6. owner handoff delivered
 7. follow-up or daily summary delivered
 8. dashboard shows real lead/conversation data with no fallback for that trial

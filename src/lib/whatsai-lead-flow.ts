@@ -144,7 +144,11 @@ async function resolveBuilderId(supabase: any, businessId?: string | null) {
 
 async function upsertLead(supabase: any, input: LeadFlowInput & { builderId: string; projectId: string | null; phone: string; source: LeadSource; body: string }) {
   const existing = input.leadId
-    ? await (supabase.from('leads') as any).select('*').eq('id', input.leadId).maybeSingle()
+    ? await (supabase.from('leads') as any)
+        .select('*')
+        .eq('id', input.leadId)
+        .eq('builder_id', input.builderId)
+        .maybeSingle()
     : await (supabase.from('leads') as any)
         .select('*')
         .eq('builder_id', input.builderId)
@@ -218,6 +222,7 @@ async function upsertThread(supabase: any, input: { businessId: string | null; b
         last_message_at: new Date().toISOString(),
       })
       .eq('id', input.threadId)
+      .eq('business_id', input.businessId)
       .select()
       .single();
     if (update.data) return update.data;
@@ -226,6 +231,7 @@ async function upsertThread(supabase: any, input: { businessId: string | null; b
   const existing = input.contactId
     ? await (supabase.from('conversation_threads') as any)
         .select('*')
+        .eq('business_id', input.businessId)
         .eq('contact_id', input.contactId)
         .eq('channel', 'whatsapp')
         .maybeSingle()
@@ -275,7 +281,7 @@ async function loadPlaybook(supabase: any, businessId: string) {
   const { data } = await (supabase.from('assistant_playbooks') as any)
     .select('id,qualification_questions')
     .eq('business_id', businessId)
-    .eq('active', true)
+    .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -319,7 +325,8 @@ async function persistQualificationAnswers(supabase: any, threadId: string | nul
 async function createAppointment(supabase: any, input: { businessId: string; contactId: string; threadId: string | null; title: string; appointmentType: string; scheduledAt: string; notes: string }) {
   const existing = input.threadId
     ? await (supabase.from('appointments') as any)
-        .select('*')
+      .select('*')
+        .eq('business_id', input.businessId)
         .eq('thread_id', input.threadId)
         .in('status', ['scheduled'])
         .order('created_at', { ascending: false })

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ENV_FILE="$ROOT_DIR/agents/x7-re-summoner/.env"
+ENV_FILE="$ROOT_DIR/agents/xerowa-summoner/.env"
 SUMMONER_URL="${SUMMONER_URL:-http://localhost:8082}"
 PHONE_FROM="${PHONE_FROM:-919999888877}"
 
@@ -18,12 +18,12 @@ if [[ -z "$PHONE_NUMBER_ID" ]]; then
 fi
 
 if [[ -z "$META_APP_SECRET" ]]; then
-  echo "META_APP_SECRET missing in agents/x7-re-summoner/.env" >&2
+  echo "META_APP_SECRET missing in agents/xerowa-summoner/.env" >&2
   exit 1
 fi
 
 if [[ -z "$PHONE_NUMBER_ID" ]]; then
-  echo "WHATSAPP_PHONE_NUMBER_ID missing in agents/x7-re-summoner/.env" >&2
+  echo "WHATSAPP_PHONE_NUMBER_ID missing in agents/xerowa-summoner/.env" >&2
   exit 1
 fi
 

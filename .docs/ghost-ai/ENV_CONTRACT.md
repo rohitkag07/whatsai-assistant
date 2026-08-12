@@ -2,7 +2,8 @@
 
 This file is the source of truth for runtime environment variables required for the current WhatsAI lead-to-appointment MVP.
 
-The repo still uses several `x7-re-*` service names and real-estate defaults. Keep those env vars working for backward compatibility while the generic WhatsAI naming is completed.
+XeroWA uses only the `xerowa-*` service names. Product-specific service names
+and runtime defaults are not part of this repository.
 
 ## Shared Rules
 
@@ -12,7 +13,8 @@ The repo still uses several `x7-re-*` service names and real-estate defaults. Ke
 - Local defaults are acceptable for development, but production must use explicit values.
 - Prefer Summoner as the public ingress for WhatsApp webhooks and agent fan-out.
 - New WhatsAI work should resolve business context before falling back to old `DEFAULT_BUILDER_ID` / `DEFAULT_PROJECT_ID` values.
-- Razorpay, content, colony, finance, advanced Meta Ads, and OpenAI content generation are deferred modules and are not MVP launch blockers.
+- Content, colony, finance, advanced Meta Ads, and OpenAI content generation are
+  outside the current XeroWA runtime and are not MVP launch blockers.
 
 ## Pivot Compatibility Values
 
@@ -25,11 +27,11 @@ Use these for the generic WhatsAI layer when implemented:
 - `TRIAL_MODE_ENABLED`
 - `DAILY_SUMMARY_TIMEZONE` default `Asia/Kolkata`
 
-These values do not replace existing real-estate env vars until code migration is complete.
+Compatibility variables should be removed only with a reviewed database migration.
 
 ## Dashboard
 
-File: `apps/dashboard/.env.local`
+File: `.env.local` at the repository root
 
 Required core values:
 
@@ -69,12 +71,10 @@ Deferred optional integrations:
 - `OPENAI_API_KEY`
 - `META_ACCESS_TOKEN`
 - `META_AD_ACCOUNT_ID`
-- `NEXT_PUBLIC_RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_SECRET`
 
 ## Summoner
 
-File: `agents/x7-re-summoner/.env`
+File: `agents/xerowa-summoner/.env`
 
 Required:
 
@@ -103,7 +103,7 @@ WhatsApp ingress:
 
 ## Sales / Assistant Agent
 
-File: `agents/x7-re-sales-agent/.env`
+File: `agents/xerowa-sales-agent/.env`
 
 This service remains named sales-agent for now, but it is the first candidate to become the generic assistant-agent.
 
@@ -138,7 +138,7 @@ Optional intelligence and proxy:
 
 ## Tool Gateway
 
-File: `agents/x7-re-tool-gateway/.env`
+File: `agents/xerowa-tool-gateway/.env`
 
 Required:
 
@@ -151,21 +151,11 @@ WhatsApp:
 - `WHATSAPP_PHONE_NUMBER_ID`
 - `WHATSAPP_ACCESS_TOKEN`
 
-Deferred optional tool-gateway integrations:
+Optional generic social publishing integrations:
 
 - `META_ACCESS_TOKEN`
 - `META_IG_USER_ID`
 - `META_FB_PAGE_ID`
-- `HIGGSFIELD_API_KEY`
-- `REMOTION_MODE`
-- `REMOTION_LAMBDA_FN`
-- `REMOTION_LAMBDA_REGION`
-- `REMOTION_SERVE_URL`
-- `REMOTION_PROJECT_DIR`
-- `RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_SECRET`
-- `DEFAULT_UPI_VPA`
-- `DEFAULT_UPI_NAME`
 
 ## Local Port Map
 
@@ -176,7 +166,7 @@ Deferred optional tool-gateway integrations:
 | Tool Gateway | `8081` |
 | Summoner | `8082` |
 
-Ports `8083`, `8085`, `8086`, `8087`, and `8088` are deferred module ports and are not part of the WhatsAI MVP proof.
+Only ports `8080`, `8081`, and `8082` belong to the current XeroWA runtime.
 
 ## Deployment Rule
 

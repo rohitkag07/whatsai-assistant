@@ -52,19 +52,12 @@ check_http "sales-agent" "http://127.0.0.1:8080/health"
 check_http "tool-gateway" "http://127.0.0.1:8081/health"
 check_http "summoner" "http://127.0.0.1:8082/health"
 check_http "summoner-deps" "http://127.0.0.1:8082/health/dependencies"
-check_http "content-agent" "http://127.0.0.1:8083/health"
-check_http "ads-agent" "http://127.0.0.1:8085/health"
-check_http "ghost-closer" "http://127.0.0.1:8086/health"
-check_http "colony-agent" "http://127.0.0.1:8087/health"
-check_http "colony-deps" "http://127.0.0.1:8087/health/dependencies"
-check_http "finance-agent" "http://127.0.0.1:8088/health"
-check_http "finance-deps" "http://127.0.0.1:8088/health/dependencies"
 check_http "dashboard-ping" "http://127.0.0.1:3000/api/ping"
 check_http "dashboard-mesh" "http://127.0.0.1:3000/api/agent-mesh/health"
 check_http "dashboard-readiness" "http://127.0.0.1:3000/api/ops/readiness"
 
 print_section "WhatsApp Graph Check"
-SALES_ENV="$ROOT_DIR/agents/x7-re-sales-agent/.env"
+SALES_ENV="$ROOT_DIR/agents/xerowa-sales-agent/.env"
 if [[ -f "$SALES_ENV" ]]; then
   set -a
   # shellcheck disable=SC1090

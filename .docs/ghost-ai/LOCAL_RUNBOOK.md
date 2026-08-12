@@ -50,8 +50,7 @@ pm2 stop whatsai-sales-agent whatsai-tool-gateway whatsai-summoner
 - tool-gateway `8081`
 - summoner `8082`
 
-Only these three services are required for the WhatsAI lead-to-appointment MVP.
-Content, ads, ghost-closer, colony, and finance agents are deferred modules and are not launch blockers.
+These are the only supported local XeroWA agent services.
 
 ## Useful Checks
 
@@ -86,4 +85,4 @@ pm2 restart all
 - production-like behavior requires real env vars from `ENV_CONTRACT.md`
 - if UI looks stale, restart local dev servers and hard refresh
 - if a page renders unstyled, check the dashboard dev server first before assuming the page code is broken
-- do not remove current real-estate local paths while building the generic WhatsAI layer
+- do not add industry-specific runtime services; use tenant playbooks

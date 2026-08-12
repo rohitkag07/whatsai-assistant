@@ -52,19 +52,15 @@ const serviceRegistry = [
   { key: 'summoner', label: 'Summoner', url: env.SUMMONER_URL || env.NEXT_PUBLIC_SUMMONER_URL || 'http://localhost:8082' },
   { key: 'sales', label: 'Sales Agent', url: env.SALES_AGENT_URL || 'http://localhost:8080' },
   { key: 'tool_gateway', label: 'Tool Gateway', url: env.TOOL_GATEWAY_URL || 'http://localhost:8081' },
-  { key: 'content', label: 'Content Agent', url: env.CONTENT_AGENT_URL || 'http://localhost:8083' },
-  { key: 'ads', label: 'Ads Agent', url: env.ADS_AGENT_URL || 'http://localhost:8085' },
-  { key: 'ghost_closer', label: 'Ghost Closer', url: env.GHOST_CLOSER_URL || 'http://localhost:8086' },
-  { key: 'colony', label: 'Colony Agent', url: env.COLONY_AGENT_URL || 'http://localhost:8087' },
-  { key: 'finance', label: 'Finance Agent', url: env.FINANCE_AGENT_URL || 'http://localhost:8088' },
 ] as const;
 
 const dataProbeRegistry = [
-  { key: 'builders', label: 'Builders', table: 'builders' },
-  { key: 'projects', label: 'Projects', table: 'projects' },
+  { key: 'businesses', label: 'Businesses', table: 'businesses' },
+  { key: 'business_channels', label: 'Business Channels', table: 'business_channels' },
+  { key: 'conversation_threads', label: 'Conversation Threads', table: 'conversation_threads' },
+  { key: 'conversation_messages', label: 'Conversation Messages', table: 'conversation_messages' },
   { key: 'leads', label: 'Leads', table: 'leads' },
-  { key: 'residents', label: 'Residents', table: 'residents' },
-  { key: 'whatsapp_messages', label: 'WhatsApp Messages', table: 'whatsapp_messages' },
+  { key: 'appointments', label: 'Appointments', table: 'appointments' },
   { key: 'agent_dispatch_queue', label: 'Dispatch Queue', table: 'agent_dispatch_queue' },
 ] as const;
 
@@ -152,16 +148,6 @@ function inferDependencyOk(key: string, payload: unknown) {
       const supabaseConfigured = Boolean((checks.supabase as { configured?: boolean } | undefined)?.configured);
       return supabaseConfigured;
     }
-    case 'content':
-      return Boolean(data.supabase) && data.tool_gateway_ping === 'ok';
-    case 'ads':
-      return Boolean(data.supabase);
-    case 'ghost_closer':
-      return Boolean(data.supabase) && Boolean(data.tool_gateway);
-    case 'colony':
-      return Boolean(data.supabase) && Boolean(data.tool_gateway);
-    case 'finance':
-      return Boolean(data.supabase);
     case 'tool_gateway':
       return true;
     default:
@@ -191,12 +177,8 @@ function serviceDetail(key: string, health: unknown, dependencies: unknown, heal
       if (whatsapp?.configured) return `Reachable, but WhatsApp Graph check is not passing${whatsapp.check?.reason ? `: ${whatsapp.check.reason}` : '.'}`;
       return 'Reachable, but WhatsApp Cloud API credentials are incomplete.';
     }
-    case 'finance':
-      return Boolean(dep.razorpay)
-        ? 'Reachable with Razorpay webhook secret configured.'
-        : 'Reachable, but Razorpay webhook secret is missing.';
     case 'tool_gateway':
-      return Boolean(dep.whatsapp) || Boolean(dep.meta) || Boolean(dep.higgsfield)
+      return Boolean(dep.whatsapp) || Boolean(dep.meta)
         ? 'Reachable with at least one external execution path configured.'
         : 'Reachable, but external execution credentials are mostly missing.';
     default:
@@ -312,22 +294,14 @@ function buildLaunchGates({
   const supabaseReady =
     envByKey.supabase_client?.status !== 'blocked' &&
     envByKey.supabase_service?.status !== 'blocked' &&
-    probeByKey.builders?.status === 'ready' &&
-    probeByKey.projects?.status === 'ready';
+    probeByKey.businesses?.status === 'ready' &&
+    probeByKey.business_channels?.status === 'ready' &&
+    probeByKey.conversation_threads?.status === 'ready';
 
   const summonerReady =
     serviceByKey.summoner?.status === 'ready' &&
     envByKey.whatsapp_ingress?.status !== 'blocked' &&
     envByKey.default_context?.status !== 'blocked';
-
-  const financePathReady =
-    serviceByKey.finance?.reachable &&
-    envByKey.razorpay?.status !== 'blocked';
-
-  const colonyReady =
-    serviceByKey.colony?.reachable &&
-    serviceByKey.tool_gateway?.reachable &&
-    envByKey.whatsapp_ingress?.status !== 'blocked';
 
   const queueProofReady =
     serviceByKey.summoner?.status === 'ready' &&
@@ -335,7 +309,8 @@ function buildLaunchGates({
 
   const liveDashboardReady =
     probeByKey.leads?.status === 'ready' &&
-    probeByKey.residents?.status === 'ready';
+    probeByKey.conversation_threads?.status === 'ready' &&
+    probeByKey.appointments?.status === 'ready';
 
   return [
     {
@@ -363,28 +338,12 @@ function buildLaunchGates({
         : 'Summoner orchestration path or queue table access is not ready.',
     },
     {
-      key: 'finance_receipts',
-      label: 'Finance and Razorpay Path',
-      status: financePathReady ? 'manual' : 'blocked',
-      detail: financePathReady
-        ? 'Finance service is reachable with Razorpay env present. Still needs a signed test webhook proof.'
-        : 'Finance service or Razorpay configuration is incomplete.',
-    },
-    {
-      key: 'colony_notifications',
-      label: 'Colony Notices and Reminders',
-      status: colonyReady ? 'manual' : 'blocked',
-      detail: colonyReady
-        ? 'Colony and tool-gateway are reachable. Still needs one outbound notification proof.'
-        : 'Colony execution path is not fully ready.',
-    },
-    {
       key: 'dashboard_live_data',
       label: 'Dashboard on Live Data',
       status: liveDashboardReady ? 'ready' : 'blocked',
       detail: liveDashboardReady
-        ? 'Core tables for sales and colony surfaces are queryable from the dashboard.'
-        : 'Lead or resident data probes are still failing, so live UI proof is weak.',
+        ? 'Lead, conversation, and appointment tables are queryable from the dashboard.'
+        : 'Lead, conversation, or appointment probes are failing, so live UI proof is weak.',
     },
   ];
 }
@@ -398,9 +357,8 @@ export async function getOpsReadiness(): Promise<OpsReadiness> {
     buildEnvGroup('supabase_service', 'Supabase Service Role', [
       'SUPABASE_SERVICE_ROLE_KEY',
     ]),
-    buildEnvGroup('default_context', 'Default Builder Context', [
-      'DEFAULT_BUILDER_ID',
-      'DEFAULT_PROJECT_ID',
+    buildEnvGroup('default_context', 'Default Business Context', [
+      'DEFAULT_BUSINESS_ID',
     ]),
     buildEnvGroup('whatsapp_ingress', 'WhatsApp Ingress', [
       'WHATSAPP_PHONE_NUMBER_ID',
@@ -409,25 +367,6 @@ export async function getOpsReadiness(): Promise<OpsReadiness> {
       'META_APP_SECRET',
     ], [
       'WHATSAPP_GRAPH_VERSION',
-    ]),
-    buildEnvGroup('meta_ads', 'Meta Ads', [
-      'META_ACCESS_TOKEN',
-      'META_AD_ACCOUNT_ID',
-    ]),
-    buildEnvGroup('razorpay', 'Razorpay', [
-      'NEXT_PUBLIC_RAZORPAY_KEY_ID',
-      'RAZORPAY_KEY_SECRET',
-      'RAZORPAY_WEBHOOK_SECRET',
-    ]),
-    buildEnvGroup('openai', 'OpenAI', [
-      'OPENAI_API_KEY',
-    ]),
-    buildEnvGroup('media', 'Render and Media', [
-      'REMOTION_MODE',
-    ], [
-      'HIGGSFIELD_API_KEY',
-      'REMOTION_SERVE_URL',
-      'REMOTION_LAMBDA_FN',
     ]),
   ];
 

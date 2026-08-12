@@ -43,13 +43,8 @@ start_agent() {
   )
 }
 
-start_agent "sales-agent" "agents/x7-re-sales-agent"
-start_agent "tool-gateway" "agents/x7-re-tool-gateway"
-start_agent "content-agent" "agents/x7-re-content-agent"
-start_agent "ads-agent" "agents/x7-re-ads-agent"
-start_agent "ghost-closer" "agents/x7-re-ghost-closer"
-start_agent "colony-agent" "agents/x7-re-colony-agent"
-start_agent "finance-agent" "agents/x7-re-finance-agent"
-start_agent "summoner" "agents/x7-re-summoner"
+start_agent "sales-agent" "agents/xerowa-sales-agent"
+start_agent "tool-gateway" "agents/xerowa-tool-gateway"
+start_agent "summoner" "agents/xerowa-summoner"
 
-echo "phase6 local stack boot requested"
+echo "XeroWA core local stack boot requested"

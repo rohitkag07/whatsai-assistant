@@ -29,7 +29,7 @@ X7 has been pivoted from a real-estate-only product into a WhatsApp-first AI rec
 
 | Step | Description | Status | Notes |
 |---|---|---|---|
-| 1 | Type-check | ✅ | `apps/dashboard` and `apps/landing` passed `tsc --noEmit`. |
+| 1 | Type-check | ✅ | The canonical root dashboard and `apps/landing` passed `tsc --noEmit`. |
 | 2 | Supabase tables | ✅ | 14/14 required tables verified through Supabase REST API. |
 | 3 | Trial business seeded | ✅ | `business_id: 6a427b8d-ec8e-418d-9eea-c8eae278e451`; checklist seeded with 8 rows. |
 | 4 | Agent health | ✅ | Launch-critical services returned 200: sales-agent, tool-gateway, and summoner. |
@@ -59,23 +59,21 @@ X7 has been pivoted from a real-estate-only product into a WhatsApp-first AI rec
 - Dashboard pages load and conversations page renders real Supabase seeded data.
 - Landing page CTA renders the correct WhatsApp URL.
 
-## What IS NOT Proven Yet
-
-- Deferred modules: Razorpay/payment automation, content generation, colony/resident management, finance receipts, and advanced Meta Ads automation.
-
-These are not blockers for the current WhatsAI lead-to-appointment MVP.
+Product-specific property operations, society management, property-content generation,
+and property advertising automation are not part of XeroWA's runtime. Generic
+WhatsApp campaigns and content drafts remain separate XeroWA capabilities.
 
 ## Pre-Launch Checklist for Rohit
 
 - [ ] Get a fresh Meta WhatsApp Access Token from Meta Developer Portal.
-- [ ] Update `WHATSAPP_ACCESS_TOKEN` in `agents/x7-re-summoner/.env`.
-- [ ] Update `WHATSAPP_ACCESS_TOKEN` in `agents/x7-re-tool-gateway/.env`.
+- [ ] Update `WHATSAPP_ACCESS_TOKEN` in `agents/xerowa-summoner/.env`.
+- [ ] Update `WHATSAPP_ACCESS_TOKEN` in `agents/xerowa-tool-gateway/.env`.
 - [ ] Start local agents with `pm2 start ecosystem.config.cjs --update-env`.
 - [ ] Start dashboard with `npm run dev`.
 - [ ] Run `npm run prove:whatsai`.
 - [ ] Start ngrok with `ngrok http 8082`.
 - [ ] Configure ngrok callback URL in Meta Developer Portal: `https://YOUR-NGROK-DOMAIN/webhook`.
-- [ ] Use `WHATSAPP_VERIFY_TOKEN` from `agents/x7-re-summoner/.env` in Meta webhook verification.
+- [ ] Use `WHATSAPP_VERIFY_TOKEN` from `agents/xerowa-summoner/.env` in Meta webhook verification.
 - [ ] Send one real WhatsApp message from personal phone to business number.
 - [ ] Watch logs: `tail -f ~/.codex-runtime/phase6/logs/summoner.log`.
 - [ ] Verify the contact appears at `http://localhost:3000/conversations`.
@@ -87,7 +85,7 @@ These are not blockers for the current WhatsAI lead-to-appointment MVP.
 
 ## Environment Variables Needed in Production
 
-### Dashboard (`apps/dashboard`)
+### Dashboard (canonical root app)
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
@@ -108,7 +106,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_APP_URL=
 ```
 
-### Summoner (`agents/x7-re-summoner`)
+### Summoner (`agents/xerowa-summoner`)
 
 ```bash
 PORT=8082
@@ -124,14 +122,9 @@ WHATSAPP_ACCESS_TOKEN=
 WHATSAPP_GRAPH_VERSION=v22.0
 META_APP_SECRET=
 SALES_AGENT_URL=
-CONTENT_AGENT_URL=
-ADS_AGENT_URL=
-COLONY_AGENT_URL=
-FINANCE_AGENT_URL=
-GHOST_CLOSER_URL=
 ```
 
-### Sales Agent (`agents/x7-re-sales-agent`)
+### Sales Agent (`agents/xerowa-sales-agent`)
 
 ```bash
 PORT=8080
@@ -151,7 +144,7 @@ OPENAI_MODEL=gpt-4o-mini
 SUMMONER_URL=
 ```
 
-### Tool Gateway (`agents/x7-re-tool-gateway`)
+### Tool Gateway (`agents/xerowa-tool-gateway`)
 
 ```bash
 PORT=8081
@@ -178,7 +171,6 @@ node scripts/seed-trial-business.js
 Dashboard:
 
 ```bash
-cd apps/dashboard
 npm run type-check
 npm run dev
 ```
@@ -202,7 +194,6 @@ ngrok http 8082
 Dashboard:
 
 ```bash
-cd apps/dashboard
 vercel link
 vercel env pull .env.local
 vercel deploy
@@ -222,8 +213,8 @@ vercel deploy --prod
 If deploying from the monorepo root with project-specific Vercel configuration, use:
 
 ```bash
-vercel deploy --cwd apps/dashboard
-vercel deploy --cwd apps/dashboard --prod
+vercel deploy
+vercel deploy --prod
 vercel deploy --cwd apps/landing
 vercel deploy --cwd apps/landing --prod
 ```

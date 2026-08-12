@@ -1,7 +1,7 @@
 const summonerUrl = process.env.SUMMONER_URL || process.env.NEXT_PUBLIC_SUMMONER_URL || 'http://localhost:8082';
 const agentSecret = process.env.AGENT_SECRET || '';
 
-type TargetAgent = 'sales' | 'content' | 'ads' | 'colony' | 'finance';
+type TargetAgent = 'sales';
 type SummonerDispatchOptions = {
   auditMode?: 'full' | 'summary';
 };

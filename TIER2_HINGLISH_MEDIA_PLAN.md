@@ -22,11 +22,11 @@ The current implementation is a strong base but has two specific gaps:
 
 | Surface | Current behaviour | Gap |
 |---|---|---|
-| `agents/x7-re-sales-agent/keyword-engine.js` | NFKC normalization, punctuation folding, exact/word/contains matching | No typo recovery, aliases, match score, ambiguity rejection, or intent packs |
+| `agents/xerowa-sales-agent/keyword-engine.js` | NFKC normalization, punctuation folding, exact/word/contains matching | No typo recovery, aliases, match score, ambiguity rejection, or intent packs |
 | `src/lib/keyword-reply-schema.ts` | Validates 30 rules with keyword arrays and exact replies | No fuzzy policy or media descriptor |
 | `src/components/whatsai/KeywordReplyEditor.tsx` | Keyword chips, match type, exact reply, browser tester | No synonym suggestions, score/reason display, upload, preview, replace, or delete |
 | `assistant_playbooks.keyword_replies` | JSONB array is the tenant reply source | Media fields and per-rule fuzzy policy are absent |
-| `agents/x7-re-tool-gateway/index.js` | Supports text, image, and document URL sends | No video send route; media validation and structured failure codes are weak |
+| `agents/xerowa-tool-gateway/index.js` | Supports text, image, and document URL sends | No video send route; media validation and structured failure codes are weak |
 | Sales Agent | Sends matched text through Tool Gateway and records metadata | Does not choose media sends or record media decision metadata |
 
 ## 2. Market Research: Tier-2 WhatsApp Behaviour
@@ -249,7 +249,7 @@ Suggested files:
 - `src/lib/intent-packs/coaching.ts`
 - `src/lib/intent-packs/gym.ts`
 - `src/lib/intent-packs/salon-spa.ts`
-- `agents/x7-re-sales-agent/intent-packs.js` generated from one neutral JSON source during build
+- `agents/xerowa-sales-agent/intent-packs.js` generated from one neutral JSON source during build
 
 Do not maintain separate handwritten frontend/backend alias lists. Use a shared JSON artifact or a generation script, and add a parity test.
 
@@ -454,7 +454,7 @@ Failure policy:
 
 ### M1: Build the evaluation corpus first
 
-- [ ] Create `agents/x7-re-sales-agent/fixtures/tier2-intents.json` with 500 labelled positive/negative examples.
+- [ ] Create `agents/xerowa-sales-agent/fixtures/tier2-intents.json` with 500 labelled positive/negative examples.
 - [ ] Include all 100 phrases in this document plus vertical-specific and adversarial examples.
 - [ ] Create `scripts/evaluate-hinglish-matcher.js` reporting precision, recall, confusion matrix, wrong-intent rate, fallback rate, and p95 latency.
 - [ ] Save baseline results from the current exact matcher before changing it.
@@ -472,7 +472,7 @@ Failure policy:
 
 ### M3: Implement conservative fuzzy matching
 
-- [ ] Modify `agents/x7-re-sales-agent/keyword-engine.js` with repeated-character normalization, token windows, bounded Damerau-Levenshtein, thresholds, and winner margin.
+- [ ] Modify `agents/xerowa-sales-agent/keyword-engine.js` with repeated-character normalization, token windows, bounded Damerau-Levenshtein, thresholds, and winner margin.
 - [ ] Mirror deterministic preview logic in `src/lib/keyword-reply-schema.ts`, preferably through shared generated code.
 - [ ] Extend `KeywordReplyRule` in `src/types/database.ts` with `intent`, `fuzzy_enabled`, and optional `fuzzy_threshold`.
 - [ ] Extend Zod validation and reject unsafe threshold values.
@@ -512,9 +512,9 @@ Failure policy:
 
 ### M7: Complete media sending
 
-- [ ] Add `/whatsapp/send/video` to `agents/x7-re-tool-gateway/index.js`.
+- [ ] Add `/whatsapp/send/video` to `agents/xerowa-tool-gateway/index.js`.
 - [ ] Harden image/document routes with schema validation, host allowlist, timeouts, and structured errors.
-- [ ] Modify `agents/x7-re-sales-agent/index.js` to resolve media and choose the correct Tool Gateway endpoint.
+- [ ] Modify `agents/xerowa-sales-agent/index.js` to resolve media and choose the correct Tool Gateway endpoint.
 - [ ] Extend canonical outbound writes with media type, object identity, provider ID, and delivery status.
 - [ ] Add idempotency protection and unknown-outcome reconciliation.
 
@@ -535,12 +535,12 @@ Failure policy:
 
 ## 6. Exact File Order
 
-1. `agents/x7-re-sales-agent/fixtures/tier2-intents.json`
+1. `agents/xerowa-sales-agent/fixtures/tier2-intents.json`
 2. `scripts/evaluate-hinglish-matcher.js`
 3. `shared/intent-packs/*.json`
 4. `scripts/build-intent-packs.js`
-5. `agents/x7-re-sales-agent/keyword-engine.js`
-6. `agents/x7-re-sales-agent/keyword-engine.test.js`
+5. `agents/xerowa-sales-agent/keyword-engine.js`
+6. `agents/xerowa-sales-agent/keyword-engine.test.js`
 7. `src/lib/keyword-reply-schema.ts`
 8. `src/types/database.ts`
 9. `src/components/whatsai/KeywordReplyEditor.tsx`
@@ -549,8 +549,8 @@ Failure policy:
 12. `supabase/migrations/014_whatsai_playbook_media.sql`
 13. `src/lib/playbook-media-schema.ts`
 14. `src/app/api/whatsai/playbook-media/route.ts`
-15. `agents/x7-re-tool-gateway/index.js`
-16. `agents/x7-re-sales-agent/index.js`
+15. `agents/xerowa-tool-gateway/index.js`
+16. `agents/xerowa-sales-agent/index.js`
 17. `scripts/prove-tier2-media.js`
 18. `package.json`, `.env.example`, `README.md`, `WHATSAI_RUNBOOK.md`
 

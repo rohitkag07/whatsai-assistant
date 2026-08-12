@@ -1,84 +1,37 @@
-# WhatsAI Assistant - Current System Map
+# XeroWA Current System Map
 
-## Repo Shape
+## Repository Shape
 
-- root `src/`: active Next.js operator dashboard
-- `agents/x7-re-summoner`: routing, queue orchestration, cron fan-out, central WhatsApp ingress
-- `agents/x7-re-sales-agent`: lead qualification, follow-up, and current real-estate assistant logic
-- `agents/x7-re-tool-gateway`: shared external execution
-- `supabase/migrations`: schema and RLS
-- `scripts`: local agent-mesh helpers
+- root `src/`: active Next.js dashboard and production serverless runtime
+- `apps/landing`: public landing application
+- `agents/xerowa-summoner`: local ingress, routing, queue, and cron orchestration
+- `agents/xerowa-sales-agent`: qualification, approved replies, and follow-up
+- `agents/xerowa-tool-gateway`: controlled WhatsApp and external side effects
+- `supabase/migrations`: schema and row-level security
+- `scripts`: setup, proof, and local runtime helpers
 
-Deferred modules, not launch blockers: content, ads, ghost-closer, colony, finance, Razorpay/payment automation.
+Only the three `xerowa-*` services are supported in the local agent mesh.
 
 ## Runtime Pattern
 
-- WhatsApp is the primary customer channel
-- dashboard is the operator and owner surface
-- Summoner is the preferred routing and orchestration layer
-- assistant playbooks define business-specific behavior
-- specialist agents own domain logic
-- tool-gateway owns shared external execution
-- Supabase is the system of record
+1. Meta sends a signed WhatsApp event.
+2. `phone_number_id` resolves to `business_channels`.
+3. XeroWA resolves the business, contact, thread, and active playbook.
+4. The approved reply engine selects the deterministic response.
+5. Tool Gateway or the serverless sender performs the outbound action.
+6. Supabase stores the conversation, lead, appointment, and handoff state.
+7. The dashboard exposes operational evidence.
 
-## Pivot Coverage
+## Real-Estate Tenant Flow
 
-The existing codebase already covers the first vertical better than a blank project would:
+`real_estate` setup creates a tenant-scoped playbook and starter rules. Property
+inquiries collect budget, location, property type, timeline, loan readiness, and
+site-visit preference. A confirmed slot is stored in `appointments` as
+`site_visit`, queued for confirmation/reminders, visible in Calendar, and linked
+to an owner handoff.
 
-- real-estate lead capture
-- qualification and follow-up logic
-- site-visit-style scheduling
-- WhatsApp Cloud API paths
-- Summoner-first ingress
-- dashboard lead/workbench surfaces
-- owner/operator readiness surfaces
+## Production Boundary
 
-The generic WhatsAI layer still needs to be built.
-
-## Current Phase Coverage
-
-- Phase 1: dashboard foundation, schema base, shared components
-- Phase 2: sales engine core, lead progression, booking-related sales flows, WhatsApp-oriented sales paths
-- Phase 5: colony operations core, residents, complaints, visitors, amenities, finance-adjacent paths
-- Phase 6: agent mesh, queue orchestration, cron surfaces, Summoner-first ingress
-- Pivot P0: documentation and product direction updated to WhatsAI-first
-
-## Current UI Reality
-
-- dashboard and colony surfaces exist and run locally
-- several pages can fall back to demo data when Supabase is unavailable
-- local operator experience is ahead of verified production wiring
-- dashboard still reads mostly as real-estate OS and needs pivot UI copy/surface changes
-
-## Current Completed Areas
-
-- Phase 1 foundation
-- major Phase 2 real-estate sales engine
-- major Phase 5 colony engine
-- major Phase 6 orchestration and local mesh
-- pivot documentation layer
-
-## Current Launch-Critical Areas
-
-- live Supabase credentials
-- live Meta WhatsApp credentials
-- production-quality evidence capture
-- generic business/playbook schema and UI
-- generic WhatsApp assistant response contract
-
-## Current External Boundaries
-
-- WhatsApp uses Meta Cloud API
-- payments, content/media, colony, finance, and advanced Meta Ads are deferred external modules
-- WhatsAI launch proof requires only WhatsApp Cloud API, Supabase, Summoner, sales-agent, and Tool Gateway
-
-## Current Routing Rule
-
-Prefer:
-
-- WhatsApp webhook -> Summoner
-- dashboard -> Summoner-first helper path
-- Summoner -> assistant playbook -> specialist agent
-- Tool Gateway for external side effects
-
-Avoid adding new direct routes unless there is a specific reason.
+The launch-critical production path is the root Next.js deployment. The Express
+services are a local compatibility and orchestration surface, not a requirement
+for the Vercel WhatsApp webhook path.

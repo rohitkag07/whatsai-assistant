@@ -13,7 +13,7 @@ interface LeadCardProps {
 
 const sourceLabels: Record<Lead['source'], string> = {
   meta_ad: 'Meta Ad', google_ad: 'Google Ad', website: 'Website', whatsapp: 'WhatsApp',
-  referral: 'Referral', walk_in: 'Walk-in', ghost_closer: 'Ghost Closer',
+  referral: 'Referral', walk_in: 'Walk-in',
   telegram: 'Telegram', manual: 'Manual',
 };
 

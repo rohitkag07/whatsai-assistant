@@ -21,7 +21,7 @@ const REQUIRED_TABLES = [
 ];
 
 const repoRoot = path.resolve(__dirname, '..');
-const envPath = path.join(repoRoot, 'agents/x7-re-summoner/.env');
+const envPath = path.join(repoRoot, 'agents/xerowa-summoner/.env');
 const proofLogPath = path.join(repoRoot, '.docs/ghost-ai/PROOF_LOG.md');
 
 function parseEnvFile(filePath) {

@@ -18,7 +18,6 @@ export default [
       '.next-dev/**',
       'apps/**',
       'agents/**',
-      'remotion/**',
       'supabase/**',
       'scripts/**',
       'node_modules/**',

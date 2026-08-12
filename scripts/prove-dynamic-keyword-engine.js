@@ -7,7 +7,7 @@ const { pathToFileURL } = require('node:url');
 
 async function main() {
   const repoRoot = path.resolve(__dirname, '..');
-  const { findKeywordReply } = await import(pathToFileURL(path.join(repoRoot, 'agents/x7-re-sales-agent/keyword-engine.js')).href);
+  const { findKeywordReply } = await import(pathToFileURL(path.join(repoRoot, 'agents/xerowa-sales-agent/keyword-engine.js')).href);
   const businesses = {
     spa: {
       id: '11111111-1111-4111-8111-111111111111',
@@ -78,8 +78,8 @@ async function main() {
     { suppressed: true, outbound: null },
   ));
 
-  const salesSource = fs.readFileSync(path.join(repoRoot, 'agents/x7-re-sales-agent/index.js'), 'utf8');
-  const summonerSource = fs.readFileSync(path.join(repoRoot, 'agents/x7-re-summoner/index.js'), 'utf8');
+  const salesSource = fs.readFileSync(path.join(repoRoot, 'agents/xerowa-sales-agent/index.js'), 'utf8');
+  const summonerSource = fs.readFileSync(path.join(repoRoot, 'agents/xerowa-summoner/index.js'), 'utf8');
   const retiredPlaybookModule = ['vertical', 'playbooks'].join('-');
   prove('Sales Agent has no hardcoded vertical playbook dependency', () => assert.equal(salesSource.includes(retiredPlaybookModule), false));
   prove('Sales Agent sends text through Tool Gateway', () => assert.equal(salesSource.includes('`${toolGatewayUrl}/whatsapp/send/text`'), true));

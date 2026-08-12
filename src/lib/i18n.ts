@@ -1,7 +1,7 @@
 /**
  * Lightweight Hindi + English bilingual string table.
  * Hindi is primary in the spec — render both where space allows,
- * default to Hindi on user-facing surfaces shown to the lead/resident.
+ * default to Hindi on user-facing lead and customer surfaces.
  */
 export type Locale = 'hi' | 'en';
 
@@ -15,7 +15,6 @@ export const strings = {
   nav_bookings:     { hi: 'हैंडऑफ',              en: 'Handoffs' },
   nav_content:      { hi: 'प्लेबुक्स',            en: 'Playbooks' },
   nav_campaigns:    { hi: 'कैम्पेन',             en: 'Campaigns' },
-  nav_colony:       { hi: 'ऑपरेशंस',             en: 'Ops' },
   nav_reports:      { hi: 'रिपोर्ट्स',           en: 'Reports' },
   nav_settings:     { hi: 'सेटिंग्स',            en: 'Settings' },
 
