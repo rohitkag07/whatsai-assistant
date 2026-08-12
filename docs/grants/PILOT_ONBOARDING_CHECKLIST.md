@@ -5,7 +5,7 @@ Use once per business. `PASS` requires a dated artifact; unchecked items are not
 ## 1. Qualification and ownership
 
 - [ ] Assign a pseudonymous pilot ID and keep business identity in the private agreement only.
-- [ ] Confirm the business is one of the approved pilot verticals: dental, coaching, gym, salon or generic real-estate tenant.
+- [ ] Confirm the business is one of the approved first-cohort verticals: coaching, salon or gym.
 - [ ] Name the Business owner, primary operator, backup operator, Aviro pilot lead, privacy contact and incident contact.
 - [ ] Select one WhatsApp number and one narrow workflow for the first seven supervised days.
 - [ ] Record current enquiry process, baseline window and known seasonal/confounding factors.
@@ -26,15 +26,20 @@ Use once per business. `PASS` requires a dated artifact; unchecked items are not
 - [ ] Define operator hours, owner-handoff SLA target and out-of-hours response.
 - [ ] Label every demo/synthetic record; do not seed it into pilot outcome reports.
 
-### Vertical guardrails
+### First-cohort vertical guardrails
 
 | Vertical | Initial in-scope workflow | Explicit boundary |
 |---|---|---|
-| Dental | Fees, availability, appointment request and human handoff | No diagnosis, clinical advice or medical-record processing without separate legal/security review |
 | Coaching | Course facts, eligibility questions, counselling slot and follow-up | No admission, placement, score or outcome guarantee |
 | Gym | Membership facts, trial/session request and follow-up | No medical, injury or guaranteed fitness claims |
 | Salon | Service facts, price/availability and booking request | No unsupported treatment or health claim |
-| Real estate tenant | Budget, location, property type, timeline, loan interest and site-visit request | Generic tenant workflow only; no standalone X7 RealEstate code, branding, database or customer data |
+
+### Deferred second-cohort boundaries
+
+| Vertical | Why deferred | Entry requirement |
+|---|---|---|
+| Dental | Medical-data and clinical-claim risk | Separate legal/security review; no diagnosis, clinical advice or medical-record processing by default |
+| Real estate tenant | Product-boundary complexity | Generic XeroWA tenant workflow only; no standalone X7 RealEstate code, branding, database or customer data |
 
 ## 4. Technical and security gate
 

@@ -1,18 +1,16 @@
 # XeroWA AI 30–60 day pilot package
 
-Status: ready-to-use blank package for a controlled cohort of three to five businesses. No business has been recruited, contacted, signed or measured by creating these files.
+Status: ready-to-use blank package for a controlled first cohort of three businesses. No business has been recruited, contacted, signed or measured by creating these files.
 
 ## Intended cohort
 
-Select up to one business from each approved vertical until the cohort reaches three to five:
+The first cohort is fixed to one business from each of these verticals:
 
-1. Dental clinic
-2. Coaching institute
+1. Coaching institute
+2. Salon
 3. Gym
-4. Salon
-5. Real-estate business using XeroWA's generic tenant-scoped `real_estate` workflow
 
-The standalone X7 RealEstate product, repository, database, branding and customer data are outside this package.
+Dental is deferred to a second cohort because medical-data and clinical-claim risks require a separate legal/security gate. Real estate is also deferred to a second cohort because the generic XeroWA tenant workflow must remain clearly separated from the standalone X7 RealEstate product boundary. The standalone X7 RealEstate repository, database, branding and customer data remain outside this package.
 
 ## Use order
 

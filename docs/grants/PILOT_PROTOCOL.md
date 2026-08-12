@@ -2,11 +2,11 @@
 
 Version: 1.0 draft
 Duration: 30–60 days
-Cohort: 3–5 Indian SMBs
+Cohort: three Indian SMBs — one coaching institute, one salon and one gym
 
 ## Purpose
 
-Test whether controlled WhatsApp workflows can improve the consistency and observability of enquiry handling without making unsupported commercial claims. Preferred verticals are dental clinics, coaching institutes, salons, gyms and local services. A real-estate business may join as a generic XeroWA tenant; the standalone X7 RealEstate product is out of scope.
+Test whether controlled WhatsApp workflows can improve the consistency and observability of enquiry handling without making unsupported commercial claims. The first cohort is fixed to coaching, salon and gym. Dental and real estate are deferred to a second cohort pending their separate medical-data and product-boundary gates; the standalone X7 RealEstate product remains out of scope.
 
 ## Entry criteria
 

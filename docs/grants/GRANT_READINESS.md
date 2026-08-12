@@ -7,13 +7,13 @@ Assessment date: 13 August 2026
 
 ## Verdict
 
-**READY FOR PILOT VALIDATION**
+**69/100 — READY FOR PILOT VALIDATION**
 
 The product has a coherent source-tested prototype, a verified production release, a clear Indian SMB problem, controlled workflow design, a governed synthetic Hinglish dataset, tenant/RLS controls in the new schema, an evidence-oriented data model and a complete blank pilot-operations package. It does not yet have the company-document pack, validated DPIIT status, signed real pilot cohort, measured customer outcomes or independent security report required for a strong formal grant application.
 
 ## Internal score
 
-69/100 using the internal rubric in `CURRENT_STATE_AUDIT.md` plus the dated post-release adjustment below. This is not a government score. More than 85 requires real signed pilot evidence and independent review.
+69/100 using the internal rubric in `CURRENT_STATE_AUDIT.md` plus the dated post-release adjustment below. This is not a government score. More than 85 requires three real signed first-cohort pilots, measured results and independent review.
 
 | Post-release adjustment | Before | After | Reason |
 |---|---:|---:|---|
@@ -47,7 +47,7 @@ The product has a coherent source-tested prototype, a verified production releas
 
 ### Market/pilot
 
-- Three to five signed pilot LOIs.
+- Three signed first-cohort pilot LOIs: coaching, salon and gym.
 - Executed consent/data-processing terms.
 - Baseline and 30–60 day pilot results.
 - Verified customer references, revenue or traction artifacts.
@@ -64,7 +64,7 @@ The product has a coherent source-tested prototype, a verified production releas
 ## Actions to reach 85+
 
 1. Complete the company/DPIIT document gate.
-2. Recruit three to five qualified pilots and sign LOI, consent, retention and measurement schedules.
+2. Recruit one qualified coaching, salon and gym pilot and sign LOI, consent, retention and measurement schedules.
 3. Run secure staging isolation/security tests and remediate findings.
 4. Operate the pilot for at least 30 days with weekly signed evidence review.
 5. Publish anonymized results with definitions, samples, windows and owner sign-off.
