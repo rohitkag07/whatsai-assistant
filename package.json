@@ -2,8 +2,8 @@
   "name": "@xerowa/dashboard",
   "version": "0.1.0",
   "private": true,
-  "description": "XeroWA AI — The 24/7 WhatsApp AI & Lead Intelligence Platform",
-  "author": "Rohit Kag <rohit@xeroseven.in>",
+  "description": "XeroWA AI — controlled WhatsApp workflows for structured leads and follow-ups",
+  "author": "AVIRO TECHNOLOGIES PRIVATE LIMITED <avritechologies@gmail.com>",
   "scripts": {
     "dev": "next dev",
     "dev:operator": "node --env-file=agents/xerowa-summoner/.env ./node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3000",

@@ -26,5 +26,5 @@ export const TEMPERATURE_LABELS: Record<LeadTemperature, { hi: string; en: strin
 };
 
 export const APP_NAME      = 'XeroWA AI';
-export const APP_TAGLINE   = 'XeroWA — The 24/7 WhatsApp AI & Lead Intelligence Platform';
-export const APP_COPYRIGHT = `© ${new Date().getFullYear()} Xero Seven AI`;
+export const APP_TAGLINE   = 'Controlled WhatsApp workflows for structured leads and follow-ups';
+export const APP_COPYRIGHT = `© ${new Date().getFullYear()} AVIRO TECHNOLOGIES PRIVATE LIMITED`;

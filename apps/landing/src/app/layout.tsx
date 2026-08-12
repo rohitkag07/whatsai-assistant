@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://landing-iota-lemon.vercel.app'),
   title: { default: 'XeroWA AI', template: '%s | XeroWA AI' },
   description:
-    'XeroWA — The 24/7 WhatsApp AI & Lead Intelligence Platform.',
+    'Controlled WhatsApp workflows for structured leads, follow-ups, appointments and owner escalation.',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
@@ -21,16 +21,52 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'XeroWA AI',
-    description: 'Turn Every WhatsApp Inbound into Revenue — 24/7.',
+    description: 'Turn WhatsApp enquiries into structured leads and follow-ups.',
     type: 'website',
     locale: 'en_IN',
+    url: 'https://landing-iota-lemon.vercel.app',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://landing-iota-lemon.vercel.app/#organization',
+        name: 'AVIRO TECHNOLOGIES PRIVATE LIMITED',
+        email: 'avritechologies@gmail.com',
+        telephone: '+91-89894-40019',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Indore',
+          addressRegion: 'Madhya Pradesh',
+          addressCountry: 'IN',
+        },
+      },
+      {
+        '@type': ['Product', 'SoftwareApplication'],
+        '@id': 'https://landing-iota-lemon.vercel.app/#product',
+        name: 'XeroWA AI',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        description: 'Controlled WhatsApp workflows for structured leads, follow-ups, appointments and owner escalation.',
+        brand: { '@id': 'https://landing-iota-lemon.vercel.app/#organization' },
+        provider: { '@id': 'https://landing-iota-lemon.vercel.app/#organization' },
+      },
+    ],
+  };
+
   return (
     <html lang="en" className={`${GeistSans.variable} ${noto.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </body>
     </html>
   );
 }
