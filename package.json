@@ -19,6 +19,7 @@
     "prove:whatsai": "node scripts/prove-whatsai.js",
     "prove:authorization-hotfix": "node scripts/prove-authorization-hotfix.js",
     "prove:operational-controls": "node scripts/prove-operational-controls.js",
+    "verify:pilot-security-staging": "bash scripts/verify-pilot-security-staging.sh",
     "test:keyword-engine": "npm test --prefix agents/xerowa-sales-agent",
     "prove:keyword-engine": "npm run test:keyword-engine && node scripts/prove-dynamic-keyword-engine.js",
     "phase-a:check": "./scripts/check-rollout-readiness.sh",

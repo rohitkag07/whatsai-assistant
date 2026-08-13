@@ -81,7 +81,7 @@ begin
   return query select
     v_count <= p_limit,
     p_limit,
-    pg_catalog.greatest(p_limit - v_count, 0),
+    greatest(p_limit - v_count, 0),
     v_window_started_at + pg_catalog.make_interval(secs => p_window_seconds);
 end;
 $$;
