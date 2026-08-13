@@ -17,6 +17,7 @@
     "test": "vitest run",
     "verify:staging-migration": "bash scripts/verify-staging-migration.sh",
     "prove:whatsai": "node scripts/prove-whatsai.js",
+    "prove:authorization-hotfix": "node scripts/prove-authorization-hotfix.js",
     "test:keyword-engine": "npm test --prefix agents/xerowa-sales-agent",
     "prove:keyword-engine": "npm run test:keyword-engine && node scripts/prove-dynamic-keyword-engine.js",
     "phase-a:check": "./scripts/check-rollout-readiness.sh",

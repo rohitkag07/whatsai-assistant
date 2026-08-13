@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { callSalesAgent, serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export async function POST(_request: Request, context: { params: Promise<{ id: s
   const supabase = serviceClientOrNull();
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
   try {
-    const { business } = await requireDashboardBusinessContext(supabase);
+    const { business } = await requireDashboardBusinessMutationContext(supabase);
     const { id } = await context.params;
     const { data: campaign, error } = await (supabase.from('broadcast_campaigns') as any)
       .select('id, status')

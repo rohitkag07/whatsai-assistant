@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { callSalesAgent, fallbackFollowUp, logAgentRun, serviceClientOrNull } from '@/lib/sales-server';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
+
+type LegacyMessageWriter = {
+  from(table: 'follow_up_queue' | 'whatsapp_messages'): {
+    upsert(values: Record<string, unknown>, options: { onConflict: string }): PromiseLike<unknown>;
+    insert(values: Record<string, unknown>): PromiseLike<unknown>;
+  };
+};
 
 const schema = z.object({
   lead_id: z.string().optional(),
@@ -22,6 +30,19 @@ export async function POST(request: Request) {
   }
 
   const payload = parsed.data;
+  const supabase = serviceClientOrNull();
+  if (!supabase) {
+    return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 503 });
+  }
+  const context = await requireDashboardBusinessMutationContext(supabase).catch((error) => error);
+  if (context instanceof Error) {
+    const status = context instanceof BusinessContextError ? context.status : 500;
+    return NextResponse.json({ ok: false, error: context.message }, { status });
+  }
+  if (payload.builder_id && context.business.builder_id !== payload.builder_id) {
+    return NextResponse.json({ ok: false, error: 'business_context_mismatch' }, { status: 403 });
+  }
+
   const agentResponse = await callSalesAgent<{ ok: boolean; response: Record<string, unknown> }>('/follow-up', payload);
   const response = agentResponse?.response ?? fallbackFollowUp({
     leadName: payload.lead_name,
@@ -30,9 +51,9 @@ export async function POST(request: Request) {
     locale: payload.locale,
   });
 
-  const supabase = serviceClientOrNull();
-  if (supabase && payload.builder_id && payload.lead_id) {
-    await (supabase.from('follow_up_queue') as any).upsert({
+  if (payload.builder_id && payload.lead_id) {
+    const legacyWriter = supabase as unknown as LegacyMessageWriter;
+    await legacyWriter.from('follow_up_queue').upsert({
       builder_id: payload.builder_id,
       lead_id: payload.lead_id,
       step: `phase2_followup_${payload.lead_stage}`,
@@ -45,7 +66,7 @@ export async function POST(request: Request) {
     }, { onConflict: 'lead_id,step' });
 
     if (payload.phone) {
-      await (supabase.from('whatsapp_messages') as any).insert({
+      await legacyWriter.from('whatsapp_messages').insert({
         builder_id: payload.builder_id,
         lead_id: payload.lead_id,
         direction: 'outbound',
