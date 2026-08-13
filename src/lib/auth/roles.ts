@@ -16,8 +16,11 @@ export function isAdminPlatformRole(role: PlatformRole) {
 }
 
 export function platformRoleFromMembershipRole(role: BusinessMemberRole | null | undefined): PlatformRole | null {
-  if (role === 'admin' || role === 'dev') return role;
-  if (role === 'client' || role === 'owner' || role === 'manager' || role === 'agent') return 'client';
+  // Tenant membership roles never grant platform-wide authorization. Global
+  // admin/dev access is accepted only from server-controlled app_metadata.
+  if (role === 'client' || role === 'owner' || role === 'manager' || role === 'agent' || role === 'admin' || role === 'dev') {
+    return 'client';
+  }
   return null;
 }
 
@@ -30,13 +33,10 @@ export function getUserPlatformRole(user: User): PlatformRole {
 
   if (isPlatformRole(appRole)) return appRole;
 
-  const userRole =
-    user.user_metadata?.platform_role ??
-    user.user_metadata?.xero_role ??
-    user.user_metadata?.xerowa_role ??
-    user.user_metadata?.role;
-
-  return isPlatformRole(userRole) ? userRole : 'client';
+  // Supabase user_metadata is editable by the signed-in user. It must never
+  // participate in authorization decisions; privileged roles are assigned
+  // only through server-controlled app_metadata.
+  return 'client';
 }
 
 export function defaultLandingForRole(role: PlatformRole) {
