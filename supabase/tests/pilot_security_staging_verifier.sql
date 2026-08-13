@@ -213,4 +213,3 @@ select pg_temp.assert_true(
 );
 
 select 'pilot_security_staging_verifier_passed' as result;
-

@@ -109,4 +109,3 @@ $$;
 
 grant select, insert, update, delete on all tables in schema public to authenticated, service_role;
 grant select, insert, update, delete on table storage.objects to authenticated, service_role;
-
