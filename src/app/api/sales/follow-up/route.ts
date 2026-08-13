@@ -3,6 +3,13 @@ import { z } from 'zod';
 import { callSalesAgent, fallbackFollowUp, logAgentRun, serviceClientOrNull } from '@/lib/sales-server';
 import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
+type LegacyMessageWriter = {
+  from(table: 'follow_up_queue' | 'whatsapp_messages'): {
+    upsert(values: Record<string, unknown>, options: { onConflict: string }): PromiseLike<unknown>;
+    insert(values: Record<string, unknown>): PromiseLike<unknown>;
+  };
+};
+
 const schema = z.object({
   lead_id: z.string().optional(),
   builder_id: z.string().optional(),
@@ -45,7 +52,8 @@ export async function POST(request: Request) {
   });
 
   if (payload.builder_id && payload.lead_id) {
-    await (supabase.from('follow_up_queue') as any).upsert({
+    const legacyWriter = supabase as unknown as LegacyMessageWriter;
+    await legacyWriter.from('follow_up_queue').upsert({
       builder_id: payload.builder_id,
       lead_id: payload.lead_id,
       step: `phase2_followup_${payload.lead_stage}`,
@@ -58,7 +66,7 @@ export async function POST(request: Request) {
     }, { onConflict: 'lead_id,step' });
 
     if (payload.phone) {
-      await (supabase.from('whatsapp_messages') as any).insert({
+      await legacyWriter.from('whatsapp_messages').insert({
         builder_id: payload.builder_id,
         lead_id: payload.lead_id,
         direction: 'outbound',
