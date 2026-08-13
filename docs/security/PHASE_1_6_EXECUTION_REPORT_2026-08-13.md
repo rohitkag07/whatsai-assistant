@@ -1,8 +1,10 @@
 # XeroWA Security and Pilot Execution Report
 
-**Date:** 13 August 2026  
-**Applicant:** AVIRO TECHNOLOGIES PRIVATE LIMITED  
-**Product:** XeroWA AI  
+**Date:** 13 August 2026
+
+**Applicant:** AVIRO TECHNOLOGIES PRIVATE LIMITED
+
+**Product:** XeroWA AI
 **Current decision:** **NO-GO for customer pilot**
 
 ## Executive result
@@ -92,4 +94,3 @@ Failed because the production RLS migration is not deployed:
 ## Product boundary
 
 Standalone X7 RealEstate remains a separate repository and was not modified. XeroWA retains only the generic tenant-scoped `real_estate` vertical. The retention verifier explicitly proves that standalone builder and project records are preserved.
-
