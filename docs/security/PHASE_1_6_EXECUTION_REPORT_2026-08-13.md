@@ -5,13 +5,13 @@
 **Applicant:** AVIRO TECHNOLOGIES PRIVATE LIMITED
 
 **Product:** XeroWA AI
-**Current decision:** **NO-GO for customer pilot**
+**Current decision:** **TECHNICAL GO for one controlled, consented customer pilot**
 
 ## Executive result
 
-The application-side authorization hotfix is merged and deployed. Database-side authorization, rate limiting and retention controls pass in an isolated PostgreSQL 17 staging harness, but production Supabase deployment is blocked because the currently authenticated CLI account cannot access project `yxiniazontslpivaoxfb`.
+The application authorization hotfix is deployed. Supabase CLI access to project `yxiniazontslpivaoxfb` was restored, the migration ledger was inspected without repair, and the production authorization, rate-limiting, retention and exposed-surface hardening migrations were applied atomically.
 
-The operational controls PR must remain unmerged: its middleware intentionally fails closed when the rate-limit RPC is unavailable, so deploying it before the database migration would return HTTP 503 for protected mutation, webhook and cron routes.
+Live authorization proof passed 13 controls and live operational proof passed 12 controls. Synthetic customer fixtures were removed and production returned to three businesses, one membership and sixteen contacts. One non-PII immutable proof audit receipt remains by design.
 
 ## Phase status
 
@@ -19,10 +19,10 @@ The operational controls PR must remain unmerged: its middleware intentionally f
 |---|---|---|
 | 1. Production containment | Complete | Production has one active owner membership and no active viewer/client memberships. Pilot remains paused. |
 | 2. Controlled PR split | Complete | Authorization PR #8 merged; operational controls isolated in draft PR #9; original PR #7 closed as superseded. |
-| 3. Staging verification | Complete locally; hosted staging blocked | PostgreSQL 17 harness executes both migrations and all synthetic RLS/rate-limit/retention assertions. Supabase hosted project access is denied. |
-| 4. Production deployment | Partial | App authorization hotfix deployed. Production DB authorization and operational migrations not deployed. |
-| 5. Final security gate | Executed: NO-GO | Live direct-DB proof still permits viewer mutations and tenant-admin membership administration. |
-| 6. Pilot launch | Blocked | Production DB proof, independent reviewer sign-off, signed pilot consent/LOI and real pilot participants are unavailable. |
+| 3. Staging verification | Complete | PostgreSQL 17 harness executes authorization, operational and advisor-hardening migrations plus all synthetic assertions. |
+| 4. Production deployment | Database complete; app release pending PR #9 merge | Authorization, rate-limit, retention and advisor-hardening controls are live in production Supabase. |
+| 5. Final security gate | Passed | Viewer mutations, cross-business access and tenant-admin membership escalation are denied; operational RPC and replay/retention proofs pass. |
+| 6. Pilot launch | Technical GO, operationally gated | One controlled pilot may launch only after signed consent/LOI and named reviewer approval. |
 
 ## Production release evidence
 
@@ -41,7 +41,7 @@ The operational controls PR must remain unmerged: its middleware intentionally f
 - TypeScript type-check: pass, zero errors.
 - ESLint: pass.
 - Vitest authorization branch: 93 passed, 2 secure-environment tests skipped.
-- Vitest operational branch: 97 passed, 2 secure-environment tests skipped.
+- Vitest operational branch: 99 passed, 2 secure-environment tests skipped.
 - Next.js production build: pass.
 - Local PostgreSQL 17 staging migration execution: pass.
 - Staging assertions passed:
@@ -60,36 +60,34 @@ The staging harness caught and fixed a real SQL defect before release: `pg_catal
 
 The proof used uniquely named synthetic fixtures and cleaned them in a `finally` block. Post-run counts returned to the original values: three businesses, one membership and sixteen contacts. No synthetic security users remain.
 
-Passed:
+Passed live:
 
 - owner reads own business;
 - owner cannot read, insert, update or delete across businesses;
 - viewer reads own business;
+- viewer cannot insert, update or delete;
 - tenant admin can mutate its own business data.
+- tenant admin cannot self-promote or modify/delete the owner;
+- service-role rate limiting allows the first request and denies the second;
+- webhook replay returns the original message instead of duplicating it;
+- retention preview, exact confirmation, cascade and immutable receipt pass.
 
-Failed because the production RLS migration is not deployed:
-
-- viewer insert, update and delete denial;
-- tenant-admin self-promotion denial;
-- tenant-admin modification/deletion of owner denial.
+Supabase security advisor errors were reduced to zero. Nine legacy aggregate views now use `security_invoker`, deny `anon`/`authenticated` access and retain service-role read access. Broadcast mutation functions are service-role-only. Four legacy functions have fixed empty search paths.
 
 ## External blockers
 
-1. The authenticated Supabase CLI account does not have privileges for project `yxiniazontslpivaoxfb`.
-2. The production migration ledger cannot be listed or reconciled until project access is restored.
-3. An independent security reviewer has not signed the release.
-4. No business has signed a pilot LOI, consent/retention terms or final measurement contract.
-5. Secret-rotation timestamps remain provider-side evidence, not repository evidence.
+1. An independent security reviewer has not signed the release.
+2. No business has signed a pilot LOI, consent/retention terms or final measurement contract.
+3. Secret-rotation timestamps remain provider-side evidence, not repository evidence.
+4. Supabase leaked-password protection is disabled on the current Free organization plan; provider setting and plan support must be confirmed before enabling it. This remains the sole security-advisor warning.
 
 ## Safe continuation order
 
-1. Grant the active Supabase account access to project `yxiniazontslpivaoxfb`.
-2. Run `supabase migration list --linked`; do not repair history without schema evidence.
-3. Apply the authorization migration and run `npm run prove:authorization-hotfix` against staging, then production.
-4. Apply the operational migration and run `npm run prove:operational-controls` before deploying middleware.
-5. Merge PR #9 only after both production RPCs pass.
-6. Run the full browser/API canary and obtain independent reviewer sign-off.
-7. Launch one consented pilot first; expand only after a clean weekly evidence review.
+1. Merge PR #9 only after its refreshed CI and Vercel previews pass.
+2. Verify dashboard and landing production deployments against the exact merge SHA.
+3. Run the full browser/API canary and confirm protected routes do not fail closed with HTTP 503.
+4. Obtain named independent reviewer sign-off and execute pilot consent/LOI documents.
+5. Launch one consented pilot first; expand only after a clean weekly evidence review.
 
 ## Product boundary
 

@@ -35,4 +35,6 @@ PSQL=("$POSTGRES_BIN/psql" -X -v ON_ERROR_STOP=1 -h "$SOCKET_DIR" -p "$PORT" -d 
 "${PSQL[@]}" -f "$PROJECT_ROOT/supabase/tests/pilot_security_staging_bootstrap.sql" >/dev/null
 "${PSQL[@]}" -f "$PROJECT_ROOT/supabase/migrations/20260812222528_pilot_authorization_hotfix.sql" >/dev/null
 "${PSQL[@]}" -f "$PROJECT_ROOT/supabase/migrations/20260812222529_pilot_operational_controls.sql" >/dev/null
+"${PSQL[@]}" -f "$PROJECT_ROOT/supabase/migrations/20260813122307_harden_legacy_exposed_surfaces.sql" >/dev/null
+"${PSQL[@]}" -f "$PROJECT_ROOT/supabase/migrations/20260813122510_set_safe_function_search_paths.sql" >/dev/null
 "${PSQL[@]}" -f "$PROJECT_ROOT/supabase/tests/pilot_security_staging_verifier.sql"

@@ -4,6 +4,12 @@ import { describe, expect, it } from 'vitest';
 
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 const migration = read('supabase/migrations/20260812222529_pilot_operational_controls.sql');
+const exposedSurfaceMigration = read(
+  'supabase/migrations/20260813122307_harden_legacy_exposed_surfaces.sql',
+);
+const safeSearchPathMigration = read(
+  'supabase/migrations/20260813122510_set_safe_function_search_paths.sql',
+);
 const middleware = read('middleware.ts');
 
 describe('pilot operational control contracts', () => {
@@ -41,5 +47,30 @@ describe('pilot operational control contracts', () => {
     }
     expect(migration).not.toContain('delete from public.builders');
     expect(migration).not.toContain('delete from public.projects');
+  });
+
+  it('closes legacy views and broadcast mutations to untrusted Data API roles', () => {
+    expect(exposedSurfaceMigration).toContain('security_invoker = true');
+    expect(exposedSurfaceMigration).toMatch(
+      /revoke all privileges on table public\.%I from public, anon, authenticated/i,
+    );
+    expect(exposedSurfaceMigration).toMatch(
+      /revoke all on function public\.claim_broadcast_recipients[\s\S]*public, anon, authenticated/i,
+    );
+    expect(exposedSurfaceMigration).toMatch(
+      /revoke all on function public\.refresh_broadcast_campaign_metrics[\s\S]*public, anon, authenticated/i,
+    );
+  });
+
+  it('pins legacy helper and trigger function search paths', () => {
+    for (const functionName of [
+      'set_updated_at',
+      'auth_builder_id',
+      'seed_setup_checklist',
+      'whatsai_touch_updated_at',
+    ]) {
+      expect(safeSearchPathMigration).toContain(`public.${functionName}`);
+    }
+    expect(safeSearchPathMigration.match(/set search_path = ''/g)).toHaveLength(4);
   });
 });
