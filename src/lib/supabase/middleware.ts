@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
+import { isDashboardAuthBypassEnabled } from '@/lib/auth/dev-bypass';
 import {
   defaultLandingForRole,
   getUserPlatformRole,
@@ -53,6 +54,8 @@ async function resolvePlatformRole(supabase: ReturnType<typeof createServerClien
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
+
+  if (isDashboardAuthBypassEnabled()) return response;
 
   const url     = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

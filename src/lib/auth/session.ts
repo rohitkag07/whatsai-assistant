@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import type { User } from '@supabase/supabase-js';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { ACTIVE_BUSINESS_COOKIE } from '@/lib/auth/active-business';
+import { buildDevAuthBypassSession, isDashboardAuthBypassEnabled } from '@/lib/auth/dev-bypass';
 import {
   defaultLandingForRole,
   getUserPlatformRole,
@@ -50,6 +51,10 @@ function normalizeMemberships(rows: unknown): BusinessMembership[] {
 }
 
 export async function getAuthSession(): Promise<AuthSession | null> {
+  if (isDashboardAuthBypassEnabled()) {
+    return buildDevAuthBypassSession();
+  }
+
   const supabase = await createClient().catch(() => null);
   if (!supabase) return null;
 
