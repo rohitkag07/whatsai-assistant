@@ -36,6 +36,7 @@ const pageNames: Record<string, { title: string; eyebrow: string }> = {
   'whatsapp-status': { title: 'WhatsApp status', eyebrow: 'Connection' },
   'plan-support': { title: 'Plan and support', eyebrow: 'Account' },
   admin: { title: 'Agency control room', eyebrow: 'Platform operations' },
+  'admin/command-os': { title: 'XeroWA Command OS', eyebrow: 'Supervised AI operations' },
   'admin/clients': { title: 'Client directory', eyebrow: 'Platform operations' },
   'admin/conversations': { title: 'Conversation monitor', eyebrow: 'Platform operations' },
   'admin/knowledge': { title: 'Knowledge editor', eyebrow: 'Platform operations' },

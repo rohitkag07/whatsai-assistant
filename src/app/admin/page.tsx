@@ -1,6 +1,7 @@
 import {
   Activity,
   BookOpen,
+  Bot,
   Building2,
   MessageCircle,
   Sparkles,
@@ -86,6 +87,12 @@ export default async function AdminOverviewPage() {
                 title="View webhook log"
                 description="Inspect inbound events and delivery updates."
                 icon={Webhook}
+              />
+              <AdminQuickAction
+                href="/admin/command-os"
+                title="Open Command OS"
+                description="Review supervised AI briefs, approvals, alerts, and kill switch state."
+                icon={Bot}
               />
               <AdminQuickAction
                 href="/admin/system"

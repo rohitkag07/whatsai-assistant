@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Activity,
+  Bot,
   Building2,
   CalendarDays,
   BookOpen,
@@ -42,6 +43,7 @@ const clientItems: Item[] = [
 
 const adminItems: Item[] = [
   { href: '/admin', label: 'Overview', description: 'Platform stats and activity', icon: LayoutDashboard },
+  { href: '/admin/command-os', label: 'Command OS', description: 'Supervised AI control', icon: Bot },
   { href: '/admin/clients', label: 'Clients', description: 'All business accounts', icon: Building2 },
   { href: '/admin/conversations', label: 'Conversations', description: 'Global message feed', icon: MessageSquare },
   { href: '/admin/knowledge', label: 'Knowledge Base', description: 'Approved replies editor', icon: BookOpen },
