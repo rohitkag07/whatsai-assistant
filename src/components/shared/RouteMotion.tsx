@@ -1,23 +1,37 @@
-'use client';
+"use client";
 
-import { useRef } from 'react';
-import { usePathname } from 'next/navigation';
-import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
+import { useRef } from "react";
+import { usePathname } from "next/navigation";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 export function RouteMotion({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const root = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const foundation = Boolean(root.current?.closest("[data-foundation]"));
 
-    gsap.fromTo(
-      root.current,
-      { autoAlpha: 0, y: 10 },
-      { autoAlpha: 1, y: 0, duration: 0.38, ease: 'power2.out', clearProps: 'all' },
-    );
-  }, { scope: root, dependencies: [pathname] });
+      gsap.fromTo(
+        root.current,
+        { autoAlpha: 0, y: 10 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: foundation ? 0.18 : 0.38,
+          ease: "power2.out",
+          clearProps: "all",
+        },
+      );
+    },
+    { scope: root, dependencies: [pathname] },
+  );
 
-  return <div ref={root} className="min-h-full">{children}</div>;
+  return (
+    <div ref={root} className="min-h-full">
+      {children}
+    </div>
+  );
 }

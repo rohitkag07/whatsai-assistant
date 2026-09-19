@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import Link from "next/link";
+import { destinationTitle, productNavigation } from "@/lib/product-navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   Bell,
   ChevronDown,
@@ -10,12 +11,12 @@ import {
   Menu,
   MessageCircle,
   Wrench,
-} from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import type { NavMode } from '@/components/shared/Sidebar';
-import { isAdminPlatformRole, type PlatformRole } from '@/lib/auth/roles';
-import type { ShellBusiness } from '@/lib/auth/shell-types';
+} from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import type { NavMode } from "@/components/shared/Sidebar";
+import { isAdminPlatformRole, type PlatformRole } from "@/lib/auth/roles";
+import type { ShellBusiness } from "@/lib/auth/shell-types";
 
 interface TopBarProps {
   mode: NavMode;
@@ -27,23 +28,38 @@ interface TopBarProps {
 }
 
 const pageNames: Record<string, { title: string; eyebrow: string }> = {
-  dashboard: { title: 'Today', eyebrow: 'Business overview' },
-  chats: { title: 'Customer chats', eyebrow: 'WhatsApp inbox' },
-  calendar: { title: 'Appointments', eyebrow: 'Schedule' },
-  leads: { title: 'Lead pipeline', eyebrow: 'Sales' },
-  knowledge: { title: 'Approved replies', eyebrow: 'Business answers' },
-  bookings: { title: 'Owner handoffs', eyebrow: 'Needs action' },
-  'whatsapp-status': { title: 'WhatsApp status', eyebrow: 'Connection' },
-  'plan-support': { title: 'Plan and support', eyebrow: 'Account' },
-  admin: { title: 'Agency control room', eyebrow: 'Platform operations' },
-  'admin/command-os': { title: 'XeroWA Command OS', eyebrow: 'Supervised AI operations' },
-  'admin/clients': { title: 'Client directory', eyebrow: 'Platform operations' },
-  'admin/conversations': { title: 'Conversation monitor', eyebrow: 'Platform operations' },
-  'admin/knowledge': { title: 'Knowledge editor', eyebrow: 'Platform operations' },
-  'admin/playbooks': { title: 'Playbook manager', eyebrow: 'Platform operations' },
-  'admin/webhooks': { title: 'Webhook log', eyebrow: 'Platform operations' },
-  'admin/team': { title: 'Team and access', eyebrow: 'Platform operations' },
-  'admin/system': { title: 'System health', eyebrow: 'Platform operations' },
+  dashboard: { title: "Today", eyebrow: "Business overview" },
+  chats: { title: "Customer chats", eyebrow: "WhatsApp inbox" },
+  calendar: { title: "Appointments", eyebrow: "Schedule" },
+  leads: { title: "Lead pipeline", eyebrow: "Sales" },
+  knowledge: { title: "Approved replies", eyebrow: "Business answers" },
+  bookings: { title: "Owner handoffs", eyebrow: "Needs action" },
+  "whatsapp-status": { title: "WhatsApp status", eyebrow: "Connection" },
+  "plan-support": { title: "Plan and support", eyebrow: "Account" },
+  admin: { title: "Agency control room", eyebrow: "Platform operations" },
+  "admin/command-os": {
+    title: "XeroWA Command OS",
+    eyebrow: "Supervised AI operations",
+  },
+  "admin/clients": {
+    title: "Client directory",
+    eyebrow: "Platform operations",
+  },
+  "admin/conversations": {
+    title: "Conversation monitor",
+    eyebrow: "Platform operations",
+  },
+  "admin/knowledge": {
+    title: "Knowledge editor",
+    eyebrow: "Platform operations",
+  },
+  "admin/playbooks": {
+    title: "Playbook manager",
+    eyebrow: "Platform operations",
+  },
+  "admin/webhooks": { title: "Webhook log", eyebrow: "Platform operations" },
+  "admin/team": { title: "Team and access", eyebrow: "Platform operations" },
+  "admin/system": { title: "System health", eyebrow: "Platform operations" },
 };
 
 export function TopBar({
@@ -58,25 +74,29 @@ export function TopBar({
   const router = useRouter();
   const [switching, setSwitching] = useState(false);
   const [switchError, setSwitchError] = useState<string | null>(null);
-  const segments = pathname.split('/').filter(Boolean);
-  const route = segments[0] === 'admin' && segments[1]
-    ? `admin/${segments[1]}`
-    : segments[0] ?? 'dashboard';
+  const segments = pathname.split("/").filter(Boolean);
+  const route =
+    segments[0] === "admin" && segments[1]
+      ? `admin/${segments[1]}`
+      : (segments[0] ?? "dashboard");
   const page = pageNames[route] ?? {
-    title: 'XeroWA AI workspace',
-    eyebrow: 'Workspace',
+    title: destinationTitle(
+      pathname,
+      productNavigation(mode === "admin" ? "command" : "control", platformRole),
+    ),
+    eyebrow: "Workspace",
   };
   const isPlatformUser = isAdminPlatformRole(platformRole);
   const currentBusiness =
     businesses.find((business) => business.id === activeBusinessId) ?? null;
   const currentBusinessId =
     currentBusiness?.id ?? (isPlatformUser ? null : businesses[0]?.id) ?? null;
-  const workspaceName = currentBusiness?.name ?? 'XeroWA AI';
+  const workspaceName = currentBusiness?.name ?? "XeroWA AI";
   const fallback = workspaceName
-    .split(' ')
+    .split(" ")
     .slice(0, 2)
     .map((part) => part[0])
-    .join('')
+    .join("")
     .toUpperCase();
 
   async function selectBusiness(businessId: string, destination?: string) {
@@ -85,26 +105,26 @@ export function TopBar({
     setSwitchError(null);
 
     try {
-      const response = await fetch('/api/admin/active-business', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/admin/active-business", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ business_id: businessId }),
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(payload?.error || 'Client switch failed.');
+        throw new Error(payload?.error || "Client switch failed.");
       }
 
       if (destination) {
         router.push(destination);
-      } else if (mode === 'admin') {
+      } else if (mode === "admin") {
         router.push(`/admin?business_id=${businessId}#client-settings`);
       } else {
         router.refresh();
       }
     } catch (error) {
       setSwitchError(
-        error instanceof Error ? error.message : 'Client switch failed.',
+        error instanceof Error ? error.message : "Client switch failed.",
       );
     } finally {
       setSwitching(false);
@@ -114,10 +134,10 @@ export function TopBar({
   async function openClientView() {
     const businessId = currentBusinessId ?? businesses[0]?.id;
     if (!businessId) {
-      setSwitchError('Add or select a client before opening Client View.');
+      setSwitchError("Add or select a client before opening Client View.");
       return;
     }
-    await selectBusiness(businessId, '/dashboard');
+    await selectBusiness(businessId, "/dashboard");
   }
 
   return (
@@ -147,7 +167,7 @@ export function TopBar({
             <label className="relative">
               <span className="sr-only">Select client</span>
               <select
-                value={currentBusinessId ?? ''}
+                value={currentBusinessId ?? ""}
                 disabled={switching || !businesses.length}
                 onChange={(event) => selectBusiness(event.target.value)}
                 className="h-10 min-w-[230px] appearance-none rounded-xl border border-[#cfd8d5] bg-[#f8faf9] py-2 pl-3 pr-9 text-sm font-medium text-[#23312d] outline-none transition focus:border-[#00a884] focus:ring-2 focus:ring-[#00a884]/15 disabled:cursor-not-allowed disabled:opacity-60"
@@ -162,7 +182,7 @@ export function TopBar({
               <ChevronDown className="pointer-events-none absolute right-3 top-3 h-4 w-4 text-[#667781]" />
             </label>
 
-            {mode === 'admin' ? (
+            {mode === "admin" ? (
               <Button
                 type="button"
                 variant="outline"
@@ -184,7 +204,7 @@ export function TopBar({
           </div>
         ) : null}
 
-        {!isPlatformUser && mode === 'client' ? (
+        {!isPlatformUser && mode === "client" ? (
           <Link
             href="/chats"
             className="hidden items-center gap-2 rounded-full border border-[#d8dee4] bg-[#f8faf9] px-3 py-2 text-xs font-medium text-[#075e54] transition hover:border-[#00a884] hover:bg-[#edf8f4] md:flex"
@@ -194,8 +214,13 @@ export function TopBar({
           </Link>
         ) : null}
 
-        {mode === 'client' ? (
-          <Button asChild variant="ghost" size="icon" className="relative rounded-full">
+        {mode === "client" ? (
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="relative rounded-full"
+          >
             <Link
               href="/chats"
               aria-label="Open conversations requiring attention"
@@ -203,7 +228,7 @@ export function TopBar({
               <Bell className="h-5 w-5" />
               {unreadCount > 0 ? (
                 <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold leading-none text-white">
-                  {unreadCount > 9 ? '9+' : unreadCount}
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               ) : null}
             </Link>
@@ -211,15 +236,15 @@ export function TopBar({
         ) : null}
 
         <Link
-          href={mode === 'admin' ? '/admin' : '/dashboard'}
+          href={mode === "admin" ? "/admin" : "/dashboard"}
           className="flex items-center gap-2 rounded-xl p-1 transition-colors hover:bg-[#edf8f4]"
           aria-label={
-            mode === 'admin' ? 'Open admin dashboard' : 'Open dashboard home'
+            mode === "admin" ? "Open admin dashboard" : "Open dashboard home"
           }
         >
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-[#00a884] text-xs text-white">
-              {fallback || 'XA'}
+              {fallback || "XA"}
             </AvatarFallback>
           </Avatar>
           <div className="hidden leading-tight md:block">
@@ -227,7 +252,7 @@ export function TopBar({
               {workspaceName}
             </div>
             <div className="text-[10px] text-[#667781]">
-              {mode === 'admin' ? 'Agency operations' : 'Client workspace'}
+              {mode === "admin" ? "Agency operations" : "Client workspace"}
             </div>
           </div>
         </Link>
@@ -238,7 +263,7 @@ export function TopBar({
           <label className="relative min-w-0 flex-1">
             <span className="sr-only">Select client</span>
             <select
-              value={currentBusinessId ?? ''}
+              value={currentBusinessId ?? ""}
               disabled={switching || !businesses.length}
               onChange={(event) => selectBusiness(event.target.value)}
               className="h-10 w-full appearance-none rounded-xl border border-[#cfd8d5] bg-[#f8faf9] py-2 pl-3 pr-9 text-sm font-medium text-[#23312d] outline-none focus:border-[#00a884]"
@@ -252,7 +277,7 @@ export function TopBar({
             </select>
             <ChevronDown className="pointer-events-none absolute right-3 top-3 h-4 w-4 text-[#667781]" />
           </label>
-          {mode === 'admin' ? (
+          {mode === "admin" ? (
             <Button
               type="button"
               size="sm"

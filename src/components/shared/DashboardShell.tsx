@@ -1,13 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Sidebar } from '@/components/shared/Sidebar';
-import { TopBar } from '@/components/shared/TopBar';
-import { RouteMotion } from '@/components/shared/RouteMotion';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import type { NavMode } from '@/components/shared/Sidebar';
-import type { PlatformRole } from '@/lib/auth/roles';
-import type { ShellBusiness } from '@/lib/auth/shell-types';
+import { useState } from "react";
+import { AppShell } from "@/components/system/AppShell";
+import type { ShellReadState } from "@/lib/auth/shell-types";
+import { Sidebar } from "@/components/shared/Sidebar";
+import { TopBar } from "@/components/shared/TopBar";
+import { RouteMotion } from "@/components/shared/RouteMotion";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import type { NavMode } from "@/components/shared/Sidebar";
+import type { PlatformRole } from "@/lib/auth/roles";
+import type { ShellBusiness } from "@/lib/auth/shell-types";
 
 type DashboardShellProps = {
   children: React.ReactNode;
@@ -16,6 +24,9 @@ type DashboardShellProps = {
   activeBusinessId: string | null;
   businesses: ShellBusiness[];
   unreadCount?: number;
+  foundation?: boolean;
+  foundationState?: ShellReadState;
+  designLab?: boolean;
 };
 
 export function DashboardShell({
@@ -25,29 +36,53 @@ export function DashboardShell({
   activeBusinessId,
   businesses,
   unreadCount = 0,
+  foundation = false,
+  foundationState,
+  designLab = false,
 }: DashboardShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  return <div className="flex min-h-screen bg-transparent">
-    <Sidebar mode={navMode} />
-    <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-      <SheetContent side="left" className="w-72 p-0 sm:max-w-72">
-        <SheetHeader className="sr-only">
-          <SheetTitle>XeroWA AI navigation</SheetTitle>
-          <SheetDescription>Open a dashboard workspace.</SheetDescription>
-        </SheetHeader>
-        <Sidebar mode={navMode} mobile onNavigate={() => setMenuOpen(false)} />
-      </SheetContent>
-    </Sheet>
-    <div className="flex min-w-0 flex-1 flex-col">
-      <TopBar
-        mode={navMode}
+  if (foundation && foundationState)
+    return (
+      <AppShell
+        context={navMode === "admin" ? "command" : "control"}
         platformRole={platformRole}
         activeBusinessId={activeBusinessId}
         businesses={businesses}
-        unreadCount={unreadCount}
-        onMenuClick={() => setMenuOpen(true)}
-      />
-      <main className="flex-1 overflow-x-hidden p-3 sm:p-5 lg:p-7"><RouteMotion>{children}</RouteMotion></main>
+        state={foundationState}
+        designLab={designLab}
+      >
+        {children}
+      </AppShell>
+    );
+  return (
+    <div className="flex min-h-screen bg-transparent">
+      <Sidebar mode={navMode} />
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent side="left" className="w-72 p-0 sm:max-w-72">
+          <SheetHeader className="sr-only">
+            <SheetTitle>XeroWA AI navigation</SheetTitle>
+            <SheetDescription>Open a dashboard workspace.</SheetDescription>
+          </SheetHeader>
+          <Sidebar
+            mode={navMode}
+            mobile
+            onNavigate={() => setMenuOpen(false)}
+          />
+        </SheetContent>
+      </Sheet>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar
+          mode={navMode}
+          platformRole={platformRole}
+          activeBusinessId={activeBusinessId}
+          businesses={businesses}
+          unreadCount={unreadCount}
+          onMenuClick={() => setMenuOpen(true)}
+        />
+        <main className="flex-1 overflow-x-hidden p-3 sm:p-5 lg:p-7">
+          <RouteMotion>{children}</RouteMotion>
+        </main>
+      </div>
     </div>
-  </div>;
+  );
 }
