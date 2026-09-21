@@ -22,6 +22,7 @@ export type AppShellProps = {
   businesses: ShellBusiness[];
   state: ShellReadState;
   designLab?: boolean;
+  onboarding?: boolean;
 };
 export function AppShell({
   children,
@@ -31,6 +32,7 @@ export function AppShell({
   businesses,
   state,
   designLab = false,
+  onboarding = false,
 }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -39,9 +41,15 @@ export function AppShell({
   const [search, setSearch] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
-  const destinations = productNavigation(context, platformRole, designLab);
+  const destinations = productNavigation(
+    context,
+    platformRole,
+    designLab,
+    onboarding,
+  );
   const presentation = shellPresentation(state);
   const isLab = pathname === "/admin/design-lab";
+  const isFoundationPage = isLab || pathname === "/admin/onboarding";
   const openSearch = (trigger: HTMLButtonElement) => {
     returnFocus.current = trigger;
     setSearch(true);
@@ -111,14 +119,18 @@ export function AppShell({
           onSearch={openSearch}
         />
         <main id="workspace-main" tabIndex={-1} className="x-main">
-          {presentation && !isLab && (
+          {presentation && !isFoundationPage && (
             <SystemState
               kind={presentation}
               compact
               onRetry={() => router.refresh()}
             />
           )}
-          <div className={isLab ? "x-foundation-content" : "x-legacy-content"}>
+          <div
+            className={
+              isFoundationPage ? "x-foundation-content" : "x-legacy-content"
+            }
+          >
             {children}
           </div>
         </main>

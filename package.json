@@ -22,7 +22,9 @@
     "phase-a:check": "./scripts/check-rollout-readiness.sh",
     "deploy:cloud-run": "./scripts/deploy-whatsai-cloud-run.sh",
     "test:foundation": "vitest run src/lib/product-foundation-flags.test.ts src/lib/product-navigation.test.ts src/lib/shell-state.test.ts tests/integration/design_lab_access.test.tsx tests/integration/foundation_shell_render.test.tsx",
-    "test:foundation:visual": "playwright test --config=playwright.foundation.config.ts"
+    "test:foundation:visual": "playwright test --config=playwright.foundation.config.ts",
+    "test:onboarding": "vitest run src/lib/onboarding/onboarding.test.ts src/lib/onboarding/draft-adapter.test.ts tests/integration/onboarding_access.test.tsx",
+    "test:onboarding:visual": "playwright test --config=playwright.onboarding.config.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

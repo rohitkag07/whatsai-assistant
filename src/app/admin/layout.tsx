@@ -1,3 +1,4 @@
+import { onboardingEnabled } from "@/lib/onboarding/flags";
 import { resolveFoundationFlags } from "@/lib/product-foundation-flags";
 import { DashboardShell } from "@/components/shared/DashboardShell";
 import { requirePlatformRole } from "@/lib/auth/session";
@@ -28,6 +29,7 @@ export default async function AdminLayout({
         foundation={flags.command}
         foundationState={foundationState}
         designLab={flags.designLab}
+        onboarding={onboardingEnabled(session, process.env)}
         platformRole={session.platformRole}
         activeBusinessId={session.activeBusinessId}
         businesses={businesses}

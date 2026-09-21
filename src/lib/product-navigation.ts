@@ -53,11 +53,22 @@ export function productNavigation(
   context: ProductContext,
   role: PlatformRole,
   designLab = false,
+  onboarding = false,
 ): ProductDestination[] {
   if (context === "command")
     return isAdminPlatformRole(role)
       ? [
           ...command,
+          ...(onboarding
+            ? [
+                {
+                  href: "/admin/onboarding",
+                  label: "Business onboarding",
+                  icon: "business",
+                  secondary: true,
+                },
+              ]
+            : []),
           ...(designLab
             ? [
                 {
