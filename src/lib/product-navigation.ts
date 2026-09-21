@@ -54,6 +54,7 @@ export function productNavigation(
   role: PlatformRole,
   designLab = false,
   onboarding = false,
+  controlOperations = false,
 ): ProductDestination[] {
   if (context === "command")
     return isAdminPlatformRole(role)
@@ -83,6 +84,7 @@ export function productNavigation(
       : [];
   return [
     ...control,
+    ...(controlOperations ? [{href:'/follow-ups',label:'Follow-ups',icon:'handoff'}] : []),
     ...(isAdminPlatformRole(role)
       ? [
           {

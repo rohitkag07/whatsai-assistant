@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { controlEntry } from '@/components/control/ControlEntry';
 import { MessageCircle } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { LeadPipeline } from '@/components/leads/LeadPipeline';
@@ -12,6 +13,8 @@ export const dynamic = 'force-dynamic';
 export default async function LeadsPage() {
   const session = await requireBusinessAccess();
   if (!session.activeBusinessId) redirect('/admin');
+  const control = await controlEntry(session, 'pipeline');
+  if (control) return control;
   const data = await loadOperatorLeadsData({ businessId: session.activeBusinessId });
 
   return (

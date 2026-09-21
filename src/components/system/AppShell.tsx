@@ -23,6 +23,7 @@ export type AppShellProps = {
   state: ShellReadState;
   designLab?: boolean;
   onboarding?: boolean;
+  controlOperations?: boolean;
 };
 export function AppShell({
   children,
@@ -33,6 +34,7 @@ export function AppShell({
   state,
   designLab = false,
   onboarding = false,
+  controlOperations = false,
 }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -46,10 +48,11 @@ export function AppShell({
     platformRole,
     designLab,
     onboarding,
+    controlOperations,
   );
   const presentation = shellPresentation(state);
   const isLab = pathname === "/admin/design-lab";
-  const isFoundationPage = isLab || pathname === "/admin/onboarding";
+  const isFoundationPage = isLab || pathname === "/admin/onboarding" || (context === 'control' && controlOperations && ['/dashboard','/chats','/leads','/calendar','/follow-ups'].includes(pathname));
   const openSearch = (trigger: HTMLButtonElement) => {
     returnFocus.current = trigger;
     setSearch(true);

@@ -1,4 +1,5 @@
 import { resolveFoundationFlags } from "@/lib/product-foundation-flags";
+import { controlEnabled } from '@/lib/control/flags';
 import { DashboardShell } from "@/components/shared/DashboardShell";
 import { requireBusinessAccess } from "@/lib/auth/session";
 import {
@@ -29,6 +30,7 @@ export default async function DashboardLayout({
       foundation={flags.control}
       foundationState={foundationState}
       designLab={flags.designLab}
+      controlOperations={controlEnabled(session,process.env)}
       platformRole={session.platformRole}
       activeBusinessId={session.activeBusinessId}
       businesses={businesses}
