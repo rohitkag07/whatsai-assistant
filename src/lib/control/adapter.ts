@@ -11,7 +11,7 @@ import {
 export function projectSnapshot(
   input: BackendSnapshot,
   expectedBusinessId: string,
-  source: "synthetic" = "synthetic",
+  source: "synthetic" | "supabase" = "synthetic",
 ): ControlReadModel {
   const fail = () => {
     throw new Error("The scoped snapshot could not be verified.");

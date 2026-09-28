@@ -1,6 +1,10 @@
 import "server-only";
 import type { AuthSession } from "@/lib/auth/session";
-import { controlEnabled, syntheticEnabled } from "@/lib/control/flags";
+import {
+  controlEnabled,
+  syntheticEnabled,
+  readEnabled,
+} from "@/lib/control/flags";
 import { projectSnapshot, unavailableModel } from "@/lib/control/adapter";
 import type { View } from "@/lib/control/model";
 import { ControlWorkspace } from "./ControlWorkspace";
@@ -15,6 +19,9 @@ export async function controlEntry(session: AuthSession, view: View) {
       syntheticSnapshot(session.activeBusinessId),
       session.activeBusinessId,
     );
+  } else if (readEnabled(process.env)) {
+    const { loadControlRead } = await import("@/lib/control/supabase-reader");
+    data = await loadControlRead(session);
   }
   return (
     <ControlWorkspace

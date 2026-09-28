@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { currentReadState } from "@/lib/control/read-adapter";
 import { useSearchParams } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -119,6 +120,30 @@ export function ControlWorkspace({
 }) {
   const params = useSearchParams();
   const [status, setStatus] = useState<ReadState>(initial.status);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+    if (!initial.read) return;
+    const expire = () => setStatus(currentReadState(initial, Date.now()));
+    expire();
+    const timer = setInterval(expire, 1000);
+    return () => clearInterval(timer);
+  }, [initial]);
+  const sourced = initial.source === "supabase";
+  function metricState(table: string): ReadState {
+    if (!sourced) return status;
+    if (table === "outcomes") return "unavailable";
+    const sources =
+      initial.read?.resources.filter((r) => r.table === table) ?? [];
+    if (!sources.length) return "unavailable";
+    if (
+      sources.some((r) =>
+        ["error", "permission", "unavailable"].includes(r.state),
+      )
+    )
+      return "unavailable";
+    return status;
+  }
   const [filter, setFilter] = useState("All");
   const [owner, setOwner] = useState("All");
   const [search, setSearch] = useState("");
@@ -170,7 +195,9 @@ export function ControlWorkspace({
     setPane("timeline");
     requestAnimationFrame(() => returnToContext.current?.focus());
   }
-  const urgent = rows.filter((c) => c.handoff?.status === "open");
+  const urgent = rows.filter(
+    (c) => c.handoff && ["open", "pending"].includes(c.handoff.status),
+  );
   const outcomes = rows.filter((c) => c.stage === "Won/completed" && c.receipt);
   const due = show ? initial.followups.filter((f) => f.state === "Due") : [];
   const failures = show
@@ -180,30 +207,60 @@ export function ControlWorkspace({
     : [];
   const counts = [
     ["Enquiries in view", rows.length],
-    ["Awaiting acknowledgement", urgent.length],
+    [
+      sourced ? "Open handoff records" : "Awaiting acknowledgement",
+      urgent.length,
+    ],
     ["Follow-ups due", due.length],
-    ["Verified outcomes in sample", outcomes.length],
+    [
+      sourced ? "Verified outcomes" : "Verified outcomes in sample",
+      outcomes.length,
+    ],
   ] as const;
-  const emptyMessage =
-    status === "empty"
-      ? "No records returned. A verified zero in this Synthetic snapshot."
+  const resourceUnavailable =
+    sourced &&
+    initial.read?.resources.some(
+      (r) =>
+        r.table ===
+          (view === "appointments"
+            ? "appointments"
+            : view === "followups"
+              ? "followup_jobs"
+              : "conversation_threads") &&
+        ["error", "permission", "unavailable"].includes(r.state),
+    );
+  const emptyMessage = resourceUnavailable
+    ? "Records unavailable for this source. Absence must not be interpreted as zero."
+    : status === "empty"
+      ? sourced
+        ? "No records returned by the complete visible read. Outcome verification remains unavailable."
+        : "No records returned. A verified zero in this Synthetic snapshot."
       : !show
         ? stateCopy[status].detail
         : "No records match these filters. Clear filters to see the full snapshot.";
   return (
-    <section className="co-root" data-control data-view={view}>
+    <section
+      className="co-root"
+      data-control
+      data-view={view}
+      data-read-ready={hydrated || undefined}
+    >
       <div className="co-provenance" role="note">
         <ShieldCheck size={18} aria-hidden="true" />
         <div>
           <strong>
             {initial.source === "synthetic"
               ? "Synthetic · Operations review"
-              : "Operations review · Data unavailable"}
+              : sourced
+                ? "Supabase · Non-production read"
+                : "Operations review · Data unavailable"}
           </strong>
           <p>
             {initial.source === "synthetic"
               ? "Every enquiry, operator, message and receipt below is an example. No live action can run here."
-              : "Live operations are unavailable. No connection or readiness claim has been verified."}
+              : sourced
+                ? "Records come from the selected non-production business. Operational writes and pilot activation remain unavailable."
+                : "Live operations are unavailable. No connection or readiness claim has been verified."}
           </p>
         </div>
         <span>Read only · Not activated</span>
@@ -213,6 +270,13 @@ export function ControlWorkspace({
           <p className="co-eyebrow">XeroWA / Control</p>
           <h1>{title.title}</h1>
           <p>{title.description}</p>
+          {initial.read && (
+            <p>
+              Selected workspace:{" "}
+              <strong>{initial.read.businessName ?? initial.businessId}</strong>{" "}
+              · {initial.businessId}
+            </p>
+          )}
         </div>
         <div className="co-stamp">
           <span>
@@ -238,7 +302,11 @@ export function ControlWorkspace({
         <p>
           <span className="co-dot" aria-hidden="true" />
           {stateCopy[status].title}{" "}
-          <span className="co-muted">· Live connection: Not connected</span>
+          <span className="co-muted">
+            {initial.read
+              ? `· ${initial.read.connection}`
+              : "· Live connection: Not connected"}
+          </span>
         </p>
         {initial.source === "synthetic" && (
           <label>
@@ -262,6 +330,33 @@ export function ControlWorkspace({
           </label>
         )}
       </div>
+      {initial.read && (
+        <details className="co-evidence">
+          <summary>Source, freshness and completeness</summary>
+          <p>{initial.read.scope}</p>
+          <p>
+            Retrieved {timeLabel(initial.read.retrievedAt)}. Fresh-read window
+            ends {timeLabel(initial.read.expiresAt)}. Display times use IST;
+            configured business timezone:{" "}
+            {initial.read.timezone ?? "unavailable"}.
+          </p>
+          <ul>
+            {initial.read.resources.map((r, i) => (
+              <li key={`${r.table}-${i}`}>
+                <strong>
+                  {r.table}: {r.state}
+                </strong>{" "}
+                · {r.rows} returned · {r.omitted} omitted. {r.detail}
+              </li>
+            ))}
+          </ul>
+          <p>
+            Qualification, acknowledgement, appointment verification and outcome
+            receipt authorities remain unavailable. A successful query does not
+            certify RLS or live provider health.
+          </p>
+        </details>
+      )}
       {status !== "ready" && (
         <div
           className="co-state"
@@ -303,10 +398,25 @@ export function ControlWorkspace({
             {counts.map(([label, value]) => (
               <div key={label}>
                 <span>{label}</span>
-                <strong>{countLabel(status, value)}</strong>
+                <strong>
+                  {countLabel(
+                    metricState(
+                      label === "Enquiries in view"
+                        ? "conversation_threads"
+                        : label === "Open handoff records"
+                          ? "handoff_events"
+                          : label === "Follow-ups due"
+                            ? "followup_jobs"
+                            : "outcomes",
+                    ),
+                    value,
+                  )}
+                </strong>
                 <small>
                   {status === "ready" || status === "empty"
-                    ? "Synthetic snapshot only"
+                    ? sourced
+                      ? "Visible source records only"
+                      : "Synthetic snapshot only"
                     : status === "partial"
                       ? "Incomplete source"
                       : status === "stale"
@@ -413,8 +523,11 @@ export function ControlWorkspace({
                     </p>
                   </div>
                   <span>
-                    {countLabel(status, initial.appointments.length)} in
-                    snapshot
+                    {countLabel(
+                      metricState("appointments"),
+                      initial.appointments.length,
+                    )}{" "}
+                    in snapshot
                   </span>
                 </article>
               </>
@@ -434,9 +547,11 @@ export function ControlWorkspace({
               </div>
             ))}
             <p className="co-muted">
-              {show
-                ? `${rows.filter((c) => c.stage === "Outcome unknown").length} explicitly unknown outcome in this sample. Other open cases are not yet completed.`
-                : "Outcomes unknown — source unavailable."}
+              {sourced
+                ? "Business outcomes remain unknown: no authoritative outcome source is connected."
+                : show
+                  ? `${rows.filter((c) => c.stage === "Outcome unknown").length} explicitly unknown outcome in this sample. Other open cases are not yet completed.`
+                  : "Outcomes unknown — source unavailable."}
             </p>
           </section>
         </>
@@ -575,10 +690,16 @@ export function ControlWorkspace({
                       <div className="co-event-meta">
                         <strong>
                           {m.direction === "inbound"
-                            ? "Synthetic customer"
+                            ? sourced
+                              ? "Customer"
+                              : "Synthetic customer"
                             : m.agent
-                              ? "Synthetic assistant"
-                              : "Synthetic operator"}
+                              ? sourced
+                                ? "Assistant activity"
+                                : "Synthetic assistant"
+                              : sourced
+                                ? "Operator activity"
+                                : "Synthetic operator"}
                         </strong>
                         <time>{timeLabel(m.created_at)}</time>
                       </div>
@@ -824,7 +945,9 @@ export function ControlWorkspace({
                   <article key={f.id} className="co-operation-row">
                     <div className="co-operation-heading">
                       <div>
-                        <span className="co-id">Synthetic · {f.id}</span>
+                        <span className="co-id">
+                          {sourced ? "Source record · " : "Synthetic · "}{f.id}
+                        </span>
                         <h2>
                           {f.state === "Due"
                             ? "Review eligibility before follow-up"
@@ -925,7 +1048,9 @@ export function ControlWorkspace({
                   <article key={a.id} className="co-operation-row">
                     <div className="co-operation-heading">
                       <div>
-                        <span className="co-id">Synthetic · {a.id}</span>
+                        <span className="co-id">
+                          {sourced ? "Source record · " : "Synthetic · "}{a.id}
+                        </span>
                         <h2>{a.title}</h2>
                         <p>{timeLabel(a.scheduledAt)}</p>
                         <Link

@@ -6,6 +6,7 @@ import type {
   HandoffEvent,
   FollowupJob,
 } from "@/types/database";
+import type { ReadEvidence } from "./read-contract";
 
 export const stages = [
   "New",
@@ -205,7 +206,8 @@ export type FollowupRead = {
 export type ControlReadModel = {
   businessId: string;
   asOf: string | null;
-  source: "synthetic" | "unavailable";
+  source: "synthetic" | "supabase" | "unavailable";
+  read?: ReadEvidence;
   status: ReadState;
   cases: Case[];
   appointments: AppointmentRead[];
