@@ -2,6 +2,7 @@ import {
   resolveFoundationFlags,
   type FoundationContext,
 } from "@/lib/product-foundation-flags";
+import { isDashboardAuthBypassEnabled } from "@/lib/auth/dev-bypass";
 export function controlEnabled(
   session: FoundationContext,
   env: Record<string, string | undefined>,
@@ -19,7 +20,7 @@ export function readEnabled(env: Record<string, string | undefined>) {
     env.XEROWA_CONTROL_READ_ENABLED !== "1" ||
     env.XEROWA_CONTROL_READ_SCHEMA_CONFIRMED !== "1" ||
     env.XEROWA_CONTROL_SYNTHETIC === "1" ||
-    env.XEROWA_AUTH_BYPASS ||
+    isDashboardAuthBypassEnabled(env) ||
     env.NODE_ENV === "production" ||
     env.VERCEL_ENV === "production"
   )

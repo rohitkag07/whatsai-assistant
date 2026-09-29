@@ -4,6 +4,7 @@
 
 create extension if not exists pgcrypto with schema extensions;
 
+alter table public.business_members add column if not exists created_at timestamptz not null default now();
 alter table public.conversation_threads add column if not exists version bigint not null default 0;
 alter table public.handoff_events add column if not exists version bigint not null default 0;
 alter table public.followup_jobs add column if not exists version bigint not null default 0;
