@@ -675,7 +675,24 @@ export interface Database {
       business_members:      { Row: BusinessMember;     Insert: Partial<BusinessMember>;     Update: Partial<BusinessMember> };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      execute_xerowa_control_command: {
+        Args: {
+          p_business_id: string;
+          p_operation: string;
+          p_resource_id: string;
+          p_idempotency_key: string;
+          p_payload: Record<string, unknown>;
+          p_payload_hash: string;
+          p_expected_version: number | null;
+          p_reason: string;
+          p_evidence_reference: string | null;
+          p_issued_at: string;
+          p_expires_at: string;
+        };
+        Returns: Record<string, unknown>;
+      };
+    };
     Enums: Record<string, never>;
   };
 }

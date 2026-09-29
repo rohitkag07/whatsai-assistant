@@ -51,6 +51,7 @@ type SaveState =
   | "permission"
   | "disconnected"
   | "conflict";
+type PublishState = "idle" | "saving" | "saved" | "approved" | "published" | "error";
 export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
   const [drafts, setDrafts] = useState<OnboardingDraft[]>([]);
   const [draft, setDraft] = useState<OnboardingDraft | null>(null);
@@ -59,6 +60,9 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
   const [dirty, setDirty] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [notice, setNotice] = useState("");
+  const [publishState, setPublishState] = useState<PublishState>("idle");
+  const [configurationHash, setConfigurationHash] = useState<string | null>(null);
+  const [publishNotice, setPublishNotice] = useState("");
   const [showErrors, setShowErrors] = useState(false);
   const [pending, setPending] = useState<(() => void) | null>(null);
   const adapter = useRef<DraftAdapter | null>(null);
@@ -169,6 +173,80 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
       );
     } catch (error) {
       fail(error);
+    } finally {
+      busy.current = false;
+    }
+  }
+  async function sendConfigurationCommand(
+    operation: "save_configuration" | "approve_configuration" | "publish_configuration",
+  ) {
+    if (!draft || busy.current || !scope.tenantContext) return;
+    busy.current = true;
+    setPublishState("saving");
+    setPublishNotice("Recording an authenticated staging command…");
+    const issuedAt = new Date();
+    const commandExpiresAt = new Date(
+      issuedAt.getTime() + (operation === "publish_configuration" ? 86_400_000 : 300_000),
+    );
+    const approvalExpiresAt = new Date(issuedAt.getTime() + 86_400_000);
+    const payload =
+      operation === "save_configuration"
+        ? { template_id: draft.templateId, configuration: draft.config }
+        : {
+            configuration_hash: configurationHash,
+            ...(operation === "approve_configuration"
+              ? { approval_expires_at: approvalExpiresAt.toISOString() }
+              : {}),
+          };
+    try {
+      const response = await fetch("/api/control/commands", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          operation,
+          resourceId: draft.id,
+          idempotencyKey: crypto.randomUUID(),
+          payload,
+          expectedVersion:
+            operation === "save_configuration"
+              ? draft.revision
+              : operation === "publish_configuration"
+                ? 0
+                : null,
+          reason:
+            operation === "save_configuration"
+              ? "Save reviewed onboarding configuration"
+              : operation === "approve_configuration"
+                ? "Owner approval for reviewed configuration"
+                : "Publish approved configuration version",
+          evidenceReference: `onboarding:${draft.id}:revision:${draft.revision}`,
+          issuedAt: issuedAt.toISOString(),
+          expiresAt: commandExpiresAt.toISOString(),
+        }),
+      });
+      const result: unknown = await response.json();
+      if (!response.ok || !result || typeof result !== "object")
+        throw new Error("Command rejected");
+      const receipt = "receipt" in result ? result.receipt : null;
+      const body = receipt && typeof receipt === "object" && "result" in receipt ? receipt.result : null;
+      const hash = body && typeof body === "object" && "configuration_hash" in body
+        ? body.configuration_hash
+        : null;
+      if (operation === "save_configuration") {
+        if (typeof hash !== "string") throw new Error("Missing configuration receipt");
+        setConfigurationHash(hash);
+        setPublishState("saved");
+        setPublishNotice("Immutable staging version saved. Owner approval is still required.");
+      } else if (operation === "approve_configuration") {
+        setPublishState("approved");
+        setPublishNotice("Hash-bound owner approval recorded for 24 hours.");
+      } else {
+        setPublishState("published");
+        setPublishNotice("Configuration published to staging. Messaging and business activation remain off.");
+      }
+    } catch {
+      setPublishState("error");
+      setPublishNotice("The staging command was not completed. No activation or message was sent.");
     } finally {
       busy.current = false;
     }
@@ -915,6 +993,43 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
                         <span>{item.state}</span>
                       </div>
                     ))}
+                    <div className="ob-review-row">
+                      <div>
+                        <strong>Secure configuration publication</strong>
+                        <p>
+                          Save an immutable version, bind owner approval to its hash,
+                          then publish the approved pointer. This never sends a message.
+                        </p>
+                      </div>
+                      <div className="ob-publish-actions">
+                        <button
+                          className="x-button x-button-secondary"
+                          disabled={dirty || !draft.config.review.acknowledged || publishState === "saving" || publishState !== "idle"}
+                          onClick={() => void sendConfigurationCommand("save_configuration")}
+                        >
+                          Save secure version
+                        </button>
+                        <button
+                          className="x-button x-button-secondary"
+                          disabled={publishState !== "saved"}
+                          onClick={() => void sendConfigurationCommand("approve_configuration")}
+                        >
+                          Approve version
+                        </button>
+                        <button
+                          className="x-button"
+                          disabled={publishState !== "approved"}
+                          onClick={() => void sendConfigurationCommand("publish_configuration")}
+                        >
+                          Publish to staging
+                        </button>
+                      </div>
+                    </div>
+                    {publishNotice && (
+                      <p className="ob-muted" role={publishState === "error" ? "alert" : "status"}>
+                        {publishNotice}
+                      </p>
+                    )}
                     <button
                       className="x-button"
                       disabled

@@ -552,6 +552,12 @@
   padding: 12px 0;
   border-bottom: 1px solid var(--x-line);
 }
+.ob-publish-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
 .ob-review-row > div {
   flex: 1;
 }
