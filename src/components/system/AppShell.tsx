@@ -24,6 +24,7 @@ export type AppShellProps = {
   designLab?: boolean;
   onboarding?: boolean;
   controlOperations?: boolean;
+  commandOperations?: boolean;
 };
 export function AppShell({
   children,
@@ -35,6 +36,7 @@ export function AppShell({
   designLab = false,
   onboarding = false,
   controlOperations = false,
+  commandOperations = false,
 }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -52,7 +54,7 @@ export function AppShell({
   );
   const presentation = shellPresentation(state);
   const isLab = pathname === "/admin/design-lab";
-  const isFoundationPage = isLab || pathname === "/admin/onboarding" || (context === 'control' && controlOperations && ['/dashboard','/chats','/leads','/calendar','/follow-ups'].includes(pathname));
+  const isFoundationPage = isLab || pathname === "/admin/onboarding" || (context === 'command' && commandOperations && ['/admin','/admin/command-os','/admin/clients','/admin/system','/admin/webhooks'].includes(pathname)) || (context === 'control' && controlOperations && ['/dashboard','/chats','/leads','/calendar','/follow-ups'].includes(pathname));
   const openSearch = (trigger: HTMLButtonElement) => {
     returnFocus.current = trigger;
     setSearch(true);
@@ -112,6 +114,7 @@ export function AppShell({
         </Dialog.Portal>
       </Dialog.Root>
       <div className="x-workspace">
+        {context === 'command' && commandOperations && <div className="xc-mode" aria-label="Global Command mode"><strong>Read-only · operational controls unavailable</strong><span>Critical incidents: unverified · security / pilot NO-GO</span></div>}
         <TopRail
           {...{ context, platformRole, businesses, activeBusinessId, menuRef }}
           title={

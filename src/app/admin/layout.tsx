@@ -2,6 +2,7 @@ import { onboardingEnabled } from "@/lib/onboarding/flags";
 import { resolveFoundationFlags } from "@/lib/product-foundation-flags";
 import { DashboardShell } from "@/components/shared/DashboardShell";
 import { requirePlatformRole } from "@/lib/auth/session";
+import { commandEnabled } from '@/lib/command/model';
 import {
   loadFoundationShellState,
   loadShellBusinesses,
@@ -16,7 +17,10 @@ export default async function AdminLayout({
 }) {
   const session = await requirePlatformRole(["admin", "dev"]);
   const flags = resolveFoundationFlags(session, process.env);
-  const foundationState = flags.command
+  const commandOperations = commandEnabled(session, process.env);
+  const foundationState = commandOperations
+    ? { businesses: { status: 'disconnected' as const, data: null }, unread: { status: 'unknown' as const, data: null } }
+    : flags.command
     ? await loadFoundationShellState(session)
     : undefined;
   const businesses = foundationState
@@ -27,6 +31,7 @@ export default async function AdminLayout({
       <DashboardShell
         navMode="admin"
         foundation={flags.command}
+        commandOperations={commandOperations}
         foundationState={foundationState}
         designLab={flags.designLab}
         onboarding={onboardingEnabled(session, process.env)}

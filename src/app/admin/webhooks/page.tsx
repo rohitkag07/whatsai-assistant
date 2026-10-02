@@ -2,11 +2,14 @@ import { ArrowDownToLine, CheckCircle2, Clock3, MessageSquare } from 'lucide-rea
 import { AdminEmptyState, AdminPageHeader, AdminSection, AdminStatusBadge, formatAdminDate, truncateAdminText } from '@/components/admin/AdminPrimitives';
 import { requirePlatformRole } from '@/lib/auth/session';
 import { loadAdminWebhookEvents } from '@/lib/admin-data';
+import { commandExperience } from '@/components/admin/CommandExperiencePage';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminWebhooksPage() {
-  await requirePlatformRole(['admin', 'dev']);
+  const session = await requirePlatformRole(['admin', 'dev']);
+  const command = commandExperience(session, 'system', 'webhooks');
+  if (command) return command;
   const events = await loadAdminWebhookEvents();
 
   return (

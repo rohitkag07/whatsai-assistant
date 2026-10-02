@@ -29,6 +29,7 @@ type DashboardShellProps = {
   designLab?: boolean;
   onboarding?: boolean;
   controlOperations?: boolean;
+  commandOperations?: boolean;
 };
 
 export function DashboardShell({
@@ -43,6 +44,7 @@ export function DashboardShell({
   designLab = false,
   onboarding = false,
   controlOperations = false,
+  commandOperations = false,
 }: DashboardShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   if (foundation && foundationState)
@@ -56,6 +58,7 @@ export function DashboardShell({
         designLab={designLab}
         onboarding={onboarding}
         controlOperations={controlOperations}
+        commandOperations={commandOperations}
       >
         {children}
       </AppShell>

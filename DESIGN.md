@@ -75,3 +75,24 @@ this slice. Fixture-render tests do not prove production RLS or live readiness.
 The baseline, commands, exact file list and screenshots live in the external Phase 1
 verification packet. Revisit workflow fit, success definitions, language needs,
 accessibility with actual operators and technical release blockers before pilots.
+
+## Command inspection — Phase 4C
+
+Overview, Runs, Agents, Approvals, Businesses and System share the dark foundation.
+Global mode remains Read-only and critical-incident verification remains visible on
+every enabled Command route. An incident leads to business scope, run, policy,
+linked approval, receipt availability and recovery context. Raw identifiers stay
+in collapsed disclosure; hidden reasoning and secret payloads are never displayed.
+
+`XEROWA_COMMAND_ENABLED=1` requires the existing Command foundation and admin/dev
+authority. With it off, legacy route readers and shell remain intact. A separately
+guarded non-production Synthetic source requires the design-lab and Synthetic flags.
+Fixtures cannot be enabled through query strings and never blend with genuine reads.
+Platform evidence has no approved adapter in this slice; the real-source view is
+explicitly unavailable. Repository configuration is not measured service health.
+
+Approval inspection performs no mutation. Changed payloads, expiry, revocation and
+denial stay visible; even a pending decision has no executable control here.
+Phase 4B remains the sole Control command/configuration/receipt authority. A future
+platform adapter needs explicit scope, actor, freshness and relationship validation;
+new schema/RLS or mutation authority requires separate approval.

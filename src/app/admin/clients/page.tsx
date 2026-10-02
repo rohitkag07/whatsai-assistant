@@ -3,11 +3,14 @@ import { requirePlatformRole } from '@/lib/auth/session';
 import { loadAdminBusinesses } from '@/lib/admin-data';
 import { AdminClientDirectory } from '@/components/admin/AdminClientDirectory';
 import { AdminPageHeader, AdminSection } from '@/components/admin/AdminPrimitives';
+import { commandExperience } from '@/components/admin/CommandExperiencePage';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminClientsPage() {
-  await requirePlatformRole(['admin', 'dev']);
+  const session = await requirePlatformRole(['admin', 'dev']);
+  const command = commandExperience(session, 'businesses');
+  if (command) return command;
   const businesses = await loadAdminBusinesses();
 
   return (

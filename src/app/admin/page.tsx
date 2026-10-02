@@ -18,11 +18,14 @@ import {
   AdminSection,
 } from '@/components/admin/AdminPrimitives';
 import { AdminActivityFeed } from '@/components/admin/AdminActivityFeed';
+import { commandExperience } from '@/components/admin/CommandExperiencePage';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOverviewPage() {
-  await requirePlatformRole(['admin', 'dev']);
+  const session = await requirePlatformRole(['admin', 'dev']);
+  const command = commandExperience(session, 'overview');
+  if (command) return command;
   const { stats, activity } = await loadAdminOverview();
 
   return (
