@@ -23,6 +23,7 @@ export type AppShellProps = {
   state: ShellReadState;
   designLab?: boolean;
   onboarding?: boolean;
+  firstRun?: boolean;
   controlOperations?: boolean;
   commandOperations?: boolean;
 };
@@ -35,6 +36,7 @@ export function AppShell({
   state,
   designLab = false,
   onboarding = false,
+  firstRun = false,
   controlOperations = false,
   commandOperations = false,
 }: AppShellProps) {
@@ -51,10 +53,11 @@ export function AppShell({
     designLab,
     onboarding,
     controlOperations,
+    firstRun,
   );
   const presentation = shellPresentation(state);
   const isLab = pathname === "/admin/design-lab";
-  const isFoundationPage = isLab || pathname === "/admin/onboarding" || (context === 'command' && commandOperations && ['/admin','/admin/command-os','/admin/clients','/admin/system','/admin/webhooks'].includes(pathname)) || (context === 'control' && controlOperations && ['/dashboard','/chats','/leads','/calendar','/follow-ups'].includes(pathname));
+  const isFoundationPage = (firstRun && pathname === '/setup') || isLab || pathname === "/admin/onboarding" || (context === 'command' && commandOperations && ['/admin','/admin/command-os','/admin/clients','/admin/system','/admin/webhooks'].includes(pathname)) || (context === 'control' && controlOperations && ['/dashboard','/chats','/leads','/calendar','/follow-ups'].includes(pathname));
   const openSearch = (trigger: HTMLButtonElement) => {
     returnFocus.current = trigger;
     setSearch(true);
@@ -78,6 +81,7 @@ export function AppShell({
       data-foundation={context}
       className="x-app-shell"
       data-shell="foundation"
+      data-first-run={firstRun ? "true" : undefined}
     >
       <a href="#workspace-main" className="x-skip-link">
         Skip to workspace

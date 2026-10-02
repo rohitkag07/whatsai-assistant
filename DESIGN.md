@@ -96,3 +96,21 @@ denial stay visible; even a pending decision has no executable control here.
 Phase 4B remains the sole Control command/configuration/receipt authority. A future
 platform adapter needs explicit scope, actor, freshness and relationship validation;
 new schema/RLS or mutation authority requires separate approval.
+# Phase 5 first-run journey
+
+Login uses the same semantic Precision Operations tokens and local fonts as
+Control. The product promise describes enquiry qualification and human handoff,
+without claiming customer outcomes. Recovery guidance does not send email or
+create permission. Pending business access remains an explicit checkpoint.
+
+Workflow setup presents a readiness checklist beside one primary next step.
+Configuration proposals, local review, authoritative owner approval, staging
+publication, channel observation and activation have separate labels. Synthetic
+tests use a persistent source boundary and explain reply, qualification, handoff
+and follow-up; the result is never a live messaging receipt.
+
+Responsive panels stack below 650px available content width, including zoomed
+layouts. The enquiry field supports Devanagari/Hinglish using the shared local
+font fallback. Keyboard focus moves to the journey heading on step changes;
+existing editor dialogs preserve focus and warn before discarding unsaved changes.
+Reduced-motion behavior and focus/contrast tokens inherit the shared foundation.

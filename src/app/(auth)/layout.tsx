@@ -1,6 +1,8 @@
 import { APP_NAME, APP_TAGLINE, APP_COPYRIGHT } from '@/lib/constants';
+import '@/components/auth/auth-foundation.css';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  if (process.env.XEROWA_FIRST_RUN_ENABLED === '1') return <div data-foundation="control" className="fr-auth-layout"><a className="x-skip-link" href="#auth-main">Skip to sign-in</a><aside className="fr-auth-story"><div className="fr-auth-brand">XeroWA<span>WhatsApp Revenue Operations</span></div><div><p className="fr-auth-kicker">Controlled work. Accountable next steps.</p><h2>Enquiry.<br />Qualification.<br />Human handoff.</h2><p>Define how enquiries move through your business. Test a Synthetic workflow before any real messaging.</p><ol><li><strong>01</strong> Configure your offers and boundaries</li><li><strong>02</strong> Review ownership and follow-up rules</li><li><strong>03</strong> Inspect a safely simulated enquiry</li></ol></div><p className="fr-auth-footnote">Setup, approval, connection and activation are separate steps.</p></aside><main id="auth-main" className="fr-auth-main" tabIndex={-1}>{children}</main></div>;
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Marketing rail */}

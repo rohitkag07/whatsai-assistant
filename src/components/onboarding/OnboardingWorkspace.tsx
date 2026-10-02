@@ -52,7 +52,10 @@ type SaveState =
   | "disconnected"
   | "conflict";
 type PublishState = "idle" | "saving" | "saved" | "approved" | "published" | "error";
-export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
+export function OnboardingWorkspace({ scope, initialDraft, resume = false, commandsEnabled = true, onComplete, onExit }: {
+  scope: DraftScope; initialDraft?: OnboardingDraft | null; resume?: boolean;
+  commandsEnabled?: boolean; onComplete?: (draft: OnboardingDraft) => void; onExit?: () => void;
+}) {
   const [drafts, setDrafts] = useState<OnboardingDraft[]>([]);
   const [draft, setDraft] = useState<OnboardingDraft | null>(null);
   const [step, setStep] = useState(0);
@@ -94,7 +97,9 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
   function load() {
     try {
       adapter.current = browserDraftAdapter(scope);
-      setDrafts(adapter.current.list());
+      const existing = adapter.current.list();
+      setDrafts(existing);
+      if (resume) open([...existing].sort((a,b) => (b.savedAt ?? '').localeCompare(a.savedAt ?? ''))[0] ?? initialDraft ?? null);
       setSaveState("idle");
       setNotice("");
     } catch (error) {
@@ -145,6 +150,7 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
     setSaveState("idle");
     setNotice("");
     setShowErrors(false);
+    setConfigurationHash(null); setPublishState("idle"); setPublishNotice("");
   }
   function start(templateId: TemplateId) {
     guard(() => open(createDraft(templateId, scope, crypto.randomUUID())));
@@ -152,6 +158,7 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
   function change(path: FieldPath, value: unknown) {
     if (!draft || busy.current) return;
     setDraft(withField(draft, path, value));
+    setConfigurationHash(null); setPublishState("idle"); setPublishNotice("");
     setDirty(true);
     setSaveState("idle");
     setNotice("");
@@ -180,7 +187,7 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
   async function sendConfigurationCommand(
     operation: "save_configuration" | "approve_configuration" | "publish_configuration",
   ) {
-    if (!draft || busy.current || !scope.tenantContext) return;
+    if (!commandsEnabled || !draft || busy.current || !scope.tenantContext) return;
     busy.current = true;
     setPublishState("saving");
     setPublishNotice("Recording an authenticated staging command…");
@@ -349,6 +356,7 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
           </span>
         }
       />
+      {onExit && <button className="x-button x-button-secondary" onClick={(event) => guard(onExit, event.currentTarget)}>Back to readiness</button>}
       <div className="ob-storage-note">
         <ShieldCheck size={18} aria-hidden="true" />
         <div>
@@ -976,7 +984,7 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
                     </p>
                   </section>
                   <OnboardingPreview key={draft.id} draft={draft} />
-                  <section className="ob-readiness">
+                  {commandsEnabled && <section className="ob-readiness">
                     <div className="ob-row">
                       <h3>Activation checklist</h3>
                       <span className="ob-state">
@@ -1042,7 +1050,7 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
                       connection, consent and verification evidence. Activation
                       is unavailable in this local slice.
                     </p>
-                  </section>
+                  </section>}
                 </>
               )}
               <div className="ob-form-actions">
@@ -1074,6 +1082,7 @@ export function OnboardingWorkspace({ scope }: { scope: DraftScope }) {
                     <Save size={16} aria-hidden="true" />
                     {saveState === "saving" ? "Saving…" : "Save draft"}
                   </button>
+                  {onComplete && step === 9 && <button className="x-button" disabled={dirty || issues.length > 0 || saveState === "saving"} onClick={() => onComplete(draft)}>Continue to Synthetic test</button>}
                   {step < 9 && (
                     <button
                       className="x-button"

@@ -28,6 +28,7 @@ type DashboardShellProps = {
   foundationState?: ShellReadState;
   designLab?: boolean;
   onboarding?: boolean;
+  firstRun?: boolean;
   controlOperations?: boolean;
   commandOperations?: boolean;
 };
@@ -43,6 +44,7 @@ export function DashboardShell({
   foundationState,
   designLab = false,
   onboarding = false,
+  firstRun = false,
   controlOperations = false,
   commandOperations = false,
 }: DashboardShellProps) {
@@ -57,6 +59,7 @@ export function DashboardShell({
         state={foundationState}
         designLab={designLab}
         onboarding={onboarding}
+        firstRun={firstRun}
         controlOperations={controlOperations}
         commandOperations={commandOperations}
       >
