@@ -53,8 +53,9 @@ export function getUserPlatformRole(user: User): PlatformRole {
 
 export function resolveTrustedPlatformRole(
   user: User,
-  _rows: unknown,
+  rows: unknown,
 ): PlatformRole {
+  void rows;
   const appRole = getUserPlatformRole(user);
   if (isAdminPlatformRole(appRole)) return appRole;
   // Tenant membership rows determine business access elsewhere, but never
