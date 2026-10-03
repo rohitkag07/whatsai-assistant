@@ -154,7 +154,7 @@ function Panel({ title, description, children }: { title: string; description: s
 }
 
 function CountCard({ label, value, icon: Icon }: { label: string; value: number; icon: typeof Users }) {
-  return <div className="rounded-2xl border border-[#d8e1dd] bg-white p-4"><div className="flex items-center justify-between"><p className="text-xs font-medium text-[#667781]">{label}</p><Icon className="h-4 w-4 text-[#00a884]" /></div><p className="mt-3 text-2xl font-semibold tracking-[-0.04em]">{value}</p></div>;
+  return <div className="rounded-2xl border border-[#d8e1dd] bg-white p-4"><div className="flex items-center justify-between"><p className="text-xs font-medium text-[#667781]">{label}</p><Icon className="h-4 w-4 text-[#00a884]" /></div><p className="mt-3 text-2xl font-semibold tracking-[-0.04em]">{value === 0 ? "Unknown" : value}</p>{value === 0 && <p className="mt-1 text-xs text-[#667781]">No verified count available</p>}</div>;
 }
 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {

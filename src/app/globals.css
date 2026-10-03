@@ -110,7 +110,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 180 13% 10%;
 
-    --primary: 169 100% 33%;
+    --primary: 169 100% 23%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 126 76% 94%;
@@ -122,7 +122,7 @@
     --accent: 126 76% 94%;
     --accent-foreground: 174 86% 20%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 35%;
     --destructive-foreground: 210 40% 98%;
 
     --success: 142.1 76.2% 36.3%;
@@ -545,6 +545,7 @@
   border-bottom: 1px solid var(--x-line);
 }
 .x-top-rail-row {
+  flex-wrap: wrap;
   min-height: 64px;
   display: flex;
   align-items: center;
@@ -567,6 +568,8 @@
   overflow-wrap: anywhere;
 }
 .x-top-actions {
+  flex-wrap: wrap;
+  max-width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -645,6 +648,19 @@
   --x-border: #718579;
   --x-focus: #156cb4;
   --x-surface: #ffffff;
+  --x-raised: #f8faf9;
+  --x-line: #dbe3de;
+  --x-selected: #e2efe8;
+  --x-accent: #086344;
+  --x-accent-ink: #ffffff;
+  --x-success: #11633f;
+  --x-success-bg: #e4f3e9;
+  --x-attention: #805012;
+  --x-attention-bg: #fff1d5;
+  --x-danger: #a32936;
+  --x-danger-bg: #fce9ed;
+  --x-info: #235eb0;
+  --x-info-bg: #e7effc;
 }
 .x-mobile-menu {
   display: none;
@@ -1185,6 +1201,9 @@
 }
 .x-system-state-compact > div {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .x-skeleton {
   width: min(420px, 65vw);
@@ -1316,7 +1335,7 @@
     align-items: flex-start;
   }
   .x-system-state-compact > div {
-    min-width: 170px;
+    min-width: 0;
   }
   .x-workspace-footer {
     padding: 16px;
@@ -1342,3 +1361,12 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Phase 6: accessible text contrast for retained legacy brand accents. */
+.x-legacy-content .text-\[\#00a884\] { color: var(--x-accent); }
+.x-legacy-content .text-\[\#008069\] { color: var(--x-accent); }
+.x-legacy-content .text-\[\#667781\],
+.x-legacy-content .text-\[\#8696a0\] { color: var(--x-muted); }
+
+/* Error notifications inherit the accessible semantic destructive colour. */
+[data-sonner-toaster][data-theme="light"] { --error-text: hsl(var(--destructive)); }

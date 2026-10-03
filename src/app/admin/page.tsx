@@ -1,3 +1,4 @@
+import { SystemState } from '@/components/system/SystemState';
 import {
   Activity,
   BookOpen,
@@ -26,7 +27,9 @@ export default async function AdminOverviewPage() {
   const session = await requirePlatformRole(['admin', 'dev']);
   const command = commandExperience(session, 'overview');
   if (command) return command;
-  const { stats, activity } = await loadAdminOverview();
+  const overview = await loadAdminOverview().catch(() => null);
+  if (!overview) return <div className="x-legacy-content"><h1 className="text-2xl font-semibold">Overview unavailable</h1><SystemState kind="error" /></div>;
+  const { stats, activity } = overview;
 
   return (
     <div className="mx-auto max-w-[1540px] space-y-6">
@@ -44,22 +47,22 @@ export default async function AdminOverviewPage() {
           icon={Users}
         />
         <AdminMetricCard
-          label="Live WhatsApp"
+          label="Recorded connections"
           value={stats.liveConnections}
-          detail="Connected channels accepting messages"
+          detail="Channels marked connected; current provider health unverified"
           icon={Wifi}
         />
         <AdminMetricCard
           label="Messages sent today"
-          value={stats.messagesSentToday}
-          detail="Outbound replies since midnight IST"
+          value={stats.messagesSentToday === 0 ? "Unknown" : stats.messagesSentToday}
+          detail={stats.messagesSentToday === 0 ? "No verified count available" : "Recorded outbound replies since midnight IST"}
           icon={MessageCircle}
           tone="blue"
         />
         <AdminMetricCard
           label="Hot handoffs"
-          value={stats.hotHandoffs}
-          detail="Open conversations needing an owner"
+          value={stats.hotHandoffs === 0 ? "Unknown" : stats.hotHandoffs}
+          detail={stats.hotHandoffs === 0 ? "No verified count available" : "Recorded open conversations needing an owner"}
           icon={Sparkles}
           tone={stats.hotHandoffs ? 'amber' : 'slate'}
         />

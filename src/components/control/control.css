@@ -791,3 +791,8 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Keep source and recovery states readable at narrow, zoomed widths. */
+.co-provenance > div,
+.co-state > div { min-width: 0; overflow-wrap: anywhere; }
+.co-provenance > span { max-width: 100%; overflow-wrap: anywhere; }

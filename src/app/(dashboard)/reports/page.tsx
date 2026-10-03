@@ -20,8 +20,10 @@ export default async function ReportsPage() {
       <PageHeader
         title="Reports & Analytics"
         titleHi="रिपोर्ट्स"
-        description="Auto-generated reports — downloadable as PDF, also delivered weekly on WhatsApp."
+        description="Synthetic report examples. Report generation and delivery are not connected."
       />
+
+      <p className="x-synthetic-banner" role="note">Synthetic · All figures and channel assessments below are illustrative fixtures, not customer or provider evidence.</p>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <ReportMetricPanel
@@ -78,7 +80,7 @@ export default async function ReportsPage() {
                       <CardDescription className="text-xs">{r.description}</CardDescription>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" /> PDF</Button>
+                  <Button variant="outline" size="sm" disabled title="PDF generation is not connected"><Download className="h-4 w-4 mr-2" /> PDF</Button>
                 </CardHeader>
                 <CardContent />
               </Card>

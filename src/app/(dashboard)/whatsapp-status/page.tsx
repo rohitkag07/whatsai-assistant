@@ -58,16 +58,16 @@ export default async function WhatsAppStatusPage() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-2xl font-semibold tracking-[-0.035em] text-[#111b21]">
-                {connected ? 'WhatsApp is connected' : 'Reconnect WhatsApp'}
+                {connected ? 'Channel record: connected' : channel ? 'Reconnect WhatsApp' : 'Connection status unavailable'}
               </h2>
               <Badge variant={connected ? 'success' : 'warning'}>
-                {connected ? 'Connected' : 'Action needed'}
+                {connected ? 'Recorded connected' : channel ? 'Action needed' : 'Unknown'}
               </Badge>
             </div>
             <p className="mt-2 text-sm leading-6 text-[#667781]">
               {connected
-                ? 'Customer messages can reach your inbox and approved replies can be sent.'
-                : 'Messages may not reach XeroWA AI until the connection is restored.'}
+                ? 'The saved channel record reports connected. Current provider health and delivered-message evidence are not verified here.'
+                : channel ? 'Messages may not reach XeroWA AI until the connection is restored.' : 'No readable channel record is available. A missing record does not establish a disconnected account.'}
             </p>
           </div>
         </div>

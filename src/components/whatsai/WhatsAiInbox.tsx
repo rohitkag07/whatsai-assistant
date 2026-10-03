@@ -659,7 +659,7 @@ function InboxErrorState({ message, onRetry }: { message: string; onRetry: () =>
         <div>
           <h2 className="text-lg font-semibold">Inbox could not load</h2>
           <p className="mt-1 text-sm">{message}</p>
-          <p className="mt-2 text-xs">Your saved customer conversations are safe. Refresh now, or try again in a few minutes.</p>
+          <p className="mt-2 text-xs">This view cannot verify stored conversations. No changes were made by this read. You can retry.</p>
           <Button className="mt-5" variant="destructive" onClick={onRetry}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry

@@ -114,3 +114,23 @@ layouts. The enquiry field supports Devanagari/Hinglish using the shared local
 font fallback. Keyboard focus moves to the journey heading on step changes;
 existing editor dialogs preserve focus and warn before discarding unsaved changes.
 Reduced-motion behavior and focus/contrast tokens inherit the shared foundation.
+
+
+## Phase 6 hardening (local acceptance candidate)
+
+Keep recorded, Synthetic, unavailable and verified states distinct. Static reports
+carry a Synthetic label; missing plan, billing and channel records remain unknown.
+Read failures use the shared recovery state and never fabricate empty queues.
+Evidence screens explain that user-scoped queries do not independently verify RLS.
+
+Legacy form fields have associated labels and helper text; completion progress
+exposes its value. Action/destructive colours and legacy text accents use readable
+semantic colours. Source and recovery text wrap at narrow zoomed widths; the top
+rail can wrap without losing navigation controls. First-run renders the known
+server checklist geometry while draft recovery keeps actions disabled.
+
+No routes or presentation components were removed. Rollout gates remain
+server-resolved and default off. Platform authority ignores user-editable
+metadata and shares trusted app-metadata/membership resolution across guards.
+Synthetic browser/profile fixtures are local evidence only; signed-in founder
+acceptance, deployed tenant isolation and pilot readiness remain separate gates.

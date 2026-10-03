@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { cloneElement, isValidElement, useId, useEffect, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -223,7 +223,7 @@ export function WhatsAiSetupForm() {
             Complete five guided steps. Your progress stays on this device.
           </CardDescription>
           <div className="pt-2">
-            <Progress value={progress} className="h-1.5 bg-white/15" />
+            <Progress aria-label="Setup completion" value={progress} className="h-1.5 bg-white/15" />
             <div className="mt-2 flex items-center justify-between text-xs text-white/70">
               <span>Step {step + 1} of {steps.length}: {steps[step].title}</span>
               <span>{saved ? 'Saved locally' : 'Autosaves on this device'}</span>
@@ -316,7 +316,7 @@ function BusinessProfileStep({ form, update, onCategoryChange }: StepProps & { o
       </Field>
       <Field label="Industry" helper="Helps the assistant ask the right questions.">
         <Select value={form.category} onValueChange={(value) => onCategoryChange(value as BusinessCategory)}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectTrigger aria-label="Business category"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="real_estate">Real estate</SelectItem>
             <SelectItem value="clinic">Clinic</SelectItem>
@@ -465,11 +465,13 @@ type StepProps = {
 };
 
 function Field({ label, helper, children }: { label: string; helper: string; children: React.ReactNode }) {
+  const id = useId();
+  const control = isValidElement<{ id?: string; "aria-describedby"?: string }>(children) ? cloneElement(children, { id, "aria-describedby": `${id}-help` }) : children;
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
-      {children}
-      <p className="text-xs text-muted-foreground">{helper}</p>
+      <Label htmlFor={id}>{label}</Label>
+      {control}
+      <p id={`${id}-help`} className="text-xs text-muted-foreground">{helper}</p>
     </div>
   );
 }

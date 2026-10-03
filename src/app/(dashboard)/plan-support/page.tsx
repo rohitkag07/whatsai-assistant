@@ -46,17 +46,18 @@ export default async function PlanSupportPage() {
                 Current plan
               </div>
               <h2 className="mt-3 text-3xl font-semibold capitalize tracking-[-0.045em] text-[#111b21]">
-                {business?.plan || 'Managed launch'}
+                {business?.plan || 'Plan unavailable'}
               </h2>
               <p className="mt-2 text-sm text-[#667781]">
-                {business?.name || 'Your business'} · Managed by the XeroWA team
+                {business?.name || 'Business details unavailable'} · Source record required
               </p>
             </div>
-            <Badge variant={business?.status === 'paused' ? 'warning' : 'success'}>
-              {business?.status === 'paused' ? 'Paused' : 'Active'}
+            <Badge variant={business?.status === 'paused' ? 'warning' : business?.status === 'active' ? 'success' : 'outline'}>
+              {business?.status === 'paused' ? 'Paused' : business?.status === 'active' ? 'Active' : 'Status unknown'}
             </Badge>
           </div>
 
+          {!business && <p className="mt-4 text-sm" role="status">Plan and entitlement data could not be verified. The capabilities below describe the product; they do not confirm an active subscription.</p>}
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             {[
               'WhatsApp customer inbox',

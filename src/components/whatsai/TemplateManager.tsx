@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Children, cloneElement, isValidElement, useId, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, Clock3, FileWarning, Plus, RefreshCw, Send, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { SystemState } from '@/components/system/SystemState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,6 +41,7 @@ const emptyForm = {
 export function TemplateManager() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
+  const [readFailed, setReadFailed] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
@@ -49,13 +51,14 @@ export function TemplateManager() {
 
   async function loadTemplates() {
     setLoading(true);
+    setReadFailed(false);
     try {
       const response = await fetch('/api/whatsai/templates', { cache: 'no-store' });
       const payload = await response.json();
       if (!response.ok || !payload.ok) throw new Error(payload.error || 'Could not load templates.');
       setTemplates(payload.templates ?? []);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not load templates.');
+    } catch {
+      setReadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -103,6 +106,9 @@ export function TemplateManager() {
     }
   }
 
+  if (loading) return <SystemState kind="loading" />;
+  if (readFailed) return <div className="space-y-4"><h1 className="text-2xl font-semibold">Templates unavailable</h1><SystemState kind="error" onRetry={() => void loadTemplates()} /></div>;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -117,7 +123,7 @@ export function TemplateManager() {
           </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button className="bg-[#008069] hover:bg-[#006b5a]"><Plus className="mr-2 h-4 w-4" />Create template</Button></DialogTrigger>
-            <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto">
+            <DialogContent className="x-legacy-content max-h-[92vh] max-w-3xl overflow-y-auto">
               <DialogHeader><DialogTitle>Create WhatsApp template</DialogTitle></DialogHeader>
               <TemplateForm form={form} setForm={setForm} />
               <div className="flex justify-end gap-2 pt-2">
@@ -157,18 +163,18 @@ function TemplateForm({ form, setForm }: { form: typeof emptyForm; setForm: Reac
     <div className="space-y-5 py-2">
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Template name"><Input value={form.name} onChange={(event) => patch({ name: event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_') })} placeholder="appointment_reminder" /></Field>
-        <Field label="Language"><Select value={form.language} onValueChange={(language) => patch({ language })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="en_US">English (US)</SelectItem><SelectItem value="en">English</SelectItem><SelectItem value="hi">Hindi</SelectItem></SelectContent></Select></Field>
-        <Field label="Category"><Select value={form.category} onValueChange={(category) => patch({ category: category as typeof form.category })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="UTILITY">Utility</SelectItem><SelectItem value="MARKETING">Marketing</SelectItem></SelectContent></Select></Field>
+        <Field label="Language"><Select value={form.language} onValueChange={(language) => patch({ language })}><SelectTrigger aria-label="Language"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="en_US">English (US)</SelectItem><SelectItem value="en">English</SelectItem><SelectItem value="hi">Hindi</SelectItem></SelectContent></Select></Field>
+        <Field label="Category"><Select value={form.category} onValueChange={(category) => patch({ category: category as typeof form.category })}><SelectTrigger aria-label="Category"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="UTILITY">Utility</SelectItem><SelectItem value="MARKETING">Marketing</SelectItem></SelectContent></Select></Field>
       </div>
       <div className="grid gap-4 sm:grid-cols-[180px_minmax(0,1fr)]">
-        <Field label="Header type"><Select value={form.headerType} onValueChange={(headerType) => patch({ headerType })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">No header</SelectItem><SelectItem value="TEXT">Text</SelectItem><SelectItem value="IMAGE">Image</SelectItem><SelectItem value="VIDEO">Video</SelectItem><SelectItem value="DOCUMENT">Document</SelectItem></SelectContent></Select></Field>
+        <Field label="Header type"><Select value={form.headerType} onValueChange={(headerType) => patch({ headerType })}><SelectTrigger aria-label="Header type"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="NONE">No header</SelectItem><SelectItem value="TEXT">Text</SelectItem><SelectItem value="IMAGE">Image</SelectItem><SelectItem value="VIDEO">Video</SelectItem><SelectItem value="DOCUMENT">Document</SelectItem></SelectContent></Select></Field>
         {form.headerType === 'TEXT' ? <Field label="Header text"><Input value={form.headerText} maxLength={60} onChange={(event) => patch({ headerText: event.target.value })} placeholder="Appointment confirmed" /></Field> : form.headerType !== 'NONE' ? <Field label="Meta sample media handle"><Input value={form.headerMediaHandle} onChange={(event) => patch({ headerMediaHandle: event.target.value })} placeholder="Paste the uploaded sample handle from Meta" /></Field> : null}
       </div>
       <Field label="Message body"><Textarea rows={6} value={form.body} onChange={(event) => patch({ body: event.target.value })} placeholder="Hi {{1}}, your appointment with {{2}} is confirmed." /><p className="text-xs text-[#667781]">Use numbered variables such as {'{{1}}'} and {'{{2}}'}.</p></Field>
       <Field label="Footer (optional)"><Input value={form.footer} maxLength={60} onChange={(event) => patch({ footer: event.target.value })} placeholder="Reply STOP to opt out" /></Field>
       <div className="rounded-2xl border border-[#d8dee4] bg-[#f8faf9] p-4">
         <div className="flex items-center justify-between gap-3"><div><Label>Buttons</Label><p className="mt-1 text-xs text-[#667781]">Up to 3 quick replies, phone calls, or links.</p></div><Button variant="outline" size="sm" disabled={form.buttons.length >= 3} onClick={() => patch({ buttons: [...form.buttons, { type: 'QUICK_REPLY', text: '', value: '' }] })}><Plus className="mr-1 h-3.5 w-3.5" />Add</Button></div>
-        <div className="mt-3 space-y-3">{form.buttons.map((button, index) => <div key={index} className="grid gap-2 rounded-xl bg-white p-3 sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)_36px]"><Select value={button.type} onValueChange={(type) => updateButton(index, { type: type as typeof button.type })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="QUICK_REPLY">Quick reply</SelectItem><SelectItem value="PHONE_NUMBER">Call</SelectItem><SelectItem value="URL">Website</SelectItem></SelectContent></Select><Input value={button.text} onChange={(event) => updateButton(index, { text: event.target.value })} placeholder="Button label" />{button.type === 'QUICK_REPLY' ? <div /> : <Input value={button.value} onChange={(event) => updateButton(index, { value: event.target.value })} placeholder={button.type === 'URL' ? 'https://...' : '+91...'} />}<Button variant="ghost" size="icon" onClick={() => patch({ buttons: form.buttons.filter((_, buttonIndex) => buttonIndex !== index) })}><XCircle className="h-4 w-4 text-red-500" /></Button></div>)}</div>
+        <div className="mt-3 space-y-3">{form.buttons.map((button, index) => <div key={index} className="grid gap-2 rounded-xl bg-white p-3 sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)_36px]"><Select value={button.type} onValueChange={(type) => updateButton(index, { type: type as typeof button.type })}><SelectTrigger aria-label={`Button ${index + 1} type`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="QUICK_REPLY">Quick reply</SelectItem><SelectItem value="PHONE_NUMBER">Call</SelectItem><SelectItem value="URL">Website</SelectItem></SelectContent></Select><Input aria-label={`Button ${index + 1} label`} value={button.text} onChange={(event) => updateButton(index, { text: event.target.value })} placeholder="Button label" />{button.type === 'QUICK_REPLY' ? <div /> : <Input aria-label={`Button ${index + 1} destination`} value={button.value} onChange={(event) => updateButton(index, { value: event.target.value })} placeholder={button.type === 'URL' ? 'https://...' : '+91...'} />}<Button aria-label={`Remove button ${index + 1}`} variant="ghost" size="icon" onClick={() => patch({ buttons: form.buttons.filter((_, buttonIndex) => buttonIndex !== index) })}><XCircle className="h-4 w-4 text-red-500" /></Button></div>)}</div>
       </div>
     </div>
   );
@@ -211,7 +217,9 @@ function statusStyle(status: Template['status']) {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="space-y-2"><Label>{label}</Label>{children}</div>;
+  const id = useId();
+  const hasInput = Children.toArray(children).some(child => isValidElement(child) && (child.type === Input || child.type === Textarea));
+  return <div className="space-y-2"><Label htmlFor={hasInput ? id : undefined}>{label}</Label>{Children.map(children, child => isValidElement(child) && (child.type === Input || child.type === Textarea) ? cloneElement(child as React.ReactElement<{id?: string}>, {id}) : child)}</div>;
 }
 
 function readError(error: unknown) {

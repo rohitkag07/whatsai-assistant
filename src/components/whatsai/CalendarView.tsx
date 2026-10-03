@@ -51,7 +51,7 @@ export function CalendarView({ initialData }: { initialData: CalendarData }) {
   function cancelAppointment() { if (selectedAppointment) updateAppointment(selectedAppointment.id, { status: 'cancelled' }, 'Appointment cancelled.'); }
   function rescheduleAppointment() { if (selectedAppointment && rescheduleValue) updateAppointment(selectedAppointment.id, { status: 'scheduled', scheduled_at: new Date(rescheduleValue).toISOString() }, 'Appointment rescheduled.'); }
 
-  if (initialData.source === 'error') return <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-red-950"><h2 className="font-semibold">Calendar could not load</h2><p className="mt-2 text-sm">{initialData.error}</p><p className="mt-2 text-xs">Your appointments remain safe. Refresh now, or try again in a few minutes.</p></div>;
+  if (initialData.source === 'error') return <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-red-950"><h2 className="font-semibold">Calendar could not load</h2><p className="mt-2 text-sm">{initialData.error}</p><p className="mt-2 text-xs">This view cannot verify stored appointments. No changes were made by this read. You can retry.</p></div>;
 
   return <>
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_330px]">

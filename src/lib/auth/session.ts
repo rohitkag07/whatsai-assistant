@@ -1,17 +1,19 @@
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import type { User } from '@supabase/supabase-js';
-import { createClient, createServiceClient } from '@/lib/supabase/server';
-import { ACTIVE_BUSINESS_COOKIE } from '@/lib/auth/active-business';
-import { buildDevAuthBypassSession, isDashboardAuthBypassEnabled } from '@/lib/auth/dev-bypass';
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import type { User } from "@supabase/supabase-js";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { ACTIVE_BUSINESS_COOKIE } from "@/lib/auth/active-business";
+import {
+  buildDevAuthBypassSession,
+  isDashboardAuthBypassEnabled,
+} from "@/lib/auth/dev-bypass";
 import {
   defaultLandingForRole,
-  getUserPlatformRole,
+  resolveTrustedPlatformRole,
   isAdminPlatformRole,
-  platformRoleFromMembershipRole,
   type BusinessMemberRole,
   type PlatformRole,
-} from '@/lib/auth/roles';
+} from "@/lib/auth/roles";
 
 export type BusinessMembership = {
   id: string;
@@ -30,19 +32,39 @@ export type AuthSession = {
   activeBusinessId: string | null;
 };
 
-function loginRedirect(next = '/'): never {
+function loginRedirect(next = "/"): never {
   const params = new URLSearchParams({ next });
   redirect(`/login?${params.toString()}`);
 }
 
-function normalizeMemberships(rows: unknown): BusinessMembership[] {
+function normalizeMemberships(
+  rows: unknown,
+  userId: string,
+): BusinessMembership[] {
   if (!Array.isArray(rows)) return [];
 
   return rows
     .filter((row): row is BusinessMembership => {
-      if (!row || typeof row !== 'object') return false;
+      if (!row || typeof row !== "object") return false;
       const item = row as Partial<BusinessMembership>;
-      return Boolean(item.id && item.business_id && item.user_id && item.role && item.active);
+      return (
+        typeof item.id === "string" &&
+        Boolean(item.id) &&
+        typeof item.business_id === "string" &&
+        Boolean(item.business_id) &&
+        item.user_id === userId &&
+        item.active === true &&
+        [
+          "owner",
+          "manager",
+          "agent",
+          "operator",
+          "viewer",
+          "client",
+          "admin",
+          "dev",
+        ].includes(item.role ?? "")
+      );
     })
     .map((row) => ({
       ...row,
@@ -58,34 +80,42 @@ export async function getAuthSession(): Promise<AuthSession | null> {
   const supabase = await createClient().catch(() => null);
   if (!supabase) return null;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
   if (userError || !user) return null;
 
-  let membershipClient: any = supabase;
+  let membershipClient = supabase;
   try {
-    membershipClient = createServiceClient();
+    membershipClient = createServiceClient() as unknown as typeof supabase;
   } catch {
     // The user-scoped client remains the fail-closed fallback.
   }
 
-  const membershipsResult = await (membershipClient.from('business_members') as any)
-    .select('id,business_id,user_id,display_name,role,active,created_at')
-    .eq('user_id', user.id)
-    .eq('active', true)
-    .order('created_at', { ascending: true });
+  const membershipsResult = await membershipClient
+    .from("business_members")
+    .select("id,business_id,user_id,display_name,role,active,created_at")
+    .eq("user_id", user.id)
+    .eq("active", true)
+    .order("created_at", { ascending: true });
 
-  const memberships = normalizeMemberships(membershipsResult.data);
-  const userPlatformRole = getUserPlatformRole(user);
-  const membershipRole = memberships.map((membership) => platformRoleFromMembershipRole(membership.role)).find(Boolean);
-  const platformRole = isAdminPlatformRole(userPlatformRole) ? userPlatformRole : membershipRole ?? userPlatformRole;
+  const memberships = normalizeMemberships(
+    membershipsResult.error ? [] : membershipsResult.data,
+    user.id,
+  );
+  const platformRole = resolveTrustedPlatformRole(user, memberships);
   const cookieStore = await cookies();
-  const selectedBusinessId = cookieStore.get(ACTIVE_BUSINESS_COOKIE)?.value ?? null;
+  const selectedBusinessId =
+    cookieStore.get(ACTIVE_BUSINESS_COOKIE)?.value ?? null;
   const activeBusinessId = isAdminPlatformRole(platformRole)
     ? selectedBusinessId
-    : memberships.some((membership) => membership.business_id === selectedBusinessId)
+    : memberships.some(
+          (membership) => membership.business_id === selectedBusinessId,
+        )
       ? selectedBusinessId
-      : memberships[0]?.business_id ?? null;
+      : (memberships[0]?.business_id ?? null);
 
   return {
     user,
@@ -95,14 +125,14 @@ export async function getAuthSession(): Promise<AuthSession | null> {
   };
 }
 
-export async function requireSession(next = '/') {
+export async function requireSession(next = "/") {
   const session = await getAuthSession();
   if (!session) loginRedirect(next);
   return session;
 }
 
 export async function requirePlatformRole(allowedRoles: PlatformRole[]) {
-  const session = await requireSession('/admin');
+  const session = await requireSession("/admin");
   if (!allowedRoles.includes(session.platformRole)) {
     redirect(defaultLandingForRole(session.platformRole));
   }
@@ -110,15 +140,17 @@ export async function requirePlatformRole(allowedRoles: PlatformRole[]) {
 }
 
 export async function requireBusinessAccess(businessId?: string) {
-  const session = await requireSession('/dashboard');
+  const session = await requireSession("/dashboard");
 
   if (isAdminPlatformRole(session.platformRole)) return session;
 
   const hasMembership = businessId
-    ? session.memberships.some((membership) => membership.business_id === businessId)
+    ? session.memberships.some(
+        (membership) => membership.business_id === businessId,
+      )
     : session.memberships.length > 0;
 
-  if (!hasMembership) redirect('/guard');
+  if (!hasMembership) redirect("/guard");
 
   return session;
 }

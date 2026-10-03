@@ -1,3 +1,4 @@
+import { SystemState } from '@/components/system/SystemState';
 import { AdminMessageTable } from '@/components/admin/AdminMessageTable';
 import { AdminPageHeader, AdminSection } from '@/components/admin/AdminPrimitives';
 import { requirePlatformRole } from '@/lib/auth/session';
@@ -7,7 +8,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminConversationsPage() {
   await requirePlatformRole(['admin', 'dev']);
-  const [messages, businesses] = await Promise.all([loadAdminMessages(100), loadAdminBusinesses()]);
+  const result = await Promise.all([loadAdminMessages(100), loadAdminBusinesses()]).catch(() => null);
+  if (!result) return <div className="space-y-5"><AdminPageHeader eyebrow="Source unavailable" title="Conversation monitor" description="The source could not be read. No empty collection or successful read is assumed." /><SystemState kind="error" /></div>;
+  const [messages, businesses] = result;
   return (
     <div className="mx-auto max-w-5xl space-y-5">
       <AdminPageHeader eyebrow="Cross-client inbox" title="Conversation monitor" description="Inspect the latest canonical inbound and outbound messages across every client without exposing raw provider credentials." />

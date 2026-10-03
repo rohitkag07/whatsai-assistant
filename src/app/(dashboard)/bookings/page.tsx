@@ -1,3 +1,4 @@
+import { SystemState } from '@/components/system/SystemState';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { AlertTriangle, ArrowRight, CheckCircle2, MessageCircle, ShieldCheck } from 'lucide-react';
@@ -16,6 +17,7 @@ export default async function BookingsPage() {
   const session = await requireBusinessAccess();
   if (!session.activeBusinessId) redirect('/admin');
   const data = await loadWhatsAiInboxData({ businessId: session.activeBusinessId });
+  if (data.source === 'error') return <div className="space-y-5"><PageHeader title="Owner Handoffs" description="Available handoff records could not be read. No empty queue or zero count is assumed." /><SystemState kind="error" /></div>;
   const handoffs = data.threads
     .filter((thread) => thread.hotHandoff || thread.status === 'pending_human' || thread.aiMode === 'manual' || thread.aiMode === 'paused')
     .sort((left, right) => priorityScore(right) - priorityScore(left) || right.lastMessageAt.localeCompare(left.lastMessageAt));

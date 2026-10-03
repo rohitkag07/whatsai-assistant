@@ -1,3 +1,4 @@
+import { SystemState } from '@/components/system/SystemState';
 import { Plus } from 'lucide-react';
 import { requirePlatformRole } from '@/lib/auth/session';
 import { loadAdminBusinesses } from '@/lib/admin-data';
@@ -11,7 +12,8 @@ export default async function AdminClientsPage() {
   const session = await requirePlatformRole(['admin', 'dev']);
   const command = commandExperience(session, 'businesses');
   if (command) return command;
-  const businesses = await loadAdminBusinesses();
+  const businesses = await loadAdminBusinesses().catch(() => null);
+  if (!businesses) return <div className="x-legacy-content"><h1 className="text-2xl font-semibold">Client directory unavailable</h1><SystemState kind="error" /></div>;
 
   return (
     <div className="mx-auto max-w-[1540px] space-y-6">

@@ -81,7 +81,7 @@ export function FirstRunJourney({
 }) {
   const router = useRouter();
   const [view, setView] = useState<View>("checklist");
-  const [draft, setDraft] = useState<OnboardingDraft | null>(null);
+  const [draft, setDraft] = useState<OnboardingDraft | null>(snapshot.version?.draft ?? null);
   const [loaded, setLoaded] = useState(false);
   const [storageError, setStorageError] = useState("");
   const [sample, setSample] = useState(sampleEnquiries[0]);
@@ -163,7 +163,7 @@ export function FirstRunJourney({
   const items = readinessChecklist(effective, activeDraft);
   const action = nextSetupAction(effective, activeDraft, false, tested);
   const blocked =
-    state === "denied" || state === "loading" || Boolean(storageError);
+    !loaded || state === "denied" || state === "loading" || Boolean(storageError);
   function go(next: View) {
     setView(next);
     setInputError("");
@@ -195,6 +195,7 @@ export function FirstRunJourney({
       data-foundation="control"
       className="fr-journey"
       aria-label="First-run workflow"
+      aria-busy={!loaded}
     >
       <header className="fr-heading">
         <div>
@@ -291,7 +292,7 @@ export function FirstRunJourney({
           </button>
         </div>
       )}
-      {!loaded || state === "loading" ? (
+      {state === "loading" ? (
         <div className="fr-panel" role="status" aria-busy="true">
           <h2>Checking readiness</h2>
           <p>Configuration, approval and channel status are not known yet.</p>

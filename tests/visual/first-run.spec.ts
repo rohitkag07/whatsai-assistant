@@ -267,14 +267,13 @@ test("teaching states, storage denial, validation and keyboard/reflow", async ({
     fullPage: true,
   });
   await page.evaluate(() => (document.documentElement.style.zoom = "1"));
+  // Start from a known control: Tab after the last page control may enter
+  // browser chrome, which is normal and differs from the dev overlay order.
+  await page.getByLabel("Synthetic enquiry", { exact: true }).focus();
   await page.keyboard.press("Tab");
-  expect(
-    await page.evaluate(
-      () =>
-        document.activeElement instanceof HTMLElement &&
-        document.activeElement !== document.body,
-    ),
-  ).toBe(true);
+  await expect(
+    page.getByRole("button", { name: "Run Synthetic test", exact: true }),
+  ).toBeFocused();
   await page.context().clearCookies();
   await page.addInitScript(
     ({ key }) => localStorage.setItem(key, "not-valid-json"),

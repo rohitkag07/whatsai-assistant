@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Children, cloneElement, isValidElement, useId, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, BarChart3, CalendarClock, Check, ChevronLeft, ChevronRight, FileText, Megaphone, MessageSquareReply, Plus, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { SystemState } from '@/components/system/SystemState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,11 +56,13 @@ export function BroadcastCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [totals, setTotals] = useState<Totals>(defaultTotals);
   const [loading, setLoading] = useState(true);
+  const [readFailed, setReadFailed] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
 
   useEffect(() => { void load(); }, []);
   async function load() {
     setLoading(true);
+    setReadFailed(false);
     try {
       const response = await fetch('/api/whatsai/broadcasts', { cache: 'no-store' });
       const payload = await response.json();
@@ -67,12 +70,15 @@ export function BroadcastCampaigns() {
       setTemplates(payload.templates ?? []);
       setCampaigns(payload.campaigns ?? []);
       setTotals(payload.totals ?? defaultTotals);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not load campaigns.');
+    } catch {
+      setReadFailed(true);
     } finally {
       setLoading(false);
     }
   }
+
+  if (loading) return <SystemState kind="loading" />;
+  if (readFailed) return <div className="space-y-4"><h1 className="text-2xl font-semibold">Campaigns unavailable</h1><SystemState kind="error" onRetry={() => void load()} /></div>;
 
   return (
     <div className="space-y-6">
@@ -86,7 +92,7 @@ export function BroadcastCampaigns() {
           <Button asChild variant="outline"><Link href="/campaigns/templates"><FileText className="mr-2 h-4 w-4" />Manage templates</Link></Button>
           <Dialog open={wizardOpen} onOpenChange={setWizardOpen}>
             <DialogTrigger asChild><Button className="bg-[#008069] hover:bg-[#006b5a]"><Plus className="mr-2 h-4 w-4" />Create campaign</Button></DialogTrigger>
-            <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto"><CampaignWizard templates={templates.filter((template) => template.status === 'APPROVED')} onDone={() => { setWizardOpen(false); void load(); }} /></DialogContent>
+            <DialogContent className="x-legacy-content max-h-[92vh] max-w-3xl overflow-y-auto"><CampaignWizard templates={templates.filter((template) => template.status === 'APPROVED')} onDone={() => { setWizardOpen(false); void load(); }} /></DialogContent>
           </Dialog>
         </div>
       </div>
@@ -170,15 +176,15 @@ function StepTemplate({ templates, draft, patch }: WizardStepProps) {
 }
 
 function StepAudience({ draft, patch }: Omit<WizardStepProps, 'templates'>) {
-  return <div className="space-y-5"><Field label="Who should receive this?"><Select value={draft.audienceType} onValueChange={(audienceType) => patch({ audienceType })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all_contacts">All contacts</SelectItem><SelectItem value="stage">Lead stage</SelectItem><SelectItem value="category">Business category</SelectItem></SelectContent></Select></Field>{draft.audienceType === 'stage' ? <div><Label>Lead stages</Label><div className="mt-3 flex flex-wrap gap-2">{['new', 'interested', 'negotiating', 'booked', 'cold'].map((stage) => <button type="button" key={stage} onClick={() => patch({ stages: draft.stages.includes(stage) ? draft.stages.filter((item) => item !== stage) : [...draft.stages, stage] })} className={`rounded-full border px-3 py-2 text-sm capitalize ${draft.stages.includes(stage) ? 'border-[#00a884] bg-[#e7fce3] text-[#075e54]' : 'border-[#d8dee4] text-[#667781]'}`}>{stage}</button>)}</div></div> : null}{draft.audienceType === 'category' ? <Field label="Category"><Select value={draft.category} onValueChange={(category) => patch({ category })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{['clinic', 'gym', 'real_estate', 'coaching', 'local_service'].map((category) => <SelectItem key={category} value={category}>{category.replace('_', ' ')}</SelectItem>)}</SelectContent></Select></Field> : null}<div className="rounded-2xl bg-[#fff8e7] p-4 text-sm text-[#784f00]">Only opted-in contacts should receive marketing templates. Start with a small test audience before sending to all contacts.</div></div>;
+  return <div className="space-y-5"><Field label="Who should receive this?"><Select value={draft.audienceType} onValueChange={(audienceType) => patch({ audienceType })}><SelectTrigger aria-label="Who should receive this?"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all_contacts">All contacts</SelectItem><SelectItem value="stage">Lead stage</SelectItem><SelectItem value="category">Business category</SelectItem></SelectContent></Select></Field>{draft.audienceType === 'stage' ? <div><Label>Lead stages</Label><div className="mt-3 flex flex-wrap gap-2">{['new', 'interested', 'negotiating', 'booked', 'cold'].map((stage) => <button type="button" key={stage} onClick={() => patch({ stages: draft.stages.includes(stage) ? draft.stages.filter((item) => item !== stage) : [...draft.stages, stage] })} className={`rounded-full border px-3 py-2 text-sm capitalize ${draft.stages.includes(stage) ? 'border-[#00a884] bg-[#e7fce3] text-[#075e54]' : 'border-[#d8dee4] text-[#667781]'}`}>{stage}</button>)}</div></div> : null}{draft.audienceType === 'category' ? <Field label="Category"><Select value={draft.category} onValueChange={(category) => patch({ category })}><SelectTrigger aria-label="Category"><SelectValue /></SelectTrigger><SelectContent>{['clinic', 'gym', 'real_estate', 'coaching', 'local_service'].map((category) => <SelectItem key={category} value={category}>{category.replace('_', ' ')}</SelectItem>)}</SelectContent></Select></Field> : null}<div className="rounded-2xl bg-[#fff8e7] p-4 text-sm text-[#784f00]">Only opted-in contacts should receive marketing templates. Start with a small test audience before sending to all contacts.</div></div>;
 }
 
 function StepVariables({ variables, draft, patch }: { variables: number[] } & Omit<WizardStepProps, 'templates'>) {
-  return <div className="space-y-4"><div><h3 className="font-semibold text-[#111b21]">Personalize template variables</h3><p className="mt-1 text-sm text-[#667781]">Map each numbered placeholder to contact or business data.</p></div>{variables.length ? variables.map((variable) => <div key={variable} className="grid items-center gap-3 rounded-2xl border border-[#d8dee4] p-4 sm:grid-cols-[100px_minmax(0,1fr)]"><Badge variant="outline" className="w-fit">{`{{${variable}}}`}</Badge><Select value={draft.mappings[String(variable)] || ''} onValueChange={(value) => patch({ mappings: { ...draft.mappings, [String(variable)]: value } })}><SelectTrigger><SelectValue placeholder="Choose a value" /></SelectTrigger><SelectContent><SelectItem value="contact_name">Contact name</SelectItem><SelectItem value="business_name">Business name</SelectItem><SelectItem value="phone">Phone number</SelectItem></SelectContent></Select></div>) : <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-[#667781]">This template has no variables. Continue to delivery.</div>}</div>;
+  return <div className="space-y-4"><div><h3 className="font-semibold text-[#111b21]">Personalize template variables</h3><p className="mt-1 text-sm text-[#667781]">Map each numbered placeholder to contact or business data.</p></div>{variables.length ? variables.map((variable) => <div key={variable} className="grid items-center gap-3 rounded-2xl border border-[#d8dee4] p-4 sm:grid-cols-[100px_minmax(0,1fr)]"><Badge variant="outline" className="w-fit">{`{{${variable}}}`}</Badge><Select value={draft.mappings[String(variable)] || ''} onValueChange={(value) => patch({ mappings: { ...draft.mappings, [String(variable)]: value } })}><SelectTrigger aria-label={`Value for variable ${variable}`}><SelectValue placeholder="Choose a value" /></SelectTrigger><SelectContent><SelectItem value="contact_name">Contact name</SelectItem><SelectItem value="business_name">Business name</SelectItem><SelectItem value="phone">Phone number</SelectItem></SelectContent></Select></div>) : <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-[#667781]">This template has no variables. Continue to delivery.</div>}</div>;
 }
 
 function StepDelivery({ draft, patch, template }: Omit<WizardStepProps, 'templates'> & { template?: Template }) {
-  return <div className="space-y-5"><div className="grid gap-3 sm:grid-cols-2">{[{ id: 'now', title: 'Send now', detail: 'Queue immediately at 20 messages per second.', icon: Send }, { id: 'schedule', title: 'Schedule', detail: 'Choose a future date and time.', icon: CalendarClock }].map((option) => <button type="button" key={option.id} onClick={() => patch({ delivery: option.id })} className={`rounded-2xl border p-4 text-left ${draft.delivery === option.id ? 'border-[#00a884] bg-[#f1fff2]' : 'border-[#d8dee4]'}`}><option.icon className="h-5 w-5 text-[#00a884]" /><div className="mt-3 font-semibold text-[#111b21]">{option.title}</div><p className="mt-1 text-xs leading-5 text-[#667781]">{option.detail}</p></button>)}</div>{draft.delivery === 'schedule' ? <Field label="Send at"><Input type="datetime-local" value={draft.scheduledAt} min={new Date().toISOString().slice(0, 16)} onChange={(event) => patch({ scheduledAt: event.target.value })} /></Field> : null}<div className="rounded-2xl bg-[#efeae2] p-4"><div className="ml-auto max-w-sm rounded-2xl rounded-tr-sm bg-[#d9fdd3] px-4 py-3 text-sm leading-5 shadow-sm">{template?.components.find((component) => component.type === 'BODY')?.text || 'Select an approved template.'}</div></div></div>;
+  return <div className="space-y-5"><div className="grid gap-3 sm:grid-cols-2">{[{ id: 'now', title: 'Send now', detail: 'Queue for configured delivery; provider receipts remain required.', icon: Send }, { id: 'schedule', title: 'Schedule', detail: 'Choose a future date and time.', icon: CalendarClock }].map((option) => <button type="button" key={option.id} onClick={() => patch({ delivery: option.id })} className={`rounded-2xl border p-4 text-left ${draft.delivery === option.id ? 'border-[#00a884] bg-[#f1fff2]' : 'border-[#d8dee4]'}`}><option.icon className="h-5 w-5 text-[#00a884]" /><div className="mt-3 font-semibold text-[#111b21]">{option.title}</div><p className="mt-1 text-xs leading-5 text-[#667781]">{option.detail}</p></button>)}</div>{draft.delivery === 'schedule' ? <Field label="Send at"><Input type="datetime-local" value={draft.scheduledAt} min={new Date().toISOString().slice(0, 16)} onChange={(event) => patch({ scheduledAt: event.target.value })} /></Field> : null}<div className="rounded-2xl bg-[#efeae2] p-4"><div className="ml-auto max-w-sm rounded-2xl rounded-tr-sm bg-[#d9fdd3] px-4 py-3 text-sm leading-5 shadow-sm">{template?.components.find((component) => component.type === 'BODY')?.text || 'Select an approved template.'}</div></div></div>;
 }
 
 function Metric({ label, value, detail, icon: Icon }: { label: string; value: number; detail: string; icon: typeof Send }) {
@@ -198,5 +204,7 @@ function CampaignRow({ campaign, onRefresh }: { campaign: Campaign; onRefresh: (
 }
 
 type WizardStepProps = { templates: Template[]; draft: typeof emptyDraft; patch: (values: Partial<typeof emptyDraft>) => void };
-function Field({ label, children }: { label: string; children: React.ReactNode }) { return <div className="space-y-2"><Label>{label}</Label>{children}</div>; }
+function Field({ label, children }: { label: string; children: React.ReactNode }) { const id = useId();
+  const hasInput = Children.toArray(children).some(child => isValidElement(child) && (child.type === Input));
+  return <div className="space-y-2"><Label htmlFor={hasInput ? id : undefined}>{label}</Label>{Children.map(children, child => isValidElement(child) && (child.type === Input) ? cloneElement(child as React.ReactElement<{id?: string}>, {id}) : child)}</div>; }
 function extractVariables(template?: Template) { if (!template) return []; const values = new Set<number>(); template.components.forEach((component) => { for (const match of component.text?.matchAll(/\{\{(\d+)\}\}/g) ?? []) values.add(Number(match[1])); }); return [...values].sort((left, right) => left - right); }

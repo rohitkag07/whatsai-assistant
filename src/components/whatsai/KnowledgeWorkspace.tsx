@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { BookCheck, Download, Loader2, RefreshCw, Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import { SystemState } from '@/components/system/SystemState';
 import { KnowledgeBaseEditor } from '@/components/whatsai/KnowledgeBaseEditor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,11 +16,13 @@ export function KnowledgeWorkspace({ showOkfTools = false }: { showOkfTools?: bo
   const [business, setBusiness] = useState<{ id: string; name: string } | null>(null);
   const [playbookId, setPlaybookId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [readFailed, setReadFailed] = useState(false);
   const [pending, startTransition] = useTransition();
   const importInput = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
+    setReadFailed(false);
     try {
       const response = await fetch('/api/whatsai/knowledge', { cache: 'no-store' });
       const payload = await response.json();
@@ -27,8 +30,8 @@ export function KnowledgeWorkspace({ showOkfTools = false }: { showOkfTools?: bo
       setBusiness(payload.business);
       setPlaybookId(payload.playbook?.id ?? null);
       setItems((payload.items as ApiItem[]).map((item) => ({ ...item, kind: item.type })));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Knowledge could not be loaded.');
+    } catch {
+      setReadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -70,7 +73,9 @@ export function KnowledgeWorkspace({ showOkfTools = false }: { showOkfTools?: bo
 
   const counts = useMemo(() => ({ published: items.filter((item) => item.status === 'published').length, draft: items.filter((item) => item.status === 'draft').length, total: items.length }), [items]);
 
-  if (loading) return <div className="grid gap-4 sm:grid-cols-3">{[1, 2, 3].map((item) => <div key={item} className="h-28 animate-pulse rounded-3xl bg-[#e9edef]" />)}</div>;
+
+  if (loading) return <SystemState kind="loading" />;
+  if (readFailed) return <div className="space-y-4"><h1 className="text-2xl font-semibold">Knowledge unavailable</h1><SystemState kind="error" onRetry={() => void load()} /></div>;
 
   return (
     <div className="space-y-5">

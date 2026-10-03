@@ -1,3 +1,4 @@
+import { SystemState } from '@/components/system/SystemState';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -17,7 +18,8 @@ export default async function AdminClientPage({
 }) {
   await requirePlatformRole(['admin', 'dev']);
   const { id } = await params;
-  const detail = await loadAdminClientDetail(id);
+  const detail = await loadAdminClientDetail(id).catch(() => undefined);
+  if (detail === undefined) return <div className="space-y-5"><AdminPageHeader eyebrow="Client operations" title="Client details unavailable" description="The source could not be read. No client status or membership is assumed." /><SystemState kind="error" /><Button asChild variant="outline"><Link href="/admin/clients">Back to clients</Link></Button></div>;
   if (!detail) notFound();
 
   return (

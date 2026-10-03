@@ -113,7 +113,7 @@ function EvidenceMetricCard({
               {formatMetric(metric.current, unit)}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {metric.sampleSize} measured samples
+              {metric.current === null ? 'Sample count unavailable' : `${metric.sampleSize} available measured samples`}
             </p>
           </div>
           {target !== undefined && metric.current !== null ? (
@@ -144,7 +144,7 @@ export function ClientOneEvidenceView({
   const { metrics } = evidence;
 
   return (
-    <main className="min-h-screen bg-muted/20">
+    <main className="min-h-screen bg-muted/20 [overflow-wrap:anywhere]">
       <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
         <header className="overflow-hidden rounded-2xl border bg-card">
           <div className="border-b bg-slate-950 px-6 py-8 text-white lg:px-8">
@@ -152,14 +152,14 @@ export function ClientOneEvidenceView({
               <div>
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-slate-300">
                   <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                  Tenant-scoped server evidence
+                  {evidence.status === 'ready' ? 'Available user-scoped records' : 'Evidence unavailable · no verified records'}
                 </div>
                 <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
                   Client #1 Evidence
                 </h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-                  XeroWA AI operating proof for Aviro Technologies Private Limited.
-                  Values below are queried from the signed-in tenant, never demo-filled.
+                  Metrics require a successful authorized tenant-scoped query.
+                  Unavailable or partial reads do not establish operating proof.
                 </p>
               </div>
               <div className="text-left md:text-right">
@@ -238,7 +238,7 @@ export function ClientOneEvidenceView({
         </section>
 
         <section className="mt-6 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle className="text-base">Before / after baseline</CardTitle>
               <CardDescription>
@@ -246,7 +246,7 @@ export function ClientOneEvidenceView({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              <div className="max-w-full overflow-x-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" tabIndex={0} role="region" aria-label="Evidence comparison table, scroll horizontally">
                 <table className="w-full min-w-[560px] text-sm">
                   <thead>
                     <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -278,15 +278,15 @@ export function ClientOneEvidenceView({
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle className="text-base">Evidence integrity</CardTitle>
               <CardDescription>How to interpret this view.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <IntegrityItem
-                title="RLS scoped"
-                detail="The server query uses the signed-in user session. Cross-tenant rows are filtered in Postgres."
+                title="User-scoped queries"
+                detail="The query uses the signed-in user session. Isolation depends on deployed RLS and grants; this view does not verify those policies."
               />
               <IntegrityItem
                 title="No synthetic fallback"
@@ -333,7 +333,7 @@ function ComparisonRow({
       </td>
       <td className="py-4 font-semibold">{formatMetric(metric.current, unit)}</td>
       <td className="py-4 text-right text-muted-foreground">
-        {metric.previousSampleSize} → {metric.sampleSize}
+        {metric.previous === null ? 'Unknown' : metric.previousSampleSize} → {metric.current === null ? 'Unknown' : metric.sampleSize}
       </td>
     </tr>
   );
