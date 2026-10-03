@@ -37,3 +37,20 @@ or source code here. Industry behavior belongs in tenant playbooks.
 - Do not sell or expose multi-agent complexity to SMB customers.
 - Use customer-facing language: WhatsApp receptionist, instant reply, missed lead recovery, appointment booking, follow-up, owner summary.
 - First MVP goal is 10 local business trials, not a complete self-serve SaaS.
+
+## Deploy Configuration (configured by /setup-deploy)
+
+- Platform: Vercel
+- Production URL: https://x7-whatsai-dashboard.vercel.app
+- Deploy workflow: automatic preview on branch push; production only after explicit approval
+- Deploy status command: `vercel inspect https://x7-whatsai-dashboard.vercel.app`
+- Merge method: squash
+- Project type: Next.js web app and API
+- Post-deploy health check: https://x7-whatsai-dashboard.vercel.app/login
+
+### Custom deploy hooks
+
+- Pre-merge: `npm run type-check && npm run lint -- --max-warnings=0 && npm test && npm run build`
+- Deploy trigger: branch push creates preview; approved merge to `main` creates production deployment
+- Deploy status: inspect the target deployment in Vercel and wait for `Ready`
+- Health check: confirm `/login` returns 200 and unauthenticated `/dashboard` redirects to `/login`
