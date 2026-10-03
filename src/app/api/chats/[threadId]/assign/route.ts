@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 const schema = z.object({ business_id: z.string().uuid(), assigned_user_id: z.string().uuid().nullable() });
 
@@ -12,7 +12,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ th
   const supabase = serviceClientOrNull();
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
   const payload = parsed.data;
-  const context = await requireDashboardBusinessContext(supabase, payload.business_id).catch((error) => error);
+  const context = await requireDashboardBusinessMutationContext(supabase, payload.business_id).catch((error) => error);
   if (context instanceof Error) {
     const status = context instanceof BusinessContextError ? context.status : 500;
     return NextResponse.json({ ok: false, error: context.message }, { status });

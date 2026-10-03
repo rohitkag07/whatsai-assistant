@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { callSalesAgent, serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, resolveDashboardBusiness } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,7 +38,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
   let business;
   try {
-    business = await resolveDashboardBusiness(tenantClient, payload.data.business_id);
+    ({ business } = await requireDashboardBusinessMutationContext(tenantClient, payload.data.business_id));
   } catch (error) {
     const status = error instanceof BusinessContextError ? error.status : 500;
     return NextResponse.json({

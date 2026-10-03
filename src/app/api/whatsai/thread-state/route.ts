@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 import type { AiMode, ConversationStatus } from '@/types/database';
 
 export const runtime = 'nodejs';
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 503 });
   }
 
-  const context = await requireDashboardBusinessContext(supabase).catch((error) => error);
+  const context = await requireDashboardBusinessMutationContext(supabase).catch((error) => error);
   if (context instanceof Error) {
     const status = context instanceof BusinessContextError ? context.status : 500;
     return NextResponse.json({ ok: false, error: context.message }, { status });

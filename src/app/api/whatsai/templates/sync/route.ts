@@ -6,7 +6,7 @@ import {
   resolveWhatsAppChannel,
 } from '@/lib/meta-whatsapp';
 import { serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,7 @@ export async function POST() {
   const supabase = serviceClientOrNull();
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
   try {
-    const { business } = await requireDashboardBusinessContext(supabase);
+    const { business } = await requireDashboardBusinessMutationContext(supabase);
     const channel = await resolveWhatsAppChannel(supabase, business.id);
     const templates = await fetchMetaTemplates(channel.business_account_id);
     const syncedAt = new Date().toISOString();

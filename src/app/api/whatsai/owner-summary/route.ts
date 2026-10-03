@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { buildOwnerSummaryText, loadWhatsAiInboxData } from '@/lib/whatsai-data';
 import { serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function POST() {
   const supabase = serviceClientOrNull();
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
-  const context = await requireDashboardBusinessContext(supabase).catch((error) => error);
+  const context = await requireDashboardBusinessMutationContext(supabase).catch((error) => error);
   if (context instanceof Error) {
     const status = context instanceof BusinessContextError ? context.status : 500;
     return NextResponse.json({ ok: false, error: context.message }, { status });

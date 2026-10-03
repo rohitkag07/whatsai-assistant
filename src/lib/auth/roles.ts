@@ -26,14 +26,15 @@ export function isAdminPlatformRole(role: PlatformRole) {
 export function platformRoleFromMembershipRole(
   role: BusinessMemberRole | null | undefined,
 ): PlatformRole | null {
-  if (role === "admin" || role === "dev") return role;
   if (
     role === "client" ||
     role === "owner" ||
     role === "manager" ||
     role === "agent" ||
     role === "operator" ||
-    role === "viewer"
+    role === "viewer" ||
+    role === "admin" ||
+    role === "dev"
   )
     return "client";
   return null;
@@ -52,34 +53,13 @@ export function getUserPlatformRole(user: User): PlatformRole {
 
 export function resolveTrustedPlatformRole(
   user: User,
-  rows: unknown,
+  _rows: unknown,
 ): PlatformRole {
   const appRole = getUserPlatformRole(user);
   if (isAdminPlatformRole(appRole)) return appRole;
-  if (!Array.isArray(rows)) return "client";
-  const roles = (rows as unknown[])
-    .filter(
-      (row): row is Record<string, unknown> =>
-        Boolean(row) &&
-        typeof row === "object" &&
-        row !== null &&
-        "active" in row &&
-        "user_id" in row &&
-        "id" in row &&
-        "business_id" in row &&
-        row.active === true &&
-        row.user_id === user.id &&
-        typeof row.id === "string" &&
-        row.id.length > 0 &&
-        typeof row.business_id === "string" &&
-        row.business_id.length > 0,
-    )
-    .map((row) =>
-      platformRoleFromMembershipRole(row.role as BusinessMemberRole),
-    );
-  // Conflicting platform memberships cannot choose their own authority by order.
-  if (roles.includes("admin") && roles.includes("dev")) return "client";
-  return roles.find((role): role is PlatformRole => role !== null) ?? "client";
+  // Tenant membership rows determine business access elsewhere, but never
+  // confer platform-wide admin/dev authority.
+  return "client";
 }
 
 export function defaultLandingForRole(role: PlatformRole) {

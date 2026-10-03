@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { knowledgeItemsInputSchema, normalizeKnowledgeKeywords, slugifyKnowledgeTitle } from '@/lib/knowledge-schema';
 import { serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessContext, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
 
   try {
-    const { business } = await requireDashboardBusinessContext(supabase, parsed.data.business_id);
+    const { business } = await requireDashboardBusinessMutationContext(supabase, parsed.data.business_id);
     const playbookId = await resolvePlaybookId(supabase, business.id, parsed.data.playbook_id);
     const saved = [];
     for (const [index, item] of parsed.data.items.entries()) {
@@ -90,7 +90,7 @@ export async function DELETE(request: Request) {
   const supabase = serviceClientOrNull();
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
   try {
-    const { business } = await requireDashboardBusinessContext(supabase, parsed.data.business_id);
+    const { business } = await requireDashboardBusinessMutationContext(supabase, parsed.data.business_id);
     const { error } = await (supabase.from('assistant_knowledge_items') as any)
       .delete()
       .eq('id', parsed.data.id)

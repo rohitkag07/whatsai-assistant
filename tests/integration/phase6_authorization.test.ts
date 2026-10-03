@@ -135,20 +135,20 @@ describe("Phase 6 single trusted authorization path", () => {
     },
   );
   it.each(["admin", "dev"])(
-    "retains controlled membership %s consistently",
+    "never promotes tenant membership %s to platform authority",
     async (role) => {
       fixture.rows = [member(role)];
-      expect((await requirePlatformRole(["admin", "dev"])).platformRole).toBe(
-        role,
+      await expect(requirePlatformRole(["admin", "dev"])).rejects.toThrow(
+        "REDIRECT /dashboard",
       );
-      expect(
-        (await requirePlatformApiSession(["admin", "dev"])).platformRole,
-      ).toBe(role);
+      await expect(
+        requirePlatformApiSession(["admin", "dev"]),
+      ).rejects.toMatchObject({ status: 403 });
       expect(
         (
           await updateSession(new NextRequest("http://localhost/admin"))
         ).headers.get("location"),
-      ).toBeNull();
+      ).toBe("http://localhost/dashboard");
     },
   );
   it.each(["client", "owner", "manager", "agent", "operator", "viewer"])(

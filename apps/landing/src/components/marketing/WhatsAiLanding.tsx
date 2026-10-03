@@ -6,6 +6,7 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { LucideIcon } from 'lucide-react';
+import { GrantReadinessSections } from '@/components/marketing/GrantReadinessSections';
 import {
   ArrowRight,
   BadgeIndianRupee,
@@ -37,16 +38,16 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const dashboardHref = 'https://x7-whatsai-dashboard.vercel.app/dashboard';
 const setupMessage = encodeURIComponent(
-  'Hi Rohit, I want to set up XeroWA AI for my business. Please show me the live workflow.',
+  'Hi Rohit, I want to explore the XeroWA AI product workflow for my business.',
 );
-const setupHref = `https://wa.me/917869161842?text=${setupMessage}`;
+const setupHref = `https://wa.me/918989440019?text=${setupMessage}`;
 
 const navItems = [
   { label: 'Product', href: '#product' },
   { label: 'How it works', href: '#workflow' },
-  { label: 'For your business', href: '#industries' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Security', href: '#control' },
+  { label: 'Innovation', href: '#innovation' },
+  { label: 'Evidence', href: '/evidence' },
+  { label: 'Pilot', href: '#pilot' },
 ];
 
 type Outcome = {
@@ -259,7 +260,7 @@ export function WhatsAiLanding() {
             </span>
             <span className="leading-tight">
               <span className="block text-sm font-bold tracking-[-0.02em]">XeroWA AI</span>
-              <span className="hidden text-[11px] font-medium text-[#68746f] sm:block">The 24/7 WhatsApp AI &amp; Lead Intelligence Platform</span>
+              <span className="hidden text-[11px] font-medium text-[#68746f] sm:block">Controlled workflows for Indian SMB enquiries</span>
             </span>
           </a>
 
@@ -313,16 +314,10 @@ export function WhatsAiLanding() {
             <div data-hero-copy className="mx-auto max-w-6xl">
               <h1 className="text-balance text-[clamp(3rem,7vw,6.5rem)] font-[680] leading-[0.92] tracking-[-0.066em] text-[#101916]">
                 Turn WhatsApp enquiries into{' '}
-                <span className="whitespace-nowrap text-[#075e54]" aria-label="booked appointments.">
-                  booked
-                  <span aria-hidden="true" className="mx-2 inline-flex h-[0.72em] w-[1.45em] translate-y-[0.02em] items-center justify-center rounded-full bg-[#d9fdd3] align-baseline sm:mx-3">
-                    <CalendarCheck2 className="h-[0.44em] w-[0.44em] stroke-[2.5]" />
-                  </span>
-                  appointments.
-                </span>
+                <span className="text-[#075e54]">structured leads and follow-ups</span>
               </h1>
               <p className="mx-auto mt-7 max-w-3xl text-balance text-lg leading-8 text-[#52605a] sm:text-xl sm:leading-9">
-                XeroWA AI answers common questions with replies you approve, captures every lead, and hands hot conversations to your team before they go cold.
+                XeroWA AI uses controlled conversational workflows for approved replies, lead qualification, follow-ups, appointments and owner escalation.
               </p>
             </div>
 
@@ -333,10 +328,10 @@ export function WhatsAiLanding() {
               </a>
               <a href="#workflow" className="inline-flex min-h-14 w-full items-center justify-center rounded-2xl border border-[#cbd5d0] bg-white/80 px-7 text-sm font-semibold text-[#101916] transition hover:border-[#00a884] hover:bg-white sm:w-auto">
                 <Play className="mr-2 h-4 w-4 fill-current" />
-                Watch the real workflow
+                Explore the product workflow
               </a>
             </div>
-            <p className="mt-5 text-sm font-medium text-[#68746f]">Works with WhatsApp Cloud API. Every automated reply stays under your control.</p>
+            <p className="mt-5 text-sm font-medium text-[#68746f]">Current stage: Pre-launch validation/staging. Assisted pilot validation is being prepared.</p>
 
             <div data-hero-demo className="mx-auto mt-14 max-w-6xl sm:mt-20">
               <HeroProductDemo />
@@ -458,6 +453,8 @@ export function WhatsAiLanding() {
           </div>
         </section>
 
+        <GrantReadinessSections />
+
         <section id="pricing" className="bg-[#ebece7] px-4 py-28 sm:px-6 sm:py-36 lg:py-48">
           <div className="landing-shell grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-start lg:gap-20">
             <div data-reveal className="lg:sticky lg:top-28">
@@ -474,7 +471,7 @@ export function WhatsAiLanding() {
               <div className="border-b border-[#dce3df] p-6 sm:p-9">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-[#00a884]">XeroWA AI assisted setup</p>
+                    <p className="text-sm font-semibold text-[#00a884]">Pre-launch assisted pilot pricing</p>
                     <h3 className="mt-2 text-3xl font-semibold tracking-[-0.035em]">One business. One WhatsApp number.</h3>
                   </div>
                   <BadgeIndianRupee className="h-10 w-10 text-[#075e54]" />
@@ -526,14 +523,14 @@ export function WhatsAiLanding() {
               Let your WhatsApp answer while you run the business.
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/68">
-              Bring one real customer question. We will show you how the approved-reply workflow handles it.
+              Bring one business enquiry. We will demonstrate how the prototype workflow handles it.
             </p>
             <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
               <a href={setupHref} target="_blank" rel="noreferrer" className="group inline-flex min-h-14 items-center justify-center rounded-2xl bg-white px-7 text-sm font-semibold text-[#075e54] transition hover:-translate-y-1 hover:bg-[#d9fdd3]">
-                WhatsApp us for a live demo
+                Explore an assisted prototype demo
                 <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" />
               </a>
-              <a href="mailto:rohit@xeroseven.in?subject=XeroWA%20AI%20demo" className="inline-flex min-h-14 items-center justify-center rounded-2xl border border-white/25 px-7 text-sm font-semibold text-white transition hover:bg-white/10">
+              <a href="mailto:avritechologies@gmail.com?subject=XeroWA%20AI%20prototype%20demo" className="inline-flex min-h-14 items-center justify-center rounded-2xl border border-white/25 px-7 text-sm font-semibold text-white transition hover:bg-white/10">
                 Contact by email
               </a>
             </div>
@@ -578,10 +575,10 @@ function HeroProductDemo() {
             <span className="h-2.5 w-2.5 rounded-full bg-[#e7b84c]" />
             <span className="h-2.5 w-2.5 rounded-full bg-[#52b788]" />
           </div>
-          <p className="text-[11px] font-semibold text-[#74807a] sm:text-xs">Live product workflow</p>
+          <p className="text-[11px] font-semibold text-[#74807a] sm:text-xs">Product workflow preview</p>
           <span className="hidden items-center gap-1.5 text-xs font-semibold text-[#07866f] sm:flex">
             <span className="h-2 w-2 rounded-full bg-[#00a884]" />
-            Connected
+            Prototype demonstration
           </span>
         </div>
         <div className="grid min-h-[27rem] lg:grid-cols-[0.34fr_0.66fr]">
@@ -813,18 +810,18 @@ function LandingFooter() {
         <div className="grid gap-12 border-b border-white/10 pb-12 md:grid-cols-[1.4fr_0.6fr_0.6fr]">
           <div>
             <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00a884]"><MessageCircle className="h-5 w-5" /></span><p className="font-semibold">XeroWA AI</p></div>
-            <p className="mt-5 max-w-sm text-sm leading-6 text-white/50">XeroWA — The 24/7 WhatsApp AI &amp; Lead Intelligence Platform. Built by Xero Seven AI.</p>
+            <p className="mt-5 max-w-md text-sm leading-6 text-white/50">XeroWA AI is a product developed by AVIRO TECHNOLOGIES PRIVATE LIMITED, an AI and software company incorporated in Indore, Madhya Pradesh, India.</p>
           </div>
           <div>
             <p className="text-sm font-semibold text-white/90">Product</p>
-            <div className="mt-4 grid gap-3 text-sm text-white/50"><a href="#workflow" className="hover:text-white">How it works</a><a href="#industries" className="hover:text-white">Industries</a><a href="#pricing" className="hover:text-white">Pricing</a><Link href={dashboardHref} className="hover:text-white">Owner login</Link></div>
+            <div className="mt-4 grid gap-3 text-sm text-white/50"><a href="#workflow" className="hover:text-white">How it works</a><a href="#industries" className="hover:text-white">Industries</a><Link href="/evidence" className="hover:text-white">Evidence centre</Link><Link href={dashboardHref} className="hover:text-white">Owner login</Link></div>
           </div>
           <div>
             <p className="text-sm font-semibold text-white/90">Company</p>
-            <div className="mt-4 grid gap-3 text-sm text-white/50"><Link href="/privacy" className="hover:text-white">Privacy</Link><Link href="/terms" className="hover:text-white">Terms</Link><a href="mailto:rohit@xeroseven.in" className="hover:text-white">Contact</a></div>
+            <div className="mt-4 grid gap-3 text-sm text-white/50"><Link href="/innovation" className="hover:text-white">Innovation</Link><Link href="/grant-readiness" className="hover:text-white">Grant readiness</Link><Link href="/privacy" className="hover:text-white">Privacy</Link><Link href="/terms" className="hover:text-white">Terms</Link><a href="mailto:avritechologies@gmail.com" className="hover:text-white">Contact</a></div>
           </div>
         </div>
-        <div className="flex flex-col gap-3 pt-8 text-xs text-white/38 sm:flex-row sm:items-center sm:justify-between"><p>Copyright 2026 Xero Seven AI. All rights reserved.</p><p>Made for owner-led Indian businesses.</p></div>
+        <div className="flex flex-col gap-3 pt-8 text-xs text-white/38 sm:flex-row sm:items-center sm:justify-between"><p>Copyright 2026 AVIRO TECHNOLOGIES PRIVATE LIMITED. All rights reserved.</p><p>Pre-launch validation/staging · Indore, Madhya Pradesh</p></div>
       </div>
     </footer>
   );

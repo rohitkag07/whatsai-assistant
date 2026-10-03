@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createTemplateSchema } from '@/lib/broadcast-schema';
 import { createMetaTemplate, normalizeMetaTemplateStatus, resolveWhatsAppChannel } from '@/lib/meta-whatsapp';
 import { serviceClientOrNull } from '@/lib/sales-server';
-import { BusinessContextError, requireDashboardBusinessContext } from '@/lib/whatsai-business';
+import { BusinessContextError, requireDashboardBusinessContext, requireDashboardBusinessMutationContext } from '@/lib/whatsai-business';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   if (!supabase) return NextResponse.json({ ok: false, error: 'Supabase service client unavailable.' }, { status: 502 });
 
   try {
-    const { business } = await requireDashboardBusinessContext(supabase);
+    const { business } = await requireDashboardBusinessMutationContext(supabase);
     const channel = await resolveWhatsAppChannel(supabase, business.id);
     const meta = await createMetaTemplate(channel.business_account_id, parsed.data);
     const { data, error } = await (supabase.from('whatsapp_templates') as any)
