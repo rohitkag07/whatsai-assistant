@@ -44,9 +44,15 @@ for (const viewport of viewports)
       .evaluate((element) => {
         const style = getComputedStyle(element);
         const luminance = (hex: string) => {
-          const channels = hex
-            .trim()
-            .slice(1)
+          const value = hex.trim().slice(1);
+          const expanded =
+            value.length === 3
+              ? value
+                  .split("")
+                  .map((channel) => `${channel}${channel}`)
+                  .join("")
+              : value;
+          const channels = expanded
             .match(/../g)!
             .map((value) => {
               const c = parseInt(value, 16) / 255;
