@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, KeyRound } from "lucide-react";
@@ -12,7 +13,6 @@ export function LoginExperience() {
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const [recovery, setRecovery] = useState(false);
   async function signIn(event: React.FormEvent) {
     event.preventDefault();
     if (busy.current) return;
@@ -56,6 +56,11 @@ export function LoginExperience() {
         Sign in to your business workspace. Set the rules, review the handoff
         and keep follow-up accountable.
       </p>
+      {params.get("password") === "updated" && (
+        <p className="fr-auth-success fr-auth-success-inline" role="status">
+          Password updated. Sign in with your new password.
+        </p>
+      )}
       <form onSubmit={signIn} aria-busy={pending}>
         <label>
           Email
@@ -96,25 +101,9 @@ export function LoginExperience() {
           </p>
         )}
       </form>
-      <button
-        className="fr-auth-link"
-        type="button"
-        onClick={() => setRecovery((v) => !v)}
-        aria-expanded={recovery}
-      >
+      <Link className="fr-auth-link" href="/forgot-password">
         Need help with access?
-      </button>
-      {recovery && (
-        <div className="fr-auth-help">
-          <h2>Recover access safely</h2>
-          <p>
-            Use the account your workspace administrator assigned. If your
-            password or business access is missing, ask that administrator to
-            restore it. This page does not send a reset email or create an
-            account.
-          </p>
-        </div>
-      )}
+      </Link>
       <p className="fr-auth-footnote">
         New account? Business membership is required. Signing in alone does not
         grant access or activate messaging.

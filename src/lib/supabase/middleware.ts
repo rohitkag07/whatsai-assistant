@@ -8,6 +8,7 @@ import {
   resolveTrustedPlatformRole,
   isAdminPlatformRole,
 } from "@/lib/auth/roles";
+import { isPublicAuthPath } from "@/lib/auth/password-recovery";
 
 const DEV_ONLY_PATHS = ["/admin", "/assistant-setup", "/reports", "/settings"];
 
@@ -83,8 +84,7 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const isAuthPg = pathname.startsWith("/login");
-  const isGuard = pathname.startsWith("/guard");
-  const isPublic = isAuthPg || isGuard;
+  const isPublic = isPublicAuthPath(pathname);
 
   if (!user && !isPublic) {
     const redirect = request.nextUrl.clone();

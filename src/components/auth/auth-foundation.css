@@ -125,6 +125,9 @@
   width: 100%;
 }
 [data-foundation] .fr-auth-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-height: 44px;
   color: var(--x-accent);
   text-decoration: underline;
@@ -132,6 +135,9 @@
   font-size: 13px;
   margin-top: 12px;
   text-align: left;
+}
+[data-foundation] .fr-auth-back {
+  margin-top: 24px;
 }
 [data-foundation] .fr-auth-help {
   background: var(--x-surface);
@@ -158,6 +164,40 @@
   border-radius: var(--x-control-radius);
   font-size: 13px;
   line-height: 1.7;
+}
+[data-foundation] .fr-auth-error a {
+  display: block;
+  color: inherit;
+  font-weight: 600;
+  margin-top: 8px;
+  text-decoration: underline;
+}
+[data-foundation] .fr-auth-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  margin-top: 24px;
+  color: var(--x-accent);
+  background: var(--x-selected);
+  border-radius: var(--x-control-radius);
+  font-size: 13px;
+  line-height: 1.7;
+}
+[data-foundation] .fr-auth-success h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+[data-foundation] .fr-auth-success p {
+  color: var(--x-muted);
+}
+[data-foundation] .fr-auth-success-inline {
+  display: block;
+}
+[data-foundation] .fr-auth-status {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--x-muted);
 }
 [data-foundation] .fr-auth-footnote {
   font-size: 12px !important;
