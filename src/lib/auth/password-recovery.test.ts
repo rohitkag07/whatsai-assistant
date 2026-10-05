@@ -28,6 +28,7 @@ describe("password recovery", () => {
     "/login",
     "/guard",
     "/forgot-password",
+    "/auth/confirm",
     "/account/update-password",
   ])("keeps %s reachable without an existing session", (pathname) => {
     expect(isPublicAuthPath(pathname)).toBe(true);

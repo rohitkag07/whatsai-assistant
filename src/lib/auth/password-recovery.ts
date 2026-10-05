@@ -11,7 +11,11 @@ export function validateNewPassword(password: string, confirmation: string) {
 }
 
 export function isPublicAuthPath(pathname: string) {
-  return ["/login", "/guard", "/forgot-password", "/account/update-password"].some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
+  return [
+    "/login",
+    "/guard",
+    "/forgot-password",
+    "/auth/confirm",
+    "/account/update-password",
+  ].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }

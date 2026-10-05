@@ -21,7 +21,10 @@ export function ForgotPasswordExperience() {
     setPending(true);
     setError("");
     try {
-      const redirectTo = `${window.location.origin}/account/update-password`;
+      // The recovery email uses this first-party callback together with a
+      // token_hash. Unlike browser-local PKCE state, it remains valid when the
+      // user opens the email in a different browser or device.
+      const redirectTo = `${window.location.origin}/auth/confirm`;
       const result = await createClient().auth.resetPasswordForEmail(
         email.trim(),
         { redirectTo },
