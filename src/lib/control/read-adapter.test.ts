@@ -268,6 +268,13 @@ describe("Control read integration with Synthetic protocol records", () => {
     };
     expect(readEnabled(env)).toBe(true);
     expect(readEnabled({ ...env, XEROWA_AUTH_BYPASS: "0" })).toBe(true);
+    expect(
+      readEnabled({
+        ...env,
+        NODE_ENV: "production",
+        VERCEL_ENV: "preview",
+      }),
+    ).toBe(true);
     expect(readEnabled({})).toBe(false);
     for (const patch of [
       { NODE_ENV: "production" },

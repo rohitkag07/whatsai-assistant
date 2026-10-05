@@ -16,13 +16,15 @@ export function syntheticEnabled(env: Record<string, string | undefined>) {
   return env.NODE_ENV !== "production" && env.XEROWA_CONTROL_SYNTHETIC === "1";
 }
 export function readEnabled(env: Record<string, string | undefined>) {
+  const productionDeployment =
+    env.VERCEL_ENV === "production" ||
+    (!env.VERCEL_ENV && env.NODE_ENV === "production");
   if (
     env.XEROWA_CONTROL_READ_ENABLED !== "1" ||
     env.XEROWA_CONTROL_READ_SCHEMA_CONFIRMED !== "1" ||
     env.XEROWA_CONTROL_SYNTHETIC === "1" ||
     isDashboardAuthBypassEnabled(env) ||
-    env.NODE_ENV === "production" ||
-    env.VERCEL_ENV === "production"
+    productionDeployment
   )
     return false;
   try {
