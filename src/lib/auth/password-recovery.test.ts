@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  getPasswordUpdateErrorMessage,
   isPublicAuthPath,
   MIN_PASSWORD_LENGTH,
   validateNewPassword,
@@ -22,6 +23,21 @@ describe("password recovery", () => {
     expect(
       validateNewPassword("a-secure-password", "a-secure-password"),
     ).toBe("");
+  });
+
+  it("explains when Supabase rejects reuse of the current password", () => {
+    expect(
+      getPasswordUpdateErrorMessage({
+        code: "same_password",
+        message: "New password should be different from the old password.",
+      }),
+    ).toBe("Choose a new password that is different from your current password.");
+  });
+
+  it("does not expose unexpected authentication errors", () => {
+    expect(getPasswordUpdateErrorMessage(new Error("internal detail"))).toBe(
+      "We could not update the password. Request a new recovery link.",
+    );
   });
 
   it.each([

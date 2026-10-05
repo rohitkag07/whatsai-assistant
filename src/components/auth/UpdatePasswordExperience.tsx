@@ -4,7 +4,11 @@ import { ArrowRight, KeyRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createImplicitRecoveryClient } from "@/lib/supabase/client";
-import { MIN_PASSWORD_LENGTH, validateNewPassword } from "@/lib/auth/password-recovery";
+import {
+  getPasswordUpdateErrorMessage,
+  MIN_PASSWORD_LENGTH,
+  validateNewPassword,
+} from "@/lib/auth/password-recovery";
 
 type RecoveryState = "checking" | "ready" | "invalid";
 
@@ -54,7 +58,7 @@ export function UpdatePasswordExperience() {
       const supabase = supabaseRef.current ?? createImplicitRecoveryClient();
       const result = await supabase.auth.updateUser({ password });
       if (result.error) {
-        setError("We could not update the password. Request a new recovery link.");
+        setError(getPasswordUpdateErrorMessage(result.error));
         return;
       }
       await supabase.auth.signOut();
