@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, KeyRound, Mail } from "lucide-react";
 import { useRef, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createImplicitRecoveryClient } from "@/lib/supabase/client";
 
 export function ForgotPasswordExperience() {
   const params = useSearchParams();
@@ -21,11 +21,8 @@ export function ForgotPasswordExperience() {
     setPending(true);
     setError("");
     try {
-      // The recovery email uses this first-party callback together with a
-      // token_hash. Unlike browser-local PKCE state, it remains valid when the
-      // user opens the email in a different browser or device.
-      const redirectTo = `${window.location.origin}/auth/confirm`;
-      const result = await createClient().auth.resetPasswordForEmail(
+      const redirectTo = `${window.location.origin}/account/update-password`;
+      const result = await createImplicitRecoveryClient().auth.resetPasswordForEmail(
         email.trim(),
         { redirectTo },
       );

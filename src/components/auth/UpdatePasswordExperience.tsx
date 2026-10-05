@@ -3,14 +3,14 @@
 import { ArrowRight, KeyRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createImplicitRecoveryClient } from "@/lib/supabase/client";
 import { MIN_PASSWORD_LENGTH, validateNewPassword } from "@/lib/auth/password-recovery";
 
 type RecoveryState = "checking" | "ready" | "invalid";
 
 export function UpdatePasswordExperience() {
   const router = useRouter();
-  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+  const supabaseRef = useRef<ReturnType<typeof createImplicitRecoveryClient> | null>(null);
   const busy = useRef(false);
   const [recoveryState, setRecoveryState] = useState<RecoveryState>("checking");
   const [password, setPassword] = useState("");
@@ -19,7 +19,7 @@ export function UpdatePasswordExperience() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = createImplicitRecoveryClient();
     supabaseRef.current = supabase;
     let active = true;
     const timeout = window.setTimeout(async () => {
@@ -51,7 +51,7 @@ export function UpdatePasswordExperience() {
     setPending(true);
     setError("");
     try {
-      const supabase = supabaseRef.current ?? createClient();
+      const supabase = supabaseRef.current ?? createImplicitRecoveryClient();
       const result = await supabase.auth.updateUser({ password });
       if (result.error) {
         setError("We could not update the password. Request a new recovery link.");

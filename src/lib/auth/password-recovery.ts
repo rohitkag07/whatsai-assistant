@@ -15,7 +15,6 @@ export function isPublicAuthPath(pathname: string) {
     "/login",
     "/guard",
     "/forgot-password",
-    "/auth/confirm",
     "/account/update-password",
   ].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
